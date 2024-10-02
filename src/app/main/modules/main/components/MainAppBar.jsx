@@ -56,7 +56,7 @@ const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
             paddingLeft: 0,
             paddingRight: 0,
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: { md: 'end', xs: 'space-between' },
             ...(isScrollingUp
               ? {
                   boxShadow: '0px 13px 14px -11px rgb(0 0 0 / 25%)',
@@ -66,25 +66,27 @@ const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
           },
         })}
       >
-        <IconButton
-          color="primary"
-          sx={{
-            minHeight: '48px',
-            minWidth: '48px',
-            margin: '4px',
-          }}
-          onClick={() => {
-            setOpenDrawer((open) => !open);
-          }}
+        <Box
+          sx={() => ({
+            width: '100%',
+            maxWidth: '232px',
+            display: { xs: 'block', md: 'none' }, // Show only on mobile and tablet
+          })}
         >
-          {/* <MenuIcon /> */}{' '}
-          {/* {false ? (
-            <ChevronLeftIcon sx={{ width: '38px', height: 'auto' }} />
-          ) : (
+          <IconButton
+            color="primary"
+            sx={{
+              minHeight: '48px',
+              minWidth: '48px',
+              margin: '4px',
+            }}
+            onClick={() => {
+              setOpenDrawer((open) => !open);
+            }}
+          >
             <MenuIcon />
-          )}    */}
-          <MenuIcon />
-        </IconButton>
+          </IconButton>
+        </Box>
         <Box>
           <MainThemeDrawer
             open={openDrawerTheme}

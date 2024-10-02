@@ -23,11 +23,15 @@ const constantColors = {
 export const defaultPalette = {
   mode: 'light',
   primary: {
-    main: '#7F889B',
+    main: '#4A7C59', // Green from the fields
+    contrastText: '#FFFFFF',
+  },
+  secondary: {
+    main: '#D2B48C', // Tan
     contrastText: '#FFFFFF',
   },
   text: {
-    title: '#101827',
+    title: '#1A1A1A', // Dark color for text
     subtitle: '#6B7280',
   },
   icon: {
@@ -35,13 +39,13 @@ export const defaultPalette = {
     error: '#DB2828',
   },
   background: {
-    default: '#F1F1F1',
+    default: '#EBEBEB', // Sky blue
   },
   sidebar: {
-    title: '#101827',
+    title: '#1A1A1A',
     subtitle: '#6B7280',
-    background: '#EBEBEB',
-    itemSelected: '#7F889B',
+    background: '#D3D3D3', // Slightly darker than background
+    itemSelected: '#4A7C59', // Green from the fields
     textItemSelected: '#ffffff',
     iconItemSelected: '#ffffff',
   },
@@ -51,34 +55,6 @@ export const defaultPalette = {
   paper: {
     background: '#FFFFFF',
   },
-  appbar: { background: '#1A1A1A' },
+  appbar: { background: '#EBEBEB' }, // Brown variation to match with green
   ...constantColors,
 };
-
-/* export const bluePalette = {
-  type: 'light',
-  button: {
-    background: '#3C88FF',
-    text: '#FFFFFF',
-  },
-  text: {
-    title: '#094067',
-    subtitle: '#4A7C9F',
-  },
-  background: {
-    default: '#F3F5F9',
-  },
-  sidebar: {
-    background: '#094067',
-    text: '#FFFFFF',
-    subtitle: '#D9D9D9',
-  },
-  toolbar: {
-    background: '#F3F5F9',
-  },
-  paper: {
-    background: '#FFFFFF',
-  },
-  ...constantColors,
-};
- */

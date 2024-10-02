@@ -32,7 +32,7 @@ const Main = () => {
         sx={() => ({
           backgroundColor: {
             special: 'transparent',
-            zIndex: 1250,
+            zIndex: 999,
           },
         })}
         setOpenDrawer={setOpenDrawer}
@@ -44,9 +44,6 @@ const Main = () => {
         component="main"
         sx={{
           backgroundColor: (theme) => theme.palette.secondary['50'],
-          // backgroundImage: {
-          //   special: 'url(http://i.stack.imgur.com/kx8MT.gif)',
-          // },
           backgroundSize: { special: 'cover' },
           flexGrow: 1,
           height: '100vh',
