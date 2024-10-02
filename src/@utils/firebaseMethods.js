@@ -380,22 +380,24 @@ const loginUser = async (email, password) => {
         userData.inventory = inventory.data[0] || [];
       }
     }
-    // Store the session in Firestore
-    const sessionId = uuidv4();
-    await insertInto({
-      collectionName: firebaseCollections.USER_SESSIONS,
-      data: {
-        id_user: userData?.id_user,
-        user: userData?.id_user,
-        key: firebaseCollectionsKey.user_sessions,
-        sessionId: sessionId,
-      },
-      showAlert: false,
-    }).then(async () => {
-      // Invalidate Old Sessions
-      userData = { ...userData, sessionId };
-      await invalidateOldSessions(userData?.id_user, sessionId);
-    });
+    if (userData?.id_user) {
+      // Store the session in Firestore
+      const sessionId = uuidv4();
+      await insertInto({
+        collectionName: firebaseCollections.USER_SESSIONS,
+        data: {
+          id_user: userData?.id_user,
+          user: userData?.id_user,
+          key: firebaseCollectionsKey.user_sessions,
+          sessionId: sessionId,
+        },
+        showAlert: false,
+      }).then(async () => {
+        // Invalidate Old Sessions
+        userData = { ...userData, sessionId };
+        await invalidateOldSessions(userData?.id_user, sessionId);
+      });
+    }
 
     return { ...userData, credential };
   } catch (error) {

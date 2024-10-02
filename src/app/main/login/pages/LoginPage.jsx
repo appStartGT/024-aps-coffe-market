@@ -10,20 +10,18 @@ import useRecoveryPassword from '../hooks/useRecoveryPassword';
 
 const leftGridProps = {
   item: true,
-  xs: 12,
-  sm: 6,
-  md: 7,
+  xs: false,
+  sm: false,
+  md: 6,
   sx: (theme) => ({
     display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     [theme.breakpoints.down('md')]: {
       width: '100%',
       display: 'flex',
       justifyContent: 'center',
-    },
-    [theme.breakpoints.down('sm')]: {
-      display: 'none',
     },
   }),
 };
@@ -31,15 +29,16 @@ const leftGridProps = {
 const rightGridProps = {
   item: true,
   xs: 12,
-  sm: 6,
-  md: 5,
+  sm: 12,
+  md: 6,
   component: Paper,
   elevation: 0,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
   sx: (theme) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
     padding: '18px',
+    background: 'Transparent',
     [theme.breakpoints.down('md')]: {
       order: 1,
     },
@@ -76,7 +75,7 @@ const SignInSide = () => {
       component="main"
       sx={{
         height: '100vh',
-        // backgroundImage: 'url(/img/svg/bebe.svg)',
+        backgroundImage: 'url(/img/jpg/background.jpg)',
         backgroundRepeat: 'no-repeat',
         backgroundColor: (t) =>
           t.palette.mode === 'light' ? '#CED2DE' : '#CED2DE',
@@ -84,13 +83,8 @@ const SignInSide = () => {
         backgroundPosition: 'center',
       }}
     >
+      <Grid {...rightGridProps}></Grid>
       <Grid {...leftGridProps}>
-        <img
-          style={{ width: '100%', maxWidth: '800px' }}
-          src="/img/png/authlogin.png"
-        />
-      </Grid>
-      <Grid {...rightGridProps}>
         <FormWrapper
           sxTittle={{
             textAlign: 'center',
@@ -104,7 +98,7 @@ const SignInSide = () => {
         >
           {showLoginForm ? (
             <AccountForm
-              submitText={'Login'}
+              submitText={'Ingresar'}
               handleClick={handleLogin}
               formik={formikLogin}
               loading={loadingLogin}
@@ -128,6 +122,16 @@ const SignInSide = () => {
             />
           )}
         </FormWrapper>
+        {/* <img
+          style={{
+            alignSelf: 'flex-end',
+            marginBottom: '32px',
+            marginRight: '30px',
+            width: '100%',
+            maxWidth: '600px',
+          }}
+          src="/img/svg/MediProLogoSVG.svg"
+        /> */}
       </Grid>
     </Grid>
   );

@@ -43,7 +43,7 @@ const RenewPassword = () => {
       component="main"
       sx={{
         height: '100vh',
-        backgroundImage: 'url(/img/png/authlogin.png)',
+        backgroundImage: 'url(/img/svg/bebe.svg)',
         backgroundRepeat: 'no-repeat',
         backgroundColor: (t) =>
           t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
@@ -66,7 +66,7 @@ const RenewPassword = () => {
         </FormWrapper>
       </Grid>
       <Grid {...rightGridProps}>
-        <img width="600px" src="/img/png/authlogin.png" />
+        <img width="600px" src="/img/svg/elroble.svg" />
       </Grid>
     </Grid>
   );

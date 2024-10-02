@@ -13,16 +13,20 @@ const FormWrapper = ({
     <Box
       sx={(theme) => ({
         my: 8,
+        mx: 4,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         alignSelf: 'center',
         backgroundColor: theme.palette.background.paper,
+        maxHeight: '728px',
         maxWidth: '500px',
         width: '100%',
         height: '100%',
-        padding: '20px',
+        borderRadius: '16px',
+        padding: { xs: '30px', sm: '60px', md: '60px' },
+        boxShadow: '16px 16px 16px rgba(0, 0, 0, 0.25);',
         [theme.breakpoints.down('sm')]: {
           maxHeight: '460px',
         },
@@ -46,8 +50,7 @@ const FormWrapper = ({
           </IconButton>
         )}
         <Typography
-          fontSize={'36px'}
-          letterSpacing={'1px'}
+          variant="h1"
           color="primary"
           sx={{ flex: '1', ...sxTittle }}
         >

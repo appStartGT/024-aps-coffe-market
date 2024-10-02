@@ -12,7 +12,7 @@ export const useLogin = () => {
     fields: [
       {
         id: '1',
-        label: 'Correo electrónico',
+        label: 'Correo electrónico o DPI',
         name: 'email',
         gridItem: true,
         gridProps: { md: 12 },

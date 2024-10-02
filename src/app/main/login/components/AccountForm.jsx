@@ -21,20 +21,16 @@ const AccountForm = ({
       <ApsForm formik={formik} />
       <Button
         onClick={handleClick}
-        disabled={
-          !formik.form.isValid ||
-          !Object.values(formik.form.values).every((e) => e) ||
-          loading
-        }
+        disabled={!formik.form.isValid || loading}
         fullWidth
         variant="contained"
         sx={{
           mt: '36px',
           borderRadius: '8px',
-          height: '40px',
+          height: '60px',
         }}
       >
-        <Typography>{submitText}</Typography>
+        <Typography variant="h6">{submitText}</Typography>
       </Button>
       {label && (
         <Typography
