@@ -14,6 +14,7 @@ export const Actions = {
   MENU_ORGANIZATION: 'Organización',
   MENU_ORGANIZATIONS: 'Organizaciones',
   MENU_EMPLOYEES: 'Nomina',
+  MENU_PURCHASE: 'Compras',
 
   ADMINSTRADOR_TAB_USUARIOS: 'Tab usuarios',
   ADMINSTRADOR_TAB_ROLES: 'Tab roles',

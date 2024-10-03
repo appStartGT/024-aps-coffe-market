@@ -10,25 +10,17 @@ import administrator from './modules/administrator';
 
 import catalogs from './modules/catalogs';
 import settings from './modules/settings';
-import hospitalario from './modules/hospitalario';
-import products from './modules/products';
-import sales from './modules/sales';
 import person from './modules/person';
-import organization from './modules/organization';
-import branch from './modules/branch';
 import employee from './modules/employee';
-import inventory from './modules/inventory';
-import productInventory from './modules/productInventory';
+import purchase from './modules/purchase';
+import customer from './modules/customer';
 
 export const store = configureStore({
   reducer: {
     administrator,
     catalogs,
-    hospitalario,
-    products,
     login,
     main,
-    organization,
     permission,
     person,
     role,
@@ -36,11 +28,9 @@ export const store = configureStore({
     subject,
     theme,
     user,
-    sales,
-    branch,
     employee,
-    inventory,
-    productInventory,
+    purchase,
+    customer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

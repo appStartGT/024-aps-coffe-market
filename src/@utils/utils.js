@@ -137,12 +137,15 @@ export const convertToFormData = (object = {}) => {
   return formData;
 };
 
-export const cleanModel = (model = {}, allowNulls = false) => {
+export const cleanModel = (
+  model = {},
+  config = { allowNulls: false, allowEmptyStrings: false }
+) => {
   return Object.keys(model).reduce((acc, key) => {
     if (
       (model[key] != undefined &&
-        (model[key] != null || (model[key] == null && allowNulls)) &&
-        model[key] != '') ||
+        (model[key] != null || (model[key] == null && config.allowNulls)) &&
+        (model[key] != '' || (model[key] == '' && config.allowEmptyStrings))) ||
       typeof model[key] == 'boolean' ||
       typeof model[key] == 'number'
     ) {

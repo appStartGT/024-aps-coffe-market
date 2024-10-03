@@ -7,13 +7,7 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import {
-  Person as PersonIcon,
-  Groups as GroupsIcon,
-  Outbox,
-  MoveToInbox,
-  CorporateFare,
-} from '@mui/icons-material';
+import { Person as PersonIcon, MoveToInbox } from '@mui/icons-material';
 import ListNav from './ListNav';
 import { useAuth } from '@hooks';
 import MainDrawerToolbar from './MainDrawerToolbar';
@@ -74,63 +68,11 @@ const MainDrawer = ({ openDrawer, setOpenDrawer }) => {
     const userRoutes = [
       {
         id: 1,
-        to: 'product',
+        to: 'purchase',
         icon: <MoveToInbox sx={styledIcon} />,
-        name: 'Producto',
-      },
-      { id: 2, to: 'sales', icon: <Outbox sx={styledIcon} />, name: 'Ventas' },
-      {
-        id: 3,
-        to: `organization/detail/${auth.user?.id_organization}`,
-        icon: <CorporateFare sx={styledIcon} />,
-        name: 'Organización',
-      },
-      {
-        id: 4,
-        to: 'organizations',
-        icon: <CorporateFare sx={styledIcon} />,
-        name: 'Organizaciones',
-      },
-      {
-        id: 5,
-        to: 'administrator',
-        icon: <GroupsIcon sx={styledIcon} />,
-        name: 'Administrador',
-      },
-      {
-        id: 6,
-        to: 'employee',
-        icon: <PersonIcon sx={styledIcon} />,
-        name: 'Nomina',
+        name: 'Compras',
       },
     ];
-
-    if (
-      auth.user?.id_organization &&
-      !auth.user?.id_branch &&
-      !auth.user?.id_inventory
-    ) {
-      userRoutes.push({
-        id: 7,
-        to: 'inventory',
-        icon: <CorporateFare sx={styledIcon} />,
-        name: 'Inventario',
-      });
-    }
-
-    if (
-      auth.user?.id_organization &&
-      auth.user?.id_branch &&
-      auth.user?.id_inventory
-    ) {
-      userRoutes.push({
-        id: 8,
-        to: `inventory/detail/${auth.user?.id_inventory}/${auth.user?.id_branch}`,
-        icon: <CorporateFare sx={styledIcon} />,
-        name: 'Inventario',
-      });
-    }
-
     setRoutes(userRoutes);
   }, [auth.user]);
 

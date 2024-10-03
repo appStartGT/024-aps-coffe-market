@@ -16,3 +16,5 @@ export * as employeeDto from './employee';
 export * as inventoryDto from './inventory';
 export * as inventoryBranchDto from './inventoryBranch';
 export * as saleDto from './sale';
+export * as purchaseDto from './purchase';
+export * as customerDto from './customer';

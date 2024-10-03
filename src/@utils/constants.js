@@ -107,6 +107,8 @@ export const firebaseCollections = {
   EMPLOYEE: 'employee',
   PRODUCT_INVENTORY: 'product_inventory',
   PRODUCT: 'product',
+  PURCHASE: 'purchase',
+  CUSTOMER: 'customer',
 };
 
 export const firebaseCollectionsKey = {
@@ -115,6 +117,8 @@ export const firebaseCollectionsKey = {
   inventory_branch: 'id_inventory_branch',
   inventory: 'id_inventory',
   user_sessions: 'id_user_session',
+  purchase: 'id_purchase',
+  customer: 'id_customer',
 };
 
 export const alertType = {
