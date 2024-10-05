@@ -14,7 +14,6 @@ const PurchaseDetailPage = () => {
     processing,
     propsSearchBarButton,
     columns,
-    searchList,
     purchaseList,
     propsModalDeletePurchase,
   } = usePurchaseDetail();
@@ -28,7 +27,7 @@ const PurchaseDetailPage = () => {
       <Paper sx={stylesPaper}>
         <SearchBar {...propsSearchBarButton} />
         <ApsDatagrid
-          rows={searchList.length > 0 ? searchList : purchaseList}
+          rows={purchaseList}
           columns={columns}
           loading={processing}
           sxContainerProps={{

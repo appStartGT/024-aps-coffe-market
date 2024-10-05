@@ -99,22 +99,10 @@ const usePurchaseDetailForm = () => {
     }
   };
 
-  const calculateTotal = () => {
-    return (
-      (
-        formikPurchaseDetail.form.values.quantity *
-        formikPurchaseDetail.form.values.price
-      ).toLocaleString('es-GT', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }) || '0,00'
-    );
-  };
   return {
     formikPurchaseDetail,
     handleOnclick,
     purchaseDetailSelected,
-    calculateTotal,
     loading,
   };
 };

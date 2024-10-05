@@ -262,3 +262,14 @@ export const firebaseFilterBuilder = (params) =>
     }
     return acc;
   }, []);
+
+export const calculateTotal = (quantity, price) => {
+  const total = quantity * price;
+  if (isNaN(total)) {
+    return '0,00';
+  }
+  return total.toLocaleString('es-GT', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};

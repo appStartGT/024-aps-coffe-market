@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   purchaseDetailListAction,
@@ -8,10 +8,11 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../components/PurchaseDetailForm';
+import { IconButton } from '@mui/material';
+import { Edit, Delete } from '@mui/icons-material';
 
 const usePurchaseDetail = () => {
   const dispatch = useDispatch();
-  const [searchList, setSearchList] = useState([]);
   const purchaseList = useSelector(
     (state) => state.purchaseDetail.purchaseDetailList
   );
@@ -30,12 +31,10 @@ const usePurchaseDetail = () => {
   }, [dispatch]);
 
   const propsSearchBarButton = {
-    label: 'Buscar por Nombre / Direccion / Teléfono ',
+    label: 'Buscar por Nombre / Dirección / Teléfono',
     type: 'text',
     searchList: purchaseList,
-    searchKey: 'name, email, job, address',
-    searchResults: (results) => setSearchList(results),
-    onChange: (value) => setText(value),
+    searchKey: 'quantity, price, total, createdAt',
     rightButton: {
       icon: 'add_circle',
       onClick: () =>
@@ -56,19 +55,52 @@ const usePurchaseDetail = () => {
       },
     },
   };
-
   const columns = [
-    { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Name', width: 150 },
-    { field: 'amount', headerName: 'Amount', width: 110 },
-    { field: 'date', headerName: 'Date', width: 150 },
+    // { field: 'id_purchase_detail', headerName: 'ID', flex: 1 },
+    { field: 'quantity', headerName: 'Libras', flex: 1 },
+    { field: 'price', headerName: 'Precio', flex: 1 },
+    { field: 'total', headerName: 'Total', flex: 1 },
+    { field: 'isPriceless', headerName: 'Sin Precio', flex: 1 },
+    { field: 'createdAt', headerName: 'Fecha', flex: 1 },
+    {
+      field: 'actions',
+      headerName: 'Acciones',
+      flex: 1,
+      renderCell: (params) => (
+        <>
+          <IconButton
+            onClick={() => handleEdit(params.row)}
+            color="primary"
+            size="small"
+          >
+            <Edit />
+          </IconButton>
+          <IconButton
+            onClick={() => handleDelete(params.row.id_purchase_detail)}
+            color="secondary"
+            size="small"
+          >
+            <Delete />
+          </IconButton>
+        </>
+      ),
+    },
   ];
+
+  const handleEdit = (row) => {
+    console.log('Edit row:', row);
+    // Implement edit functionality
+  };
+
+  const handleDelete = (id) => {
+    console.log('Delete id:', id);
+    // Implement delete functionality
+  };
 
   return {
     processing,
     propsSearchBarButton,
     columns,
-    searchList,
     purchaseList,
     propsModalDeletePurchase,
   };
