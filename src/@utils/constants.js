@@ -109,19 +109,33 @@ export const firebaseCollections = {
   PRODUCT: 'product',
   PURCHASE: 'purchase',
   CUSTOMER: 'customer',
+  PURCHASE_DETAIL: 'purchase_detail',
+  ROLE: 'role',
+  PERSON_TYPE: 'person_type',
+  CAT_PAYMENT_METHOD: 'cat_payment_method',
+  PERSON: 'person',
 };
 
 export const firebaseCollectionsKey = {
   user: 'id_user',
   sale: 'id_sale',
+  role: 'id_role',
   inventory_branch: 'id_inventory_branch',
   inventory: 'id_inventory',
   user_sessions: 'id_user_session',
   purchase: 'id_purchase',
   customer: 'id_customer',
+  purchase_detail: 'id_purchase_detail',
+  person_type: 'id_person_type',
+  cat_payment_method: 'id_cat_payment_method',
+  person: 'id_person',
 };
 
 export const alertType = {
   SUCCESS: 'success',
   ERROR: 'error',
+};
+
+export const paymentMethodType = {
+  CASH: 'U4za5UqRxnDdgCdG32nL',
 };

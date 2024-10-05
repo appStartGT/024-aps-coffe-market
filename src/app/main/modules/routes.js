@@ -7,5 +7,5 @@ export default [
   ...employees,
   ...administratorRoutes,
   ...purchase,
-  { path: '*', to: 'sales', element: Navigate },
+  { path: '*', to: 'purchase', element: Navigate },
 ];

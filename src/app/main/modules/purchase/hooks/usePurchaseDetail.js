@@ -16,6 +16,7 @@ import {
   purchaseGetOneAction,
 } from '../../../../store/modules/purchase';
 import Payments from '../components/Payments';
+import PurchaseDetailPage from '../tabs/purchaseDetail/pages/PurchaseDetailPage';
 
 const stylesPaper = {
   padding: '16px',
@@ -104,13 +105,8 @@ const usePurchaseDetail = () => {
     if (params.id_purchase != 0) {
       ability.can(Actions.PURCHASES_TAB_PAGOS, Subjects.PURCHASES) &&
         tabs.push({
-          title: 'Pagos',
-          content: (
-            <Payments
-              processing={processing}
-              purchaseSelected={purchaseSelected}
-            ></Payments>
-          ),
+          title: 'Cafe Pagado',
+          content: <PurchaseDetailPage />,
         });
     }
     return { tabs: tabs };

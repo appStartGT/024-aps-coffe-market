@@ -24,7 +24,7 @@ const useCreateUserForm = ({ id_user_type, id_organization, id_branch }) => {
   const roles = useSelector((state) => state.catalogs.roles);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-
+console.log(roles);
   const formik = useFormikFields({
     fields: [
       {
@@ -193,6 +193,7 @@ const useCreateUserForm = ({ id_user_type, id_organization, id_branch }) => {
 
   const handleOnclick = () => {
     if (selectedUser && selectedUser.id_user) {
+      console.log(formik.form.values);
       //update
       dispatch(
         updateUserAction({

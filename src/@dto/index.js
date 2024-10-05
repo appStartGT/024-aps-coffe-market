@@ -18,3 +18,4 @@ export * as inventoryBranchDto from './inventoryBranch';
 export * as saleDto from './sale';
 export * as purchaseDto from './purchase';
 export * as customerDto from './customer';
+export * as purchaseDetailDto from './purchaseDetail';

@@ -14,6 +14,7 @@ import person from './modules/person';
 import employee from './modules/employee';
 import purchase from './modules/purchase';
 import customer from './modules/customer';
+import purchaseDetail from './modules/purchaseDetail';
 
 export const store = configureStore({
   reducer: {
@@ -31,6 +32,7 @@ export const store = configureStore({
     employee,
     purchase,
     customer,
+    purchaseDetail,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -7,7 +7,6 @@ const ApsGlobalModal = () => {
   const dispatch = useDispatch();
 
   const onClose = () => {
-    // dispatch(setApsGlobalModalPropsAction({ open: false }));
     apsGlobalModalProps.onClose
       ? apsGlobalModalProps.onClose()
       : dispatch(setApsGlobalModalPropsAction({ open: false }));
@@ -16,7 +15,17 @@ const ApsGlobalModal = () => {
   const apsGlobalModalProps = useSelector(
     (state) => state.main.components.apsGlobalModalProps
   );
-  return <ApsModal {...apsGlobalModalProps} onClose={onClose} />;
+
+  const modalProps = { ...apsGlobalModalProps };
+
+  if (
+    typeof modalProps.handleCancel === 'boolean' &&
+    modalProps.handleCancel
+  ) {
+    modalProps.handleCancel = onClose;
+  }
+
+  return <ApsModal {...modalProps} onClose={onClose} />;
 };
 
 export default ApsGlobalModal;

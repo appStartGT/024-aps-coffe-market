@@ -2,19 +2,10 @@ import { cleanModel } from '@utils';
 
 export const list = ({ data, valueKey, nameKey = 'name' }) => {
   return data.map((item) => ({
-    //...item,
-    value: item[valueKey]?.toString(),
+    value: item[valueKey],
     label: item[nameKey],
   }));
 };
-/* 
-export const list = ({ data, valueKey, nameKey = 'name' }) => {
-  return data.map((item) => ({
-    // ...item,
-    value: item[valueKey]?.toString(),
-    label: item[nameKey],
-  }));
-}; */
 
 export const listProductMeasure = ({
   data,

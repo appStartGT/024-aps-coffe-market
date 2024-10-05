@@ -2,6 +2,7 @@ import { cleanModel, validateBoolean } from '@utils';
 import moment from 'moment';
 
 export const post = (data) => {
+  console.log(data);
   let model = {
     id_user_type: data.id_user_type,
     id_organization: data.id_organization,
@@ -25,6 +26,7 @@ export const post = (data) => {
 };
 
 export const put = (data) => {
+  console.log(data);
   let model = {
     id_user_type: data.id_user_type,
     id_organization: data.id_organization,
@@ -58,8 +60,8 @@ const parseUserModel = (user) => {
     photo: user.photo || '',
     photoMetadata: user?.photoMetadata,
     isActive: validateBoolean(user.isActive),
-    id_role: { value: user.id_role.id, label: user.id_role.name },
-    rol: user.id_role.name,
+    id_role: user.role ? { value: user.role.id, label: user.role.name } : null,
+    rol: user.role?.name,
     phone: user.phone || '',
     names: user.names || '',
     surNames: user.surNames || '',
