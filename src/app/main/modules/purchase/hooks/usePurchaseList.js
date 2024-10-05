@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Delete, Edit } from '@mui/icons-material';
+import { Delete, Edit, ShoppingCart } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { Typography } from '@mui/material';
 import {
   purchaseListAction,
   purchaseDeleteAction,
 } from '../../../../store/modules/purchase';
+import {
+setApsGlobalModalPropsAction
+} from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
+import PurchaseDetailForm from '../tabs/purchaseDetail/components/PurchaseDetailForm';
 
 const usePurchaseList = () => {
   /* hooks */
@@ -31,6 +35,18 @@ const usePurchaseList = () => {
   useEffect(() => {
     dispatch(purchaseListAction());
   }, [dispatch]);
+  
+  const handleOpenPurchaseDetailModal = (id_purchase) => {
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'xs',
+        title: 'Detalle de Compra',
+        description: 'Registre un nuevo detalle de compra',
+        content: <PurchaseDetailForm id_purchase={id_purchase} />,
+      })
+    );
+  };
 
   const columns = [
     {
@@ -102,6 +118,17 @@ const usePurchaseList = () => {
                 }}
               />
             )}
+              <ApsIconButton
+                tooltip={{ title: 'Comprar' }}
+                onClick={() => handleOpenPurchaseDetailModal(params.row.id_purchase)} 
+                children={<ShoppingCart color="primary" />}
+                can={{
+                  key: `can-buy-purchase-${params.row.id_purchase}`,
+                  I: Actions.CREATE,
+                  a: Subjects.PURCHASES,
+                }}
+              />
+            
           </div>
         );
       },

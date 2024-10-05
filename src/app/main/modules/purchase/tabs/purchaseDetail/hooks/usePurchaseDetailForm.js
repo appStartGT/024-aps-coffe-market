@@ -1,6 +1,5 @@
 import { useFormikFields, useMountEffect } from '@hooks';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import {
   purchaseDetailCreateAction,
   purchaseDetailUpdateAction,
@@ -10,9 +9,8 @@ import { fieldValidations, paymentMethodType } from '@utils';
 import { paidMethodCatalogAction } from '../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 
-const usePurchaseDetailForm = () => {
+const usePurchaseDetailForm = (id_purchase) => {
   const dispatch = useDispatch();
-  const { id_purchase } = useParams();
 
   const loading = useSelector((state) => state.purchaseDetail.processing);
   const purchaseDetailSelected = useSelector(
@@ -38,15 +36,8 @@ const usePurchaseDetailForm = () => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
+        validations: fieldValidations.required,
       },
-      // {
-      //   id: '13',
-      //   label: 'Total',
-      //   name: 'total',
-      //   gridItem: true,
-      //   gridProps: { md: 6 },
-      //   inputProps: { maxLength: 10 },
-      // },
       {
         id: '15',
         label: 'Forma de Pago',
@@ -73,17 +64,18 @@ const usePurchaseDetailForm = () => {
 
   const handleOnclick = () => {
     const body = { ...formikPurchaseDetail.form.values };
-    if (id_purchase && id_purchase !== '0') {
+    if (purchaseDetailSelected?.id_purchase_detail) {
       dispatch(
         purchaseDetailUpdateAction({
           ...body,
-          id_purchase_detail: id_purchase,
+          id_purchase_detail: purchaseDetailSelected?.id_purchase_detail,
         })
       );
     } else {
       dispatch(
         purchaseDetailCreateAction({
           ...formikPurchaseDetail.form.values,
+          id_purchase: id_purchase,
         })
       )
         .unwrap()

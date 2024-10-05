@@ -10,6 +10,7 @@ import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../components/PurchaseDetailForm';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
+import { useParams } from 'react-router-dom';
 
 const usePurchaseDetail = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,7 @@ const usePurchaseDetail = () => {
   );
   const processing = useSelector((state) => state.purchaseDetail.processing);
 
+  const { id_purchase } = useParams();
   const propsModalDeletePurchase = {
     open: false,
     onClose: () => {},
@@ -27,7 +29,7 @@ const usePurchaseDetail = () => {
   };
 
   useEffect(() => {
-    dispatch(purchaseDetailListAction());
+    dispatch(purchaseDetailListAction({ id_purchase }));
   }, [dispatch]);
 
   const propsSearchBarButton = {
@@ -44,7 +46,7 @@ const usePurchaseDetail = () => {
             maxWidth: 'xs',
             title: 'Compra',
             description: 'Registre un nuevo detalle de compra',
-            content: <PurchaseDetailForm />,
+            content: <PurchaseDetailForm id_purchase={id_purchase} />,
           })
         ),
       color: 'primary',

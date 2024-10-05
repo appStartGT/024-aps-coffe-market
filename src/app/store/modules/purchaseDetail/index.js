@@ -176,6 +176,7 @@ export const purchaseDetailSlice = createSlice({
       (state, { payload }) => {
         const purchaseDetail = purchaseDetailDto.purchaseDetailGetOne(payload);
         state.purchaseDetailSelected = purchaseDetail;
+        state.purchaseDetailList = [...state.purchaseDetailList, purchaseDetail];
         state.processing = false;
       }
     );

@@ -4,8 +4,9 @@ import { FormControlLabel, Switch, Typography, Box } from '@mui/material';
 import ApsButton from '@components/ApsButton';
 import { calculateTotal } from '@utils';
 
-const PurchaseDetailForm = () => {
-  const { formikPurchaseDetail, handleOnclick } = usePurchaseDetailForm();
+const PurchaseDetailForm = ({ id_purchase }) => {
+  const { formikPurchaseDetail, handleOnclick, loading } =
+    usePurchaseDetailForm(id_purchase);
   return (
     <Box display="flex" flexDirection="column">
       <Box
@@ -45,7 +46,7 @@ const PurchaseDetailForm = () => {
         variant="contained"
         color="primary"
         sx={{ mt: 2 }}
-        disabled={!formikPurchaseDetail.form.isValid}
+        disabled={!formikPurchaseDetail.form.isValid || loading}
       >
         Comprar
       </ApsButton>
