@@ -18,7 +18,7 @@ const PurchaseDetailForm = ({ id_purchase }) => {
         <FormControlLabel
           control={
             <Switch
-              // checked={formikPurchaseDetail.form.values.isPriceless}
+              checked={Boolean(formikPurchaseDetail.form.values.isPriceless)}
               onChange={(event) =>
                 formikPurchaseDetail.form.setFieldValue(
                   'isPriceless',
@@ -26,7 +26,7 @@ const PurchaseDetailForm = ({ id_purchase }) => {
                 )
               }
               name="isPriceless"
-              value={formikPurchaseDetail.form.values.isPriceless}
+              // value={formikPurchaseDetail.form.values.isPriceless}
             />
           }
           label="Sin precio"

@@ -17,7 +17,8 @@ import {
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
   async (params, { rejectWithValue }) => {
-    const filterBy = firebaseFilterBuilder(cleanModel(params));
+    const filterBy = firebaseFilterBuilder(cleanModel(params, { allowNulls: true }));
+    console.log(filterBy);
     return await getDataFrom({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       filterBy,
@@ -32,7 +33,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
   'purchaseDetail/create',
   async (data, { rejectWithValue, dispatch }) => {
     let body = cleanModel(data);
-
+    body.isPriceless = Boolean(data.isPriceless);
     const purchaseDetailData = {
       key: firebaseCollectionsKey.purchase_detail,
       ...body,
@@ -86,10 +87,11 @@ export const getOneAllDetallePurchaseDetailAction = createAsyncThunk(
 
 export const purchaseDetailUpdateAction = createAsyncThunk(
   'purchaseDetail/update',
-  async (data, { dispatch }) => {
+  async (data, { rejectWithValue }) => {
+    const body = purchaseDetailDto.purchaseDetailPut(data);
     return await updateRecordBy({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
-      data,
+      data: body,
       filterBy: [
         {
           field: firebaseCollectionsKey.purchase_detail,
@@ -138,6 +140,9 @@ export const purchaseDetailSlice = createSlice({
     setNewGeneralTotal: (state, payload) => {
       state.purchaseDetailSelected.total = payload.payload;
     },
+    setPurchaseDetail: (state, action) => {
+      state.purchaseDetailSelected = action.payload;
+    },
   },
   extraReducers: (builder) => {
     /* LIST */
@@ -176,7 +181,10 @@ export const purchaseDetailSlice = createSlice({
       (state, { payload }) => {
         const purchaseDetail = purchaseDetailDto.purchaseDetailGetOne(payload);
         state.purchaseDetailSelected = purchaseDetail;
-        state.purchaseDetailList = [...state.purchaseDetailList, purchaseDetail];
+        state.purchaseDetailList = [
+          ...state.purchaseDetailList,
+          purchaseDetail,
+        ];
         state.processing = false;
       }
     );
@@ -248,6 +256,7 @@ export const purchaseDetailSlice = createSlice({
   },
 });
 
-export const { clearPurchaseDetailSelected } = purchaseDetailSlice.actions;
+export const { clearPurchaseDetailSelected, setPurchaseDetail } =
+  purchaseDetailSlice.actions;
 
 export default purchaseDetailSlice.reducer;

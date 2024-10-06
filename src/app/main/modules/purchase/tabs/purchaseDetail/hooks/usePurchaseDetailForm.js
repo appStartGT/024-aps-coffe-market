@@ -36,7 +36,7 @@ const usePurchaseDetailForm = (id_purchase) => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
-        validations: fieldValidations.required,
+        validations: fieldValidations.numberRequired,
       },
       {
         id: '15',
@@ -65,6 +65,7 @@ const usePurchaseDetailForm = (id_purchase) => {
   const handleOnclick = () => {
     const body = { ...formikPurchaseDetail.form.values };
     if (purchaseDetailSelected?.id_purchase_detail) {
+      console.log('body', body);
       dispatch(
         purchaseDetailUpdateAction({
           ...body,

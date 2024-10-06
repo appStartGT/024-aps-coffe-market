@@ -6,7 +6,8 @@ const purchaseDetailModel = (purchaseDetail) => {
     id: purchaseDetail.id_purchase_detail,
     id_purchase_detail: purchaseDetail.id_purchase_detail,
     id_purchase: purchaseDetail?.id_purchase,
-    price: `Q${purchaseDetail?.price}`,
+    priceFormat: `Q${purchaseDetail?.price}`,
+    price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,
     total: `Q${calculateTotal(
       purchaseDetail?.quantity,

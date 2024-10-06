@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   purchaseDetailListAction,
   purchaseDetailDeleteAction,
+  setPurchaseDetail,
+  clearPurchaseDetailSelected,
 } from '../../../../../../store/modules/purchaseDetail';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
@@ -29,8 +31,13 @@ const usePurchaseDetail = () => {
   };
 
   useEffect(() => {
-    dispatch(purchaseDetailListAction({ id_purchase }));
+    dispatch(purchaseDetailListAction({ id_purchase, isPriceless: false })); //purchases without price
   }, [dispatch]);
+
+  const onClose = () => {
+    dispatch(clearPurchaseDetailSelected());
+    dispatch(setApsGlobalModalPropsAction({ open: false }));
+  };
 
   const propsSearchBarButton = {
     label: 'Buscar por Nombre / Dirección / Teléfono',
@@ -47,6 +54,7 @@ const usePurchaseDetail = () => {
             title: 'Compra',
             description: 'Registre un nuevo detalle de compra',
             content: <PurchaseDetailForm id_purchase={id_purchase} />,
+            onClose,
           })
         ),
       color: 'primary',
@@ -60,9 +68,9 @@ const usePurchaseDetail = () => {
   const columns = [
     // { field: 'id_purchase_detail', headerName: 'ID', flex: 1 },
     { field: 'quantity', headerName: 'Libras', flex: 1 },
-    { field: 'price', headerName: 'Precio', flex: 1 },
+    { field: 'priceFormat', headerName: 'Precio', flex: 1 },
     { field: 'total', headerName: 'Total', flex: 1 },
-    { field: 'isPriceless', headerName: 'Sin Precio', flex: 1 },
+    // { field: 'isPriceless', headerName: 'Sin Precio', flex: 1 },
     { field: 'createdAt', headerName: 'Fecha', flex: 1 },
     {
       field: 'actions',
@@ -90,13 +98,23 @@ const usePurchaseDetail = () => {
   ];
 
   const handleEdit = (row) => {
-    console.log('Edit row:', row);
-    // Implement edit functionality
+    dispatch(setPurchaseDetail(row));
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'xs',
+        title: 'Editar Compra',
+        description: 'Edite los detalles de la compra',
+        content: (
+          <PurchaseDetailForm id_purchase={id_purchase} initialValues={row} />
+        ),
+        onClose,
+      })
+    );
   };
 
   const handleDelete = (id) => {
-    console.log('Delete id:', id);
-    // Implement delete functionality
+    dispatch(purchaseDetailDeleteAction(id));
   };
 
   return {

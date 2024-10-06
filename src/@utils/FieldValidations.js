@@ -103,11 +103,13 @@ export const fieldValidations = {
     .required('Description is required'),
   number: yup
     .number('Field only accepts numbers.')
+    .typeError('Por favor ingresa un número válido.')
     .min(0, 'Amount has to be 0 or greater.'),
   numberRequired: yup
-    .number('Field only accepts numbers.')
+    .number('Por favor ingresa un número válido.')
+    .typeError('Por favor ingresa un número válido.')
     .min(0, 'Amount has to be 0 or greater.')
-    .required('Quantity is required.'),
+    .required('Requerido'),
   numberSpotsFields: yup
     .number('Field only accepts numbers.')
     .typeError('Field only accepts numbers.')
