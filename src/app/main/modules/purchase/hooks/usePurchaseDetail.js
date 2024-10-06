@@ -15,7 +15,6 @@ import {
   clearPurchaseSelected,
   purchaseGetOneAction,
 } from '../../../../store/modules/purchase';
-import Payments from '../components/Payments';
 import PurchaseDetailPage from '../tabs/purchaseDetail/pages/PurchaseDetailPage';
 
 const stylesPaper = {

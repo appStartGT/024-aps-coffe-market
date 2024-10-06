@@ -9,7 +9,8 @@ const purchaseDetailModel = (purchaseDetail) => {
     priceFormat: `Q${purchaseDetail?.price}`,
     price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,
-    total: `Q${calculateTotal(
+    total: purchaseDetail?.total,
+    totalFormat: `Q${calculateTotal(
       purchaseDetail?.quantity,
       purchaseDetail?.price
     )}`,

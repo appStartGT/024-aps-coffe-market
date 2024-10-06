@@ -17,8 +17,9 @@ import {
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
   async (params, { rejectWithValue }) => {
-    const filterBy = firebaseFilterBuilder(cleanModel(params, { allowNulls: true }));
-    console.log(filterBy);
+    const filterBy = firebaseFilterBuilder(
+      cleanModel(params, { allowNulls: true })
+    );
     return await getDataFrom({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       filterBy,

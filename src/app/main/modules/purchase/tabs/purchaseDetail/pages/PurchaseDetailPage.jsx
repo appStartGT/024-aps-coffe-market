@@ -3,8 +3,9 @@ import { Paper } from '@mui/material';
 import usePurchaseDetail from '../hooks/usePurchaseDetail';
 import ApsModal from '@components/ApsModal';
 import SearchBar from '@components/SearchBar';
+import DataOverview from '../components/DataOverview';
 
-const stylesPaper = {
+const PAPER_STYLES = {
   padding: '16px',
   borderRadius: '12px',
 };
@@ -24,15 +25,14 @@ const PurchaseDetailPage = () => {
         <ApsModal {...propsModalDeletePurchase} />
       )}
 
-      <Paper sx={stylesPaper}>
+      <Paper sx={PAPER_STYLES}>
+        <DataOverview />
         <SearchBar {...propsSearchBarButton} />
         <ApsDatagrid
           rows={purchaseList}
           columns={columns}
           loading={processing}
-          sxContainerProps={{
-            height: 500,
-          }}
+          sxContainerProps={{ height: 500 }}
           autoHeight={false}
         />
       </Paper>

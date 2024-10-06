@@ -66,16 +66,35 @@ const usePurchaseDetail = () => {
     },
   };
   const columns = [
-    // { field: 'id_purchase_detail', headerName: 'ID', flex: 1 },
-    { field: 'quantity', headerName: 'Libras', flex: 1 },
-    { field: 'priceFormat', headerName: 'Precio', flex: 1 },
-    { field: 'total', headerName: 'Total', flex: 1 },
-    // { field: 'isPriceless', headerName: 'Sin Precio', flex: 1 },
-    { field: 'createdAt', headerName: 'Fecha', flex: 1 },
+    {
+      field: 'quantity',
+      headerName: 'Libras',
+      flex: 1,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'priceFormat',
+      headerName: 'Precio',
+      flex: 1,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'totalFormat',
+      headerName: 'Total',
+      flex: 1,
+      disableColumnMenu: true,
+    },
+    {
+      field: 'createdAt',
+      headerName: 'Fecha',
+      flex: 1,
+      disableColumnMenu: true,
+    },
     {
       field: 'actions',
       headerName: 'Acciones',
-      flex: 1,
+      sortable: false,
+      disableColumnMenu: true,
       renderCell: (params) => (
         <>
           <IconButton

@@ -62,16 +62,29 @@ const usePurchaseDetailForm = (id_purchase) => {
     deps: [purchaseDetailSelected],
   });
 
+  const handleFormReset = () => {
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: false,
+      })
+    );
+    dispatch(clearPurchaseDetailSelected());
+    formikPurchaseDetail.form.resetForm();
+  };
+
   const handleOnclick = () => {
     const body = { ...formikPurchaseDetail.form.values };
     if (purchaseDetailSelected?.id_purchase_detail) {
-      console.log('body', body);
       dispatch(
         purchaseDetailUpdateAction({
           ...body,
           id_purchase_detail: purchaseDetailSelected?.id_purchase_detail,
         })
-      );
+      )
+        .unwrap()
+        .then(() => {
+          handleFormReset();
+        });
     } else {
       dispatch(
         purchaseDetailCreateAction({
@@ -81,13 +94,7 @@ const usePurchaseDetailForm = (id_purchase) => {
       )
         .unwrap()
         .then(() => {
-          dispatch(
-            setApsGlobalModalPropsAction({
-              open: false,
-            })
-          );
-          dispatch(clearPurchaseDetailSelected());
-          formikPurchaseDetail.form.resetForm();
+          handleFormReset();
         });
     }
   };
