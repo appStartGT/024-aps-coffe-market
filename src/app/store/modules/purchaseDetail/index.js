@@ -46,7 +46,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
     })
       .then((res) => {
         dispatch(setLoadingMainViewAction(false));
-        return {...res};
+        return { ...res };
       })
       .catch((res) => {
         return rejectWithValue(res);
@@ -195,10 +195,22 @@ export const purchaseDetailSlice = createSlice({
       purchaseDetailCreateAction.fulfilled,
       (state, { payload }) => {
         if (!payload.nonupdate) {
-          const purchaseDetail = purchaseDetailDto.purchaseDetailGetOne(payload);
+          const purchaseDetail =
+            purchaseDetailDto.purchaseDetailGetOne(payload);
           state.purchaseDetailSelected = purchaseDetail;
-          state.purchaseDetailList = [
-            ...state.purchaseDetailList,
+          if (purchaseDetail.isPriceless) {
+            state.purchaseDetailListPriceless = [
+              ...state.purchaseDetailListPriceless,
+              purchaseDetail,
+            ];
+          } else {
+            state.purchaseDetailList = [
+              ...state.purchaseDetailList,
+              purchaseDetail,
+            ];
+          }
+          state.allPurchaseDetails = [
+            ...state.allPurchaseDetails,
             purchaseDetail,
           ];
         }
@@ -242,10 +254,35 @@ export const purchaseDetailSlice = createSlice({
         const updatedPurchaseDetail =
           purchaseDetailDto.purchaseDetailGetOne(payload);
         state.purchaseDetailSelected = updatedPurchaseDetail;
-        state.purchaseDetailList = purchaseDetailDto.updateListPurchaseDetail(
-          state.purchaseDetailList,
-          payload
+
+        // Remove the old record from both lists
+        state.purchaseDetailList = state.purchaseDetailList.filter(
+          (detail) =>
+            detail[firebaseCollectionsKey.purchase_detail] !==
+            updatedPurchaseDetail[firebaseCollectionsKey.purchase_detail]
         );
+        state.purchaseDetailListPriceless =
+          state.purchaseDetailListPriceless.filter(
+            (detail) =>
+              detail[firebaseCollectionsKey.purchase_detail] !==
+              updatedPurchaseDetail[firebaseCollectionsKey.purchase_detail]
+          );
+
+        // Add the updated record to the correct list
+        if (updatedPurchaseDetail.isPriceless) {
+          state.purchaseDetailListPriceless.push(updatedPurchaseDetail);
+        } else {
+          state.purchaseDetailList.push(updatedPurchaseDetail);
+        }
+
+        // Update the record in allPurchaseDetails
+        state.allPurchaseDetails = state.allPurchaseDetails.map((detail) =>
+          detail[firebaseCollectionsKey.purchase_detail] ===
+          updatedPurchaseDetail[firebaseCollectionsKey.purchase_detail]
+            ? updatedPurchaseDetail
+            : detail
+        );
+
         state.processing = false;
       }
     );
@@ -263,6 +300,17 @@ export const purchaseDetailSlice = createSlice({
       (state, { payload }) => {
         const id_purchaseDetail = payload.ids[0];
         state.purchaseDetailList = state.purchaseDetailList.filter(
+          (purchaseDetail) =>
+            purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
+            id_purchaseDetail
+        );
+        state.purchaseDetailListPriceless =
+          state.purchaseDetailListPriceless.filter(
+            (purchaseDetail) =>
+              purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
+              id_purchaseDetail
+          );
+        state.allPurchaseDetails = state.allPurchaseDetails.filter(
           (purchaseDetail) =>
             purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
             id_purchaseDetail

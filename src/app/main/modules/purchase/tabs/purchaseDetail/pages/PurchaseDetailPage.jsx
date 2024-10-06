@@ -2,7 +2,7 @@ import ApsDatagrid from '@components/ApsDatagrid';
 import { Paper } from '@mui/material';
 import usePurchaseDetail from '../hooks/usePurchaseDetail';
 import SearchBar from '@components/SearchBar';
-import DataOverview from '../components/DataOverview';
+import DataTableOverview from '../components/DataTableOverview';
 
 const PAPER_STYLES = {
   padding: '16px',
@@ -21,7 +21,7 @@ const PurchaseDetailPage = () => {
   return (
     <>
       <Paper sx={PAPER_STYLES}>
-        <DataOverview purchaseList={purchaseList} />
+        <DataTableOverview purchaseList={purchaseList} />
         <SearchBar {...propsSearchBarButton} />
         <ApsDatagrid
           rows={searchList || purchaseList}

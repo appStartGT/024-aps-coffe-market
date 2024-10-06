@@ -19,6 +19,25 @@ const constantColors = {
   },
 };
 
+const chartColors = {
+  totalPurchases: {
+    background: '#e3f2fd',
+    text: '#1565c0',
+  },
+  totalQuantity: {
+    background: '#e8f5e9',
+    text: '#2e7d32',
+  },
+  averagePrice: {
+    background: '#fff3e0',
+    text: '#e65100',
+  },
+  totalAmount: {
+    background: '#fce4ec',
+    text: '#c2185b',
+  },
+};
+
 //paletas
 export const defaultPalette = {
   mode: 'light',
@@ -57,4 +76,5 @@ export const defaultPalette = {
   },
   appbar: { background: '#EBEBEB' }, // Brown variation to match with green
   ...constantColors,
+  ...chartColors,
 };

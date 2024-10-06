@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth, useFormikFields, useMountEffect } from '@hooks';
+import React from 'react';
+import { useFormikFields, useMountEffect } from '@hooks';
 import { LocationOn, Phone, RecentActors } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
 import { useDispatch } from 'react-redux';
@@ -16,7 +16,6 @@ const usePurchaseForm = ({ navigate }) => {
   /* HOOKS */
   const dispatch = useDispatch();
   const { id_purchase } = useParams();
-  const auth = useAuth();
 
   /* SELECTORS */
   const loading = useSelector((state) => state.purchase.processing);

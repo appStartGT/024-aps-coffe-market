@@ -39,9 +39,10 @@ export const mainSlice = createSlice({
       state.components.tabComponent.value = { ...currentValue, ...newValue };
     },
     setApsGlobalModalPropsAction: (state, action) => {
-      const currentValue = state.components.apsGlobalModalProps;
+      // const currentValue = state.components.apsGlobalModalProps;
       const newValue = action.payload;
-      state.components.apsGlobalModalProps = { ...currentValue, ...newValue };
+      // state.components.apsGlobalModalProps = { ...currentValue, ...newValue };
+      state.components.apsGlobalModalProps = newValue;
     },
   },
 });

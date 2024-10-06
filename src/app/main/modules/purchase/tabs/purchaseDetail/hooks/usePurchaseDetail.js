@@ -137,7 +137,7 @@ const usePurchaseDetail = () => {
         content: null,
         handleOk: () => {
           dispatch(purchaseDetailDeleteAction({ id_purchase_detail }));
-          dispatch(setApsGlobalModalPropsAction({ open: false }));
+          dispatch(setApsGlobalModalPropsAction({}));
         },
         handleCancel: true,
         titleOk: 'Eliminar',

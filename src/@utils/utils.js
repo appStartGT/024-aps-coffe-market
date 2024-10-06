@@ -144,7 +144,8 @@ export const cleanModel = (
     if (
       (model[key] !== undefined &&
         (model[key] !== null || (model[key] === null && config.allowNulls)) &&
-        (model[key] !== '' || (model[key] === '' && config.allowEmptyStrings))) ||
+        (model[key] !== '' ||
+          (model[key] === '' && config.allowEmptyStrings))) ||
       typeof model[key] === 'boolean' ||
       typeof model[key] === 'number'
     ) {
@@ -156,29 +157,6 @@ export const cleanModel = (
 
 export const validateBoolean = (value) =>
   typeof value === 'boolean' ? value : value == 'true' ? true : false;
-
-// export const getFIleFromURL = async () =>
-//   new Promise((resolve, reject) =>
-//     fetch('https://storage.googleapis.com/dev_charter/1682011718116.pdf', {
-//       method: 'GET',
-//     })
-//       .then((response) => response.blob())
-//       .then((blob) => {
-//         const url = window.URL.createObjectURL(blob);
-//         const link = document.createElement('a');
-//         link.href = url;
-//         link.download = 'file.pdf';
-//         document.body.appendChild(link);
-//         link.click();
-//         document.body.removeChild(link);
-//         window.URL.revokeObjectURL(url);
-//         resolve(true);
-//       })
-//       .catch((error) => {
-//         console.error(error);
-//         reject(error);
-//       })
-//   );
 
 export const getFIleFromURL = async () => {
   try {
@@ -268,6 +246,19 @@ export const calculateTotal = (quantity, price) => {
     return '0,00';
   }
   return total.toLocaleString('es-GT', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+export const formatNumber = (number) => {
+  if (typeof number === 'string') {
+    number = parseFloat(number);
+  }
+  if (typeof number !== 'number' || isNaN(number)) {
+    return '0.00';
+  }
+  return number.toLocaleString('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
