@@ -72,7 +72,7 @@ const usePurchaseDetailForm = (id_purchase) => {
     formikPurchaseDetail.form.resetForm();
   };
 
-  const handleOnclick = (nonupdate) => {
+  const handleOnclick = () => {
     const body = { ...formikPurchaseDetail.form.values };
     if (purchaseDetailSelected?.id_purchase_detail) {
       dispatch(
@@ -90,7 +90,6 @@ const usePurchaseDetailForm = (id_purchase) => {
         purchaseDetailCreateAction({
           ...formikPurchaseDetail.form.values,
           id_purchase: id_purchase,
-          nonupdate,
         })
       )
         .unwrap()

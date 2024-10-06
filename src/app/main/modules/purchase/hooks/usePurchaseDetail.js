@@ -16,6 +16,7 @@ import {
   purchaseGetOneAction,
 } from '../../../../store/modules/purchase';
 import PurchaseDetailPage from '../tabs/purchaseDetail/pages/PurchaseDetailPage';
+import PurchaseDetailPricelessPage from '../tabs/purchaseDetailPriceless/pages/PurchaseDetailPricelessPage';
 
 const stylesPaper = {
   padding: '16px',
@@ -35,8 +36,6 @@ const usePurchaseDetail = () => {
   );
   const { formikPurchase, handleOnclick, purchaseSelected, loading } =
     usePurchaseForm({ navigate });
-
-  const processing = useSelector((state) => state.purchase.processing);
 
   /* USE EFFECTS */
   useMountEffect({
@@ -104,8 +103,13 @@ const usePurchaseDetail = () => {
     if (params.id_purchase != 0) {
       ability.can(Actions.PURCHASES_TAB_PAGOS, Subjects.PURCHASES) &&
         tabs.push({
-          title: 'Cafe Pagado',
+          title: 'Compras',
           content: <PurchaseDetailPage />,
+        });
+      ability.can(Actions.PURCHASES_TAB_PAGOS, Subjects.PURCHASES) &&
+        tabs.push({
+          title: 'Compras (Sin precio)',
+          content: <PurchaseDetailPricelessPage />, //purchases without price (cafe sin precio)
         });
     }
     return { tabs: tabs };

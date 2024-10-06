@@ -46,7 +46,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
     })
       .then((res) => {
         dispatch(setLoadingMainViewAction(false));
-        return res;
+        return {...res};
       })
       .catch((res) => {
         return rejectWithValue(res);
@@ -108,14 +108,14 @@ export const purchaseDetailUpdateAction = createAsyncThunk(
 
 export const purchaseDetailDeleteAction = createAsyncThunk(
   'purchaseDetail/delete',
-  async ({ id_purchaseDetail }, { rejectWithValue }) => {
+  async ({ id_purchase_detail }, { rejectWithValue }) => {
     return await deleteRecordById({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       filterBy: [
         {
           field: firebaseCollectionsKey.purchase_detail,
           condition: '==',
-          value: id_purchaseDetail,
+          value: id_purchase_detail,
         },
       ],
     })
@@ -128,6 +128,8 @@ const initialState = {
   purchaseDetailSelected: null,
   processing: false,
   purchaseDetailList: [],
+  purchaseDetailListPriceless: [],
+  allPurchaseDetails: [],
   totalItems: 5,
 };
 
@@ -144,6 +146,11 @@ export const purchaseDetailSlice = createSlice({
     setPurchaseDetail: (state, action) => {
       state.purchaseDetailSelected = action.payload;
     },
+    clearAllPurchaseDetails: (state) => {
+      state.allPurchaseDetails = [];
+      state.purchaseDetailList = [];
+      state.purchaseDetailListPriceless = [];
+    },
   },
   extraReducers: (builder) => {
     /* LIST */
@@ -157,8 +164,15 @@ export const purchaseDetailSlice = createSlice({
     builder.addCase(
       purchaseDetailListAction.fulfilled,
       (state, { payload }) => {
-        state.purchaseDetailList = purchaseDetailDto.purchaseDetailList(
+        const allPurchaseDetails = purchaseDetailDto.purchaseDetailList(
           payload.data
+        );
+        state.allPurchaseDetails = allPurchaseDetails;
+        state.purchaseDetailList = allPurchaseDetails.filter(
+          (detail) => detail.isPriceless === false
+        );
+        state.purchaseDetailListPriceless = allPurchaseDetails.filter(
+          (detail) => detail.isPriceless === true
         );
         state.totalItems = payload.data.totalItems;
         state.processing = false;
@@ -180,12 +194,14 @@ export const purchaseDetailSlice = createSlice({
     builder.addCase(
       purchaseDetailCreateAction.fulfilled,
       (state, { payload }) => {
-        const purchaseDetail = purchaseDetailDto.purchaseDetailGetOne(payload);
-        state.purchaseDetailSelected = purchaseDetail;
-        state.purchaseDetailList = [
-          ...state.purchaseDetailList,
-          purchaseDetail,
-        ];
+        if (!payload.nonupdate) {
+          const purchaseDetail = purchaseDetailDto.purchaseDetailGetOne(payload);
+          state.purchaseDetailSelected = purchaseDetail;
+          state.purchaseDetailList = [
+            ...state.purchaseDetailList,
+            purchaseDetail,
+          ];
+        }
         state.processing = false;
       }
     );
@@ -257,7 +273,10 @@ export const purchaseDetailSlice = createSlice({
   },
 });
 
-export const { clearPurchaseDetailSelected, setPurchaseDetail } =
-  purchaseDetailSlice.actions;
+export const {
+  clearPurchaseDetailSelected,
+  setPurchaseDetail,
+  clearAllPurchaseDetails,
+} = purchaseDetailSlice.actions;
 
 export default purchaseDetailSlice.reducer;

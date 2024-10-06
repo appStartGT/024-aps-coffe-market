@@ -9,22 +9,22 @@ const PAPER_STYLES = {
   borderRadius: '12px',
 };
 
-const PurchaseDetailPage = () => {
+const PurchaseDetailPricelessPage = () => {
   const {
     processing,
     propsSearchBarButton,
     columns,
     searchList,
-    purchaseList,
+    purchaseListPriceless,
   } = usePurchaseDetail();
 
   return (
     <>
       <Paper sx={PAPER_STYLES}>
-        <DataOverview purchaseList={purchaseList} />
+        <DataOverview purchaseList={purchaseListPriceless} />
         <SearchBar {...propsSearchBarButton} />
         <ApsDatagrid
-          rows={searchList || purchaseList}
+          rows={searchList || purchaseListPriceless}
           columns={columns}
           loading={processing}
           sxContainerProps={{ height: 500 }}
@@ -35,4 +35,4 @@ const PurchaseDetailPage = () => {
   );
 };
 
-export default PurchaseDetailPage;
+export default PurchaseDetailPricelessPage;

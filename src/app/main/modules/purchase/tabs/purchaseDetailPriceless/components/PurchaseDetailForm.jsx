@@ -4,8 +4,7 @@ import { FormControlLabel, Switch, Typography, Box } from '@mui/material';
 import ApsButton from '@components/ApsButton';
 import { calculateTotal } from '@utils';
 
-const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
-  //nonupdate true no update redux
+const PurchaseDetailForm = ({ id_purchase }) => {
   const { formikPurchaseDetail, handleOnclick, loading } =
     usePurchaseDetailForm(id_purchase);
   return (
@@ -43,7 +42,7 @@ const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
       <ApsForm formik={formikPurchaseDetail} />
 
       <ApsButton
-        onClick={() => handleOnclick(nonupdate)}
+        onClick={handleOnclick}
         variant="contained"
         color="primary"
         sx={{ mt: 2 }}

@@ -18,14 +18,16 @@ const usePurchaseDetail = () => {
   const dispatch = useDispatch();
   const [searchList, setSearchList] = useState(null);
   const processing = useSelector((state) => state.purchaseDetail.processing);
-  const purchaseList = useSelector(
-    (state) => state.purchaseDetail.purchaseDetailList
+
+  const purchaseListPriceless = useSelector(
+    (state) => state.purchaseDetail.purchaseDetailListPriceless
   );
+
   const { id_purchase } = useParams();
 
   useEffect(() => {
-    if (Array.isArray(purchaseList) && !purchaseList.length) {
-      dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
+    if (Array.isArray(purchaseListPriceless) && !purchaseListPriceless.length) {
+      dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
     }
   }, [dispatch]);
 
@@ -36,7 +38,7 @@ const usePurchaseDetail = () => {
   const propsSearchBarButton = {
     label: 'Buscar por Libras / Precio / Total',
     type: 'text',
-    searchList: purchaseList,
+    searchList: purchaseListPriceless,
     searchResults: (results) => setSearchList(results),
     searchKey: 'quantity, priceFormat, totalFormat',
     rightButton: {
@@ -153,7 +155,7 @@ const usePurchaseDetail = () => {
     propsSearchBarButton,
     columns,
     searchList,
-    purchaseList,
+    purchaseListPriceless,
   };
 };
 

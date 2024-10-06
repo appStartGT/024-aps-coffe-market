@@ -8,9 +8,8 @@ import {
   purchaseListAction,
   purchaseDeleteAction,
 } from '../../../../store/modules/purchase';
-import {
-setApsGlobalModalPropsAction
-} from '../../../../store/modules/main';
+import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetail';
+import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../tabs/purchaseDetail/components/PurchaseDetailForm';
 
@@ -23,6 +22,10 @@ const usePurchaseList = () => {
   const purchaseList = useSelector((state) => state.purchase.purchaseList);
   const totalItems = useSelector((state) => state.purchase.totalItems);
   const processing = useSelector((state) => state.purchase.processing);
+
+  const allPurchaseDetails = useSelector(
+    (state) => state.purchaseDetail.allPurchaseDetails
+  );
   /* STATES */
   /* Search */
   const [searchList, setSearchList] = useState(null);
@@ -35,7 +38,12 @@ const usePurchaseList = () => {
   useEffect(() => {
     dispatch(purchaseListAction());
   }, [dispatch]);
-  
+
+  useEffect(() => {
+    if (allPurchaseDetails && allPurchaseDetails.length > 0) {
+      dispatch(clearAllPurchaseDetails());
+    }
+  }, [dispatch]);
   const handleOpenPurchaseDetailModal = (id_purchase) => {
     dispatch(
       setApsGlobalModalPropsAction({
@@ -43,7 +51,7 @@ const usePurchaseList = () => {
         maxWidth: 'xs',
         title: 'Detalle de Compra',
         description: 'Registre un nuevo detalle de compra',
-        content: <PurchaseDetailForm id_purchase={id_purchase} />,
+        content: <PurchaseDetailForm id_purchase={id_purchase} nonupdate />,
       })
     );
   };
@@ -118,17 +126,18 @@ const usePurchaseList = () => {
                 }}
               />
             )}
-              <ApsIconButton
-                tooltip={{ title: 'Comprar' }}
-                onClick={() => handleOpenPurchaseDetailModal(params.row.id_purchase)} 
-                children={<ShoppingCart color="primary" />}
-                can={{
-                  key: `can-buy-purchase-${params.row.id_purchase}`,
-                  I: Actions.CREATE,
-                  a: Subjects.PURCHASES,
-                }}
-              />
-            
+            <ApsIconButton
+              tooltip={{ title: 'Comprar' }}
+              onClick={() =>
+                handleOpenPurchaseDetailModal(params.row.id_purchase)
+              }
+              children={<ShoppingCart color="primary" />}
+              can={{
+                key: `can-buy-purchase-${params.row.id_purchase}`,
+                I: Actions.CREATE,
+                a: Subjects.PURCHASES,
+              }}
+            />
           </div>
         );
       },
