@@ -1,4 +1,4 @@
-import { calculateTotal, cleanModel } from '@utils';
+import { formatNumber, cleanModel } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
 const purchaseDetailModel = (purchaseDetail) => {
@@ -6,13 +6,12 @@ const purchaseDetailModel = (purchaseDetail) => {
     id: purchaseDetail.id_purchase_detail,
     id_purchase_detail: purchaseDetail.id_purchase_detail,
     id_purchase: purchaseDetail?.id_purchase,
-    priceFormat: `Q${purchaseDetail?.price}`,
+    priceFormat: `Q${formatNumber(purchaseDetail?.price)}`,
     price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,
     total: purchaseDetail?.total,
-    totalFormat: `Q${calculateTotal(
-      purchaseDetail?.quantity,
-      purchaseDetail?.price
+    totalFormat: `Q${formatNumber(
+      purchaseDetail?.quantity * purchaseDetail?.price
     )}`,
     isPriceless: purchaseDetail?.isPriceless,
     id_cat_payment_method: purchaseDetail?.id_cat_payment_method,
@@ -21,6 +20,13 @@ const purchaseDetailModel = (purchaseDetail) => {
     isActive: purchaseDetail.isActive || false,
     key: purchaseDetail.key || '',
     updatedAt: formatFirebaseTimestamp(purchaseDetail.updatedAt),
+    advancePayments: purchaseDetail?.advancePayments || [],
+    advancePaymentAmount: `Q${formatNumber(
+      purchaseDetail?.advancePayments?.reduce(
+        (sum, payment) => sum + (payment.amount || 0),
+        0
+      )
+    )}`,
   };
   return obj;
 };

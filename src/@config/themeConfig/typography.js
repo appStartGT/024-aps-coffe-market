@@ -10,146 +10,184 @@ const breakpoints = createBreakpoints({
   },
 });
 
-export const typography = (/* palette = {} */) => ({
-  // fontFamily: [
-  //     'Work Sans',
-  //     'sans-serif'
-  // ],
+export const typography = () => ({
   fontFamily: 'Roboto, sans-serif',
   h1: {
     fontWeight: 900,
-    fontSize: 40,
+    fontSize: '1.9rem',
     fontStyle: 'normal',
-    // letterSpacing: -1.5,
-    // [breakpoints.down('lg')]: {
-    //     fontSize: 40
-    // },
-    [breakpoints.down('sm')]: {
-      fontSize: 32,
+    [breakpoints.up('sm')]: {
+      fontSize: '2.15rem',
     },
-    [breakpoints.down('xs')]: {
-      fontSize: 32,
+    [breakpoints.up('md')]: {
+      fontSize: '2.65rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '2.65rem',
     },
   },
   h2: {
-    fontSize: 36,
     fontWeight: 700,
-    letterSpacing: -0.5,
-
-    // [breakpoints.down('lg')]: {
-    //     fontSize: '5.1rem'
-    // },
-    // [breakpoints.down('sm')]: {
-    //     fontSize: '4.6rem'
-    // },
-    // [breakpoints.down('xs')]: {
-    //     fontSize: '3.8rem'
-    // },
+    fontSize: '1.65rem',
+    letterSpacing: '-0.5px',
+    [breakpoints.up('sm')]: {
+      fontSize: '1.9rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '2.4rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '2.4rem',
+    },
   },
-  // h3: {
-  //     fontSize: 48,
-  //     fontWeight: 700,
-  //     [breakpoints.down('lg')]: {
-  //         fontSize: '4.3rem'
-  //     },
-  //     [breakpoints.down('md')]: {
-  //         fontSize: '4rem'
-  //     },
-  //     [breakpoints.down('xs')]: {
-  //         fontSize: '3.2rem'
-  //     },
-  // },
-  h4: {
-    fontSize: 28,
+  h3: {
     fontWeight: 700,
-    // letterSpacing: 0.25,
-    // [breakpoints.down('lg')]: {
-    //     fontSize: '3rem'
-    // },
-    // [breakpoints.down('md')]: {
-    //     fontSize: '2.8rem'
-    // },
-    // [breakpoints.down('xs')]: {
-    //     fontSize: '2.5rem'
-    // },
+    fontSize: '1.4rem',
+    [breakpoints.up('sm')]: {
+      fontSize: '1.65rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '2.15rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '2.15rem',
+    },
+  },
+  h4: {
+    fontWeight: 700,
+    fontSize: '1.15rem',
+    [breakpoints.up('sm')]: {
+      fontSize: '1.4rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '1.9rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '1.9rem',
+    },
   },
   h5: {
     fontWeight: 700,
-    fontSize: 24,
-    /* [breakpoints.down('lg')]: {
-           fontSize: '2.2rem'
-       },
-       [breakpoints.down('sm')]: {
-           fontSize: '2rem'
-       } */
+    fontSize: '1rem',
+    [breakpoints.up('sm')]: {
+      fontSize: '1.15rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '1.65rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '1.65rem',
+    },
   },
   h6: {
-    fontWeight: 'bold',
-    fontSize: 20,
-    // textTransform: 'capitalize'
+    fontWeight: 700,
+    fontSize: '0.9rem',
     textTransform: 'none',
-    // [breakpoints.down('lg')]: {
-    //     fontSize: '1.7rem'
-    // }
+    [breakpoints.up('sm')]: {
+      fontSize: '1rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '1.4rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '1.4rem',
+    },
   },
   subtitle1: {
     fontWeight: 'normal',
-    fontSize: 20,
-    //color: palette.white.default,
-    //letterSpacing: 0.15,
-    //[breakpoints.down('lg')]: {
-    //    fontSize: '1.5rem'
-    //}
+    fontSize: '0.8rem',
+    [breakpoints.up('sm')]: {
+      fontSize: '0.9rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '1.15rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '1.15rem',
+    },
   },
   subtitle2: {
     fontWeight: 400,
-    fontSize: 16,
-    letterSpacing: 0.1,
-    //color: palette.white.default,
-    /* [breakpoints.down('lg')]: {
-      fontSize: '1.3rem',
-    }, */
+    fontSize: '0.7rem',
+    letterSpacing: '0.1px',
+    [breakpoints.up('sm')]: {
+      fontSize: '0.75rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '0.9rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '0.9rem',
+    },
   },
-  // body1: {
-  //     fontWeight: 400,
-  //     fontSize: 16,
-  //     [breakpoints.down('lg')]: {
-  //         fontSize: '1.5rem'
-  //     },
-  // },
-  // body2: {
-  //     fontWeight: 400,
-  //     fontSize: 14,
-  //     letterSpacing: -0.15,
-  //     [breakpoints.down('lg')]: {
-  //         fontSize: '1.3rem'
-  //     },
-  // },
-  // button: {
-  //     fontWeight: 500,
-  //     fontSize: 14,
-  //     letterSpacing: 1.25,
-  //     [breakpoints.down('lg')]: {
-  //         fontSize: '1.3rem'
-  //     },
-  // },
+  body1: {
+    fontWeight: 400,
+    fontSize: '0.8rem',
+    [breakpoints.up('sm')]: {
+      fontSize: '0.9rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '1.1rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '1.1rem',
+    },
+  },
+  body2: {
+    fontWeight: 400,
+    fontSize: '0.7rem',
+    [breakpoints.up('sm')]: {
+      fontSize: '0.75rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '0.9rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '0.9rem',
+    },
+  },
+  button: {
+    fontWeight: 500,
+    fontSize: '0.7rem',
+    letterSpacing: '0.02em',
+    [breakpoints.up('sm')]: {
+      fontSize: '0.75rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '0.9rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '0.9rem',
+    },
+  },
   caption: {
-    fontWeight: '400px',
-    fontSize: '12px',
-    fontStyle: 'normal',
-    lineHeight: '14px',
-    // letterSpacing: 0.4,
-    //color: palette.white.white07,
-    // [breakpoints.down('lg')]: {
-    //     fontSize: '1.1rem'
-    // },
+    fontWeight: 400,
+    fontSize: '0.6rem',
+    lineHeight: 1.66,
+    [breakpoints.up('sm')]: {
+      fontSize: '0.65rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '0.8rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '0.8rem',
+    },
   },
   overline: {
     fontWeight: 400,
-    fontSize: 10,
-    lineHeight: '12px',
-    fontStyle: 'normal',
-    //color: palette.white.white07,
-    // letterSpacing: 1.5,
+    fontSize: '0.5rem',
+    letterSpacing: '0.08em',
+    lineHeight: 2.66,
+    textTransform: 'uppercase',
+    [breakpoints.up('sm')]: {
+      fontSize: '0.55rem',
+    },
+    [breakpoints.up('md')]: {
+      fontSize: '0.7rem',
+    },
+    [breakpoints.up('lg')]: {
+      fontSize: '0.7rem',
+    },
   },
 });

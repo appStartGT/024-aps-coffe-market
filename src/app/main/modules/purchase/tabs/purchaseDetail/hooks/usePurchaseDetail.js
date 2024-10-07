@@ -80,6 +80,12 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
     },
     {
+      field: 'advancePaymentAmount',
+      headerName: 'Anticipo',
+      flex: 1,
+      disableColumnMenu: true,
+    },
+    {
       field: 'createdAt',
       headerName: 'Fecha',
       flex: 1,

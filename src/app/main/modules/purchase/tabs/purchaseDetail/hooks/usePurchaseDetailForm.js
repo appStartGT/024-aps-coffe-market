@@ -27,7 +27,7 @@ const usePurchaseDetailForm = (id_purchase) => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
-        validations: fieldValidations.required,
+        validations: fieldValidations.numberRequired,
       },
       {
         id: '12',
@@ -48,6 +48,15 @@ const usePurchaseDetailForm = (id_purchase) => {
         field: 'select',
         options: paidMethod,
         value: paymentMethodType.CASH,
+      },
+      {
+        id: '16',
+        label: 'Anticipos',
+        name: 'advancePayments',
+        gridItem: true,
+        gridProps: { md: 12 },
+        renderfunction: () => false,
+        value: [],
       },
     ],
   });

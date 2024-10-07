@@ -36,6 +36,18 @@ const chartColors = {
     background: '#fce4ec',
     text: '#c2185b',
   },
+  totalAdvancePayments: {
+    background: '#e8f5e9',
+    text: '#2e7d32',
+  },
+  advancePayment: {
+    background: '#e8f5e9',
+    text: '#2e7d32',
+  },
+  balance: {
+    background: '#e0f2f1',
+    text: '#00695c',
+  },
 };
 
 //paletas

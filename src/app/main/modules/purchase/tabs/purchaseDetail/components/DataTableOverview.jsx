@@ -10,6 +10,8 @@ const DataTableOverview = ({ purchaseList }) => {
     totalQuantity: 0,
     averagePrice: 0,
     totalAmount: 0,
+    totalAdvancePayments: 0,
+    balance: 0,
   });
 
   useEffect(() => {
@@ -24,12 +26,24 @@ const DataTableOverview = ({ purchaseList }) => {
         0
       );
       const averagePrice = totalAmount / totalQuantity;
+      const totalAdvancePayments = purchaseList.reduce(
+        (sum, purchase) =>
+          sum +
+          (purchase.advancePayments?.reduce(
+            (paymentSum, payment) => paymentSum + payment.amount,
+            0
+          ) || 0),
+        0
+      );
+      const balance = totalAmount - totalAdvancePayments;
 
       setStatistics({
         totalPurchases: totalPurchases,
         totalQuantity: formatNumber(totalQuantity),
         averagePrice: formatNumber(averagePrice),
         totalAmount: formatNumber(totalAmount),
+        totalAdvancePayments: formatNumber(totalAdvancePayments),
+        balance: formatNumber(balance),
       });
     }
   }, [purchaseList]);
@@ -60,6 +74,18 @@ const DataTableOverview = ({ purchaseList }) => {
           label="Monto Total"
           backgroundColor={theme.palette.totalAmount.background}
           color={theme.palette.totalAmount.text}
+        />
+        <DataItem
+          value={`Q${statistics.totalAdvancePayments}`}
+          label="Total Anticipos"
+          backgroundColor={theme.palette.totalAdvancePayments.background}
+          color={theme.palette.totalAdvancePayments.text}
+        />
+        <DataItem
+          value={`Q${statistics.balance}`}
+          label="Saldo"
+          backgroundColor={theme.palette.balance.background}
+          color={theme.palette.balance.text}
         />
       </Box>
     </Box>
