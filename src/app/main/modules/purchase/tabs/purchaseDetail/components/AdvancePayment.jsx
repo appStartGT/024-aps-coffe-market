@@ -12,42 +12,67 @@ const AdvancePayment = ({ formikPurchaseDetail }) => {
   const [advancePaymentAmount, setAdvancePaymentAmount] = useState('');
   const [error, setError] = useState('');
 
-  const validateAmount = useCallback((amount) => {
-    if (!amount || amount.trim() === '') {
-      setError('El monto no puede estar vacío');
-      return false;
-    }
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      setError('Por favor, ingrese un número válido mayor que cero');
-      return false;
-    }
-    const totalAmount =
-      formikPurchaseDetail.form.values.quantity *
-        formikPurchaseDetail.form.values.price || 0;
-    const currentAdvancePayments = formikPurchaseDetail.form.values.advancePayments || [];
-    const totalAdvancePayments = currentAdvancePayments.reduce((sum, payment) => sum + payment.amount, 0);
-    if (parsedAmount + totalAdvancePayments > totalAmount) {
-      setError('El total de anticipos no puede ser mayor que el monto total de la compra');
-      return false;
-    }
-    setError('');
-    return true;
-  }, [formikPurchaseDetail.form.values.quantity, formikPurchaseDetail.form.values.price, formikPurchaseDetail.form.values.advancePayments]);
+  const validateAmount = useCallback(
+    (amount) => {
+      if (formikPurchaseDetail.form.values.isPriceless) {
+        setError('');
+        return true;
+      }
+
+      if (!amount || amount.trim() === '') {
+        setError('El monto no puede estar vacío');
+        return false;
+      }
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        setError('Por favor, ingrese un número válido mayor que cero');
+        return false;
+      }
+      const totalAmount =
+        formikPurchaseDetail.form.values.quantity *
+          formikPurchaseDetail.form.values.price || 0;
+      const currentAdvancePayments =
+        formikPurchaseDetail.form.values.advancePayments || [];
+      const totalAdvancePayments = currentAdvancePayments.reduce(
+        (sum, payment) => sum + payment.amount,
+        0
+      );
+      if (parsedAmount + totalAdvancePayments > totalAmount) {
+        setError(
+          'El total de anticipos no puede ser mayor que el monto total de la compra'
+        );
+        return false;
+      }
+      setError('');
+      return true;
+    },
+    [
+      formikPurchaseDetail.form.values.quantity,
+      formikPurchaseDetail.form.values.price,
+      formikPurchaseDetail.form.values.advancePayments,
+      formikPurchaseDetail.form.values.isPriceless,
+    ]
+  );
 
   useEffect(() => {
     if (advancePaymentAmount) {
       validateAmount(advancePaymentAmount);
     }
-  }, [formikPurchaseDetail.form.values.quantity, formikPurchaseDetail.form.values.price, validateAmount, advancePaymentAmount]);
+  }, [
+    formikPurchaseDetail.form.values.quantity,
+    formikPurchaseDetail.form.values.price,
+    formikPurchaseDetail.form.values.isPriceless,
+    validateAmount,
+    advancePaymentAmount,
+  ]);
 
   const handleAddAdvancePayment = useCallback(() => {
     if (validateAmount(advancePaymentAmount)) {
       const newPayments = [
         ...(formikPurchaseDetail.form.values.advancePayments || []),
-        { 
+        {
           amount: parseFloat(advancePaymentAmount),
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         },
       ];
       formikPurchaseDetail.form.setFieldValue('advancePayments', newPayments);

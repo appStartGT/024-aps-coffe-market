@@ -1,4 +1,5 @@
-import { useFormikFields, useMountEffect } from '@hooks';
+import { useState } from 'react';
+import { useFormikFields, useMountEffect, useUpdateEffect } from '@hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   purchaseDetailCreateAction,
@@ -8,10 +9,11 @@ import {
 import { fieldValidations, paymentMethodType } from '@utils';
 import { paidMethodCatalogAction } from '../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
+import * as Yup from 'yup';
 
 const usePurchaseDetailForm = (id_purchase) => {
   const dispatch = useDispatch();
-
+  const [isPriceless, setIsPriceless] = useState(false);
   const loading = useSelector((state) => state.purchaseDetail.processing);
   const purchaseDetailSelected = useSelector(
     (state) => state.purchaseDetail.purchaseDetailSelected
@@ -21,25 +23,34 @@ const usePurchaseDetailForm = (id_purchase) => {
   const formikPurchaseDetail = useFormikFields({
     fields: [
       {
-        id: '11',
+        id: '1',
         label: 'Libras',
         name: 'quantity',
         gridItem: true,
-        gridProps: { md: 6 },
+        gridProps: { md: isPriceless ? 12 : 6 },
         inputProps: { maxLength: 10 },
         validations: fieldValidations.numberRequired,
       },
       {
-        id: '12',
+        id: '2',
         label: 'Precio',
         name: 'price',
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
-        validations: fieldValidations.numberRequired,
+        validations: Yup.number().when('isPriceless', {
+          is: true,
+          then: Yup.number()
+            .notRequired()
+            .typeError('El precio debe ser un número'),
+          otherwise: Yup.number()
+            .typeError('El precio debe ser un número')
+            .required('El precio es requerido'),
+        }),
+        disabled: () => formikPurchaseDetail.form.values.isPriceless,
       },
       {
-        id: '15',
+        id: '3',
         label: 'Forma de Pago',
         name: 'id_cat_payment_method',
         gridItem: true,
@@ -50,7 +61,7 @@ const usePurchaseDetailForm = (id_purchase) => {
         value: paymentMethodType.CASH,
       },
       {
-        id: '16',
+        id: '4',
         label: 'Anticipos',
         name: 'advancePayments',
         gridItem: true,
@@ -65,11 +76,19 @@ const usePurchaseDetailForm = (id_purchase) => {
     effect: () => {
       if (purchaseDetailSelected) {
         formikPurchaseDetail.form.setValues(purchaseDetailSelected);
+        setIsPriceless(purchaseDetailSelected.isPriceless);
       }
       dispatch(paidMethodCatalogAction());
     },
     deps: [purchaseDetailSelected],
   });
+  useUpdateEffect(() => {
+    if (formikPurchaseDetail.form.values.isPriceless) {
+      formikPurchaseDetail.form.setFieldValue('price', 0);
+    } else if (formikPurchaseDetail.form.values.price === 0) {
+      formikPurchaseDetail.form.setFieldValue('price', '');
+    }
+  }, [formikPurchaseDetail.form.values.isPriceless]);
 
   const handleFormReset = () => {
     dispatch(

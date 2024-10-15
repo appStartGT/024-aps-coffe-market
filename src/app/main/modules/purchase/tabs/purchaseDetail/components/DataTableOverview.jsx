@@ -7,15 +7,15 @@ const DataTableOverview = ({ purchaseList }) => {
   const theme = useTheme();
   const [statistics, setStatistics] = useState({
     totalPurchases: 0,
-    totalQuantity: 0,
-    averagePrice: 0,
-    totalAmount: 0,
-    totalAdvancePayments: 0,
-    balance: 0,
+    totalQuantity: '0.00',
+    averagePrice: '0.00',
+    totalAmount: '0.00',
+    totalAdvancePayments: '0.00',
+    balance: '0.00',
   });
 
   useEffect(() => {
-    if (purchaseList.length > 0) {
+    if (purchaseList && purchaseList.length > 0) {
       const totalPurchases = purchaseList.length;
       const totalQuantity = purchaseList.reduce(
         (sum, purchase) => sum + Number(purchase.quantity),
@@ -25,7 +25,8 @@ const DataTableOverview = ({ purchaseList }) => {
         (sum, purchase) => sum + purchase.quantity * purchase.price,
         0
       );
-      const averagePrice = totalAmount / totalQuantity;
+      const averagePrice =
+        totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
       const totalAdvancePayments = purchaseList.reduce(
         (sum, purchase) =>
           sum +
@@ -35,7 +36,17 @@ const DataTableOverview = ({ purchaseList }) => {
           ) || 0),
         0
       );
-      const balance = totalAmount - totalAdvancePayments;
+      const balance = purchaseList.reduce((sum, purchase) => {
+        if (purchase.advancePayments && purchase.advancePayments.length > 0) {
+          const purchaseTotal = purchase.quantity * purchase.price;
+          const purchaseAdvances = purchase.advancePayments.reduce(
+            (total, payment) => total + payment.amount,
+            0
+          );
+          return sum + (purchaseTotal - purchaseAdvances);
+        }
+        return sum;
+      }, 0);
 
       setStatistics({
         totalPurchases: totalPurchases,
@@ -44,6 +55,15 @@ const DataTableOverview = ({ purchaseList }) => {
         totalAmount: formatNumber(totalAmount),
         totalAdvancePayments: formatNumber(totalAdvancePayments),
         balance: formatNumber(balance),
+      });
+    } else {
+      setStatistics({
+        totalPurchases: 0,
+        totalQuantity: '0.00',
+        averagePrice: '0.00',
+        totalAmount: '0.00',
+        totalAdvancePayments: '0.00',
+        balance: '0.00',
       });
     }
   }, [purchaseList]);

@@ -7,29 +7,37 @@ const DataTableOverview = ({ purchaseList }) => {
   const theme = useTheme();
   const [statistics, setStatistics] = useState({
     totalPurchases: 0,
-    totalQuantity: 0,
-    averagePrice: 0,
-    totalAmount: 0,
+    totalQuantity: '0.00',
+    totalAdvancePayments: '0.00',
   });
 
   useEffect(() => {
-    if (purchaseList.length > 0) {
+    if (purchaseList && purchaseList.length > 0) {
       const totalPurchases = purchaseList.length;
       const totalQuantity = purchaseList.reduce(
         (sum, purchase) => sum + Number(purchase.quantity),
         0
       );
-      const totalAmount = purchaseList.reduce(
-        (sum, purchase) => sum + purchase.quantity * purchase.price,
+      const totalAdvancePayments = purchaseList.reduce(
+        (sum, purchase) =>
+          sum +
+          (purchase.advancePayments?.reduce(
+            (paymentSum, payment) => paymentSum + payment.amount,
+            0
+          ) || 0),
         0
       );
-      const averagePrice = totalAmount / totalQuantity;
 
       setStatistics({
         totalPurchases: totalPurchases,
         totalQuantity: formatNumber(totalQuantity),
-        averagePrice: formatNumber(averagePrice),
-        totalAmount: formatNumber(totalAmount),
+        totalAdvancePayments: formatNumber(totalAdvancePayments),
+      });
+    } else {
+      setStatistics({
+        totalPurchases: 0,
+        totalQuantity: '0.00',
+        totalAdvancePayments: '0.00',
       });
     }
   }, [purchaseList]);
@@ -50,16 +58,10 @@ const DataTableOverview = ({ purchaseList }) => {
           color={theme.palette.totalQuantity.text}
         />
         <DataItem
-          value={`Q${statistics.averagePrice}`}
-          label="Precio Promedio"
-          backgroundColor={theme.palette.averagePrice.background}
-          color={theme.palette.averagePrice.text}
-        />
-        <DataItem
-          value={`Q${statistics.totalAmount}`}
-          label="Monto Total"
-          backgroundColor={theme.palette.totalAmount.background}
-          color={theme.palette.totalAmount.text}
+          value={`Q${statistics.totalAdvancePayments}`}
+          label="Total Anticipos"
+          backgroundColor={theme.palette.totalAdvancePayments.background}
+          color={theme.palette.totalAdvancePayments.text}
         />
       </Box>
     </Box>

@@ -17,6 +17,7 @@ const ApsTextField = ({
   gridProps = {},
   options = [],
   addItemOption,
+  disabled,
   ...props
 }) => {
   const [isAddClicked, setAddClick] = useState(false);
@@ -145,6 +146,8 @@ const ApsTextField = ({
     return selectItems;
   };
 
+  const isDisabled = typeof disabled === 'function' ? disabled() : disabled;
+
   return (
     <Container {...propsGrid}>
       <TextField
@@ -153,6 +156,7 @@ const ApsTextField = ({
         onChange={_changeValue}
         {..._formikConfig()}
         {..._selectProps()}
+        disabled={isDisabled}
         inputProps={{
           autoComplete: 'new-password',
           form: {
