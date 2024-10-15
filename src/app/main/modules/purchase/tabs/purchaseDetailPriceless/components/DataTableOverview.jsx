@@ -9,6 +9,7 @@ const DataTableOverview = ({ purchaseList }) => {
     totalPurchases: 0,
     totalQuantity: '0.00',
     totalAdvancePayments: '0.00',
+    totalRematado: '0.00',
   });
 
   useEffect(() => {
@@ -27,17 +28,24 @@ const DataTableOverview = ({ purchaseList }) => {
           ) || 0),
         0
       );
+      const totalRematado = purchaseList.reduce(
+        (sum, purchase) =>
+          sum + (purchase.isRemate ? Number(purchase.quantity) : 0),
+        0
+      );
 
       setStatistics({
         totalPurchases: totalPurchases,
         totalQuantity: formatNumber(totalQuantity),
         totalAdvancePayments: formatNumber(totalAdvancePayments),
+        totalRematado: formatNumber(totalRematado),
       });
     } else {
       setStatistics({
         totalPurchases: 0,
         totalQuantity: '0.00',
         totalAdvancePayments: '0.00',
+        totalRematado: '0.00',
       });
     }
   }, [purchaseList]);
@@ -52,10 +60,16 @@ const DataTableOverview = ({ purchaseList }) => {
           color={theme.palette.totalPurchases.text}
         />
         <DataItem
-          value={statistics.totalQuantity}
+          value={`${statistics.totalQuantity} lb`}
           label="Total Libras"
           backgroundColor={theme.palette.totalQuantity.background}
           color={theme.palette.totalQuantity.text}
+        />
+        <DataItem
+          value={`${statistics.totalRematado} lb`}
+          label="Total Rematado"
+          backgroundColor={theme.palette.warning.main}
+          color={theme.palette.primary.contrastText}
         />
         <DataItem
           value={`Q${statistics.totalAdvancePayments}`}

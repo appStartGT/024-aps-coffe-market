@@ -48,8 +48,6 @@ const columnsLocal = [
     width: 160,
     align: 'center',
     headerAlign: 'center',
-    // valueGetter: (params) =>
-    //   `${params.row.firstName || ''} ${params.row.lastName || ''}`,
   },
   {
     field: 'status',
@@ -148,6 +146,7 @@ const ApsDatagrid = ({
   sx: sxProp,
   sxContainerProps,
   skeleton = false,
+  isRowSelectable = () => true,
   ...props
 }) => {
   const [page, setPage] = useState(0);
@@ -189,7 +188,7 @@ const ApsDatagrid = ({
     '.MuiDataGrid-columnHeader:focus': {
       outline: 'none',
     },
-    ...sxProp, // Propiedades `sx` nuevas
+    ...sxProp,
   };
 
   return skeleton ? (
@@ -221,6 +220,7 @@ const ApsDatagrid = ({
         experimentalFeatures={{ newEditingApi: true }}
         getRowHeight={() => 'auto'}
         headerHeight={35}
+        isRowSelectable={isRowSelectable}
         {...props}
       />
     </Box>

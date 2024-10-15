@@ -10,7 +10,7 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../components/PurchaseDetailForm';
-import { IconButton } from '@mui/material';
+import { IconButton, Chip } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 
@@ -62,7 +62,7 @@ const usePurchaseDetail = () => {
   };
   const columns = [
     {
-      field: 'quantity',
+      field: 'quantityFormated',
       headerName: 'Libras',
       flex: 1,
       disableColumnMenu: true,
@@ -98,6 +98,14 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
       renderCell: (params) => (
         <>
+          {params.row.isRemate && (
+            <Chip
+              label="Rematado"
+              color="warning"
+              size="small"
+              style={{ marginRight: '8px', color: 'white' }}
+            />
+          )}
           <IconButton
             onClick={() => handleEdit(params.row)}
             color="primary"

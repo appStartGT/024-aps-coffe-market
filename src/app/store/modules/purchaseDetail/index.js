@@ -13,6 +13,7 @@ import {
   insertInto,
   updateRecordBy,
 } from '@utils/firebaseMethods';
+import { firestore, FieldValue } from '@config/firebaseConfig';
 
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
@@ -121,6 +122,75 @@ export const purchaseDetailDeleteAction = createAsyncThunk(
     })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
+  }
+);
+
+export const createRemateAction = createAsyncThunk(
+  'purchaseDetail/createRemate',
+  async (data, { rejectWithValue }) => {
+    const {
+      id_purchase,
+      rematePrice,
+      totalAdvancePayments,
+      total,
+      list,
+      createdBy,
+      quantity,
+    } = data;
+
+    try {
+      return await firestore.runTransaction(async (transaction) => {
+        // Create new purchase detail for remate
+        const newRemateRef = firestore
+          .collection(firebaseCollections.PURCHASE_DETAIL)
+          .doc();
+        const newRemateData = {
+          id_purchase_detail: newRemateRef.id,
+          id_purchase: firestore.doc(
+            `${firebaseCollections.PURCHASE}/${id_purchase}`
+          ),
+          price: rematePrice,
+          quantity,
+          totalAdvancePayments,
+          total,
+          isRemate: true,
+          createdAt: FieldValue.serverTimestamp(),
+          deleted: false,
+          createdBy,
+          isPriceless: false,
+        };
+        transaction.set(newRemateRef, newRemateData);
+
+        // Update each purchase detail from data.list
+        const updatePromises = list.map(async (item) => {
+          const detailRef = firestore
+            .collection(firebaseCollections.PURCHASE_DETAIL)
+            .doc(item.id_purchase_detail);
+          transaction.update(detailRef, {
+            isRemate: true,
+            id_purchase_detail_remate: newRemateRef.id,
+            updatedAt: FieldValue.serverTimestamp(),
+            updatedBy: createdBy,
+          });
+        });
+
+        await Promise.all(updatePromises);
+
+        return {
+          success: true,
+          newRemateId: newRemateRef.id,
+          newRemateData: {
+            ...newRemateData,
+            createdBy: createdBy,
+            createdAt: new Date(),
+          },
+          updatedList: list,
+        };
+      });
+    } catch (error) {
+      console.error('Transaction failed:', error);
+      return rejectWithValue(error);
+    }
   }
 );
 
@@ -318,6 +388,53 @@ export const purchaseDetailSlice = createSlice({
         state.processing = false;
       }
     );
+
+    /* CREATE REMATE */
+    builder.addCase(createRemateAction.pending, (state) => {
+      state.processing = true;
+    });
+    builder.addCase(createRemateAction.rejected, (state, { payload }) => {
+      console.error(payload);
+      state.error = payload;
+      state.processing = false;
+    });
+    builder.addCase(createRemateAction.fulfilled, (state, { payload }) => {
+      const { newRemateId, newRemateData, updatedList } = payload;
+      // Add the new remate to the lists
+      const newRemateDetail = purchaseDetailDto.purchaseDetailGetOne({
+        ...newRemateData,
+        [firebaseCollectionsKey.purchase_detail]: newRemateId,
+      });
+      state.purchaseDetailList.push(newRemateDetail);
+      state.allPurchaseDetails.push(newRemateDetail);
+
+      // Update the existing purchase details
+      state.allPurchaseDetails = state.allPurchaseDetails.map((detail) => {
+        const updatedDetail = updatedList.find(
+          (item) =>
+            item.id_purchase_detail ===
+            detail[firebaseCollectionsKey.purchase_detail]
+        );
+        if (updatedDetail) {
+          return {
+            ...detail,
+            isRemate: true,
+            id_purchase_detail_remate: newRemateId,
+          };
+        }
+        return detail;
+      });
+
+      // Update purchaseDetailList and purchaseDetailListPriceless
+      state.purchaseDetailList = state.allPurchaseDetails.filter(
+        (detail) => !detail.isPriceless
+      );
+      state.purchaseDetailListPriceless = state.allPurchaseDetails.filter(
+        (detail) => detail.isPriceless
+      );
+
+      state.processing = false;
+    });
   },
 });
 

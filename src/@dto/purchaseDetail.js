@@ -9,6 +9,7 @@ const purchaseDetailModel = (purchaseDetail) => {
     priceFormat: `Q${formatNumber(purchaseDetail?.price)}`,
     price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,
+    quantityFormated: `${formatNumber(purchaseDetail?.quantity)} lb`, 
     total: purchaseDetail?.total,
     totalFormat: `Q${formatNumber(
       purchaseDetail?.quantity * purchaseDetail?.price
@@ -27,6 +28,8 @@ const purchaseDetailModel = (purchaseDetail) => {
         0
       )
     )}`,
+    isRemate: purchaseDetail?.isRemate || false,
+    id_purchase_detail_remate: purchaseDetail?.id_purchase_detail_remate || '',
   };
   return obj;
 };

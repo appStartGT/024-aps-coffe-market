@@ -148,7 +148,7 @@ const usePurchaseList = () => {
     label: 'Buscar por Nombre / Direccion / Teléfono ',
     type: 'text',
     searchList: purchaseList,
-    searchKey: 'name, email, job, address',
+    searchKey: 'fullName, email, address',
     searchResults: (results) => setSearchList(results),
     onChange: (value) => setText(value),
     rightButton: {

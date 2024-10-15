@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -10,9 +10,10 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../../purchaseDetail/components/PurchaseDetailForm';
-import { IconButton } from '@mui/material';
+import { Chip, IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
+import RemateDetailsForm from '../components/RemateDetailsForm';
 
 const usePurchaseDetail = () => {
   const dispatch = useDispatch();
@@ -25,11 +26,19 @@ const usePurchaseDetail = () => {
 
   const { id_purchase } = useParams();
 
+  const [selectionModel, setSelectionModel] = useState([]);
   useEffect(() => {
     if (Array.isArray(purchaseListPriceless) && !purchaseListPriceless.length) {
       dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
     }
   }, [dispatch]);
+
+  const totalSelectedQuantity = useMemo(() => {
+    const selectedRows = (searchList || purchaseListPriceless).filter((row) =>
+      selectionModel.includes(row.id)
+    );
+    return selectedRows.reduce((sum, row) => sum + Number(row.quantity), 0);
+  }, [selectionModel, searchList, purchaseListPriceless]);
 
   const onClose = () => {
     dispatch(clearPurchaseDetailSelected());
@@ -64,7 +73,7 @@ const usePurchaseDetail = () => {
   };
   const columns = [
     {
-      field: 'quantity',
+      field: 'quantityFormated',
       headerName: 'Libras',
       flex: 1,
       disableColumnMenu: true,
@@ -98,24 +107,36 @@ const usePurchaseDetail = () => {
       headerName: 'Acciones',
       sortable: false,
       disableColumnMenu: true,
-      renderCell: (params) => (
-        <>
-          <IconButton
-            onClick={() => handleEdit(params.row)}
-            color="primary"
-            size="small"
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            onClick={() => handleDelete(params.row.id_purchase_detail)}
-            color="error"
-            size="small"
-          >
-            <Delete />
-          </IconButton>
-        </>
-      ),
+      renderCell: (params) => {
+        if (params.row.isRemate) {
+          return (
+            <Chip
+              label="Rematado"
+              color="warning"
+              size="small"
+              style={{ marginRight: '8px', color: 'white' }}
+            />
+          );
+        }
+        return (
+          <>
+            <IconButton
+              onClick={() => handleEdit(params.row)}
+              color="primary"
+              size="small"
+            >
+              <Edit />
+            </IconButton>
+            <IconButton
+              onClick={() => handleDelete(params.row.id_purchase_detail)}
+              color="error"
+              size="small"
+            >
+              <Delete />
+            </IconButton>
+          </>
+        );
+      },
     },
   ];
 
@@ -156,12 +177,36 @@ const usePurchaseDetail = () => {
     );
   };
 
+  const handleRemate = () => {
+    const selectedItems = (searchList || purchaseListPriceless).filter((item) =>
+      selectionModel.includes(item.id)
+    );
+
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'sm',
+        title: 'Resumen del Remate',
+        description: 'Detalles de los items seleccionados para remate',
+        content: <RemateDetailsForm selectedItems={selectedItems} />,
+        titleOk: 'Confirmar Remate',
+        okProps: {
+          color: 'primary',
+        },
+      })
+    );
+  };
+
   return {
     processing,
     propsSearchBarButton,
     columns,
     searchList,
     purchaseListPriceless,
+    selectionModel,
+    setSelectionModel,
+    totalSelectedQuantity,
+    handleRemate,
   };
 };
 
