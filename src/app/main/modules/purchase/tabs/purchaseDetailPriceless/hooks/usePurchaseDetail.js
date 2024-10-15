@@ -10,10 +10,12 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../../purchaseDetail/components/PurchaseDetailForm';
-import { Chip, IconButton } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { Box, Chip, IconButton } from '@mui/material';
+import { Edit, Delete, PictureAsPdf } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import RemateDetailsForm from '../components/RemateDetailsForm';
+import { BlobProvider } from '@react-pdf/renderer';
+import PdfComprobante from '../components/PdfComprobante';
 
 const usePurchaseDetail = () => {
   const dispatch = useDispatch();
@@ -107,6 +109,7 @@ const usePurchaseDetail = () => {
       headerName: 'Acciones',
       sortable: false,
       disableColumnMenu: true,
+      flex: 0.8,
       renderCell: (params) => {
         if (params.row.isRemate) {
           return (
@@ -119,7 +122,13 @@ const usePurchaseDetail = () => {
           );
         }
         return (
-          <>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
             <IconButton
               onClick={() => handleEdit(params.row)}
               color="primary"
@@ -134,7 +143,25 @@ const usePurchaseDetail = () => {
             >
               <Delete />
             </IconButton>
-          </>
+            <BlobProvider
+              document={
+                <PdfComprobante
+                  title={`Compra ${params.row?.id}`}
+                  content={params.row}
+                />
+              }
+            >
+              {({ url }) => (
+                <IconButton
+                  onClick={() => window.open(url, '_blank')}
+                  color="secondary"
+                  size="small"
+                >
+                  <PictureAsPdf />
+                </IconButton>
+              )}
+            </BlobProvider>
+          </Box>
         );
       },
     },

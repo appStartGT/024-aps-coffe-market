@@ -60,7 +60,7 @@ exports.onPurchaseDetailChange = functions.firestore
         let totalAdvancePayments = Number(
           purchaseData.totalAdvancePayments || 0
         );
-        let totalRemateAmount = Number(purchaseData.totalRemateAmount || 0);
+        let totalLbRemate = Number(purchaseData.totalLbRemate || 0);
 
         if (!change.before.exists) {
           // New document created
@@ -70,7 +70,7 @@ exports.onPurchaseDetailChange = functions.firestore
               Number(newValue.price || 0) * Number(newValue.quantity || 0);
             totalAmount += amount;
             if (newValue.isRemate) {
-              totalRemateAmount += amount;
+              totalLbRemate += Number(newValue.quantity || 0);
             }
           } else {
             totalLbPriceless += Number(newValue.quantity || 0);
@@ -85,7 +85,7 @@ exports.onPurchaseDetailChange = functions.firestore
                 Number(oldValue.price || 0) * Number(oldValue.quantity || 0);
               totalAmount -= amount;
               if (oldValue.isRemate) {
-                totalRemateAmount -= amount;
+                totalLbRemate -= Number(oldValue.quantity || 0);
               }
             } else {
               totalLbPriceless -= Number(oldValue.quantity || 0);
@@ -98,7 +98,7 @@ exports.onPurchaseDetailChange = functions.firestore
                 Number(oldValue.price || 0) * Number(oldValue.quantity || 0);
               totalAmount -= oldAmount;
               if (oldValue.isRemate) {
-                totalRemateAmount -= oldAmount;
+                totalLbRemate -= Number(oldValue.quantity || 0);
               }
             } else {
               totalLbPriceless -= Number(oldValue.quantity || 0);
@@ -109,7 +109,7 @@ exports.onPurchaseDetailChange = functions.firestore
                 Number(newValue.price || 0) * Number(newValue.quantity || 0);
               totalAmount += newAmount;
               if (newValue.isRemate) {
-                totalRemateAmount += newAmount;
+                totalLbRemate += Number(newValue.quantity || 0);
               }
             } else {
               totalLbPriceless += Number(newValue.quantity || 0);
@@ -123,7 +123,7 @@ exports.onPurchaseDetailChange = functions.firestore
               Number(oldValue.price || 0) * Number(oldValue.quantity || 0);
             totalAmount -= amount;
             if (oldValue.isRemate) {
-              totalRemateAmount -= amount;
+              totalLbRemate -= Number(oldValue.quantity || 0);
             }
           } else {
             totalLbPriceless -= Number(oldValue.quantity || 0);
@@ -155,7 +155,7 @@ exports.onPurchaseDetailChange = functions.firestore
           totalAmount,
           averagePrice,
           totalAdvancePayments,
-          totalRemateAmount,
+          totalLbRemate,
         });
       });
       console.log(`Updated purchase ${id_purchase.id}`);
