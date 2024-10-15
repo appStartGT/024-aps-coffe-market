@@ -1,5 +1,9 @@
 {
   "projects": {
-    "default": "aps-cm"
-  }
+    "default": "aps-cm",
+    "development": "aps-cm"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
