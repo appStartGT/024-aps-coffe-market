@@ -9,7 +9,7 @@ import {
 } from '../../../../../../store/modules/purchaseDetail';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
-import PurchaseDetailForm from '../components/PurchaseDetailForm';
+import PurchaseDetailForm from '../../purchaseDetail/components/PurchaseDetailForm';
 import { IconButton } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';

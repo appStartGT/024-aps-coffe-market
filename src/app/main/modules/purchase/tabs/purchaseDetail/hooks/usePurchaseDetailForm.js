@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useFormikFields, useMountEffect, useUpdateEffect } from '@hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -13,7 +12,6 @@ import * as Yup from 'yup';
 
 const usePurchaseDetailForm = (id_purchase) => {
   const dispatch = useDispatch();
-  const [isPriceless, setIsPriceless] = useState(false);
   const loading = useSelector((state) => state.purchaseDetail.processing);
   const purchaseDetailSelected = useSelector(
     (state) => state.purchaseDetail.purchaseDetailSelected
@@ -27,7 +25,7 @@ const usePurchaseDetailForm = (id_purchase) => {
         label: 'Libras',
         name: 'quantity',
         gridItem: true,
-        gridProps: { md: isPriceless ? 12 : 6 },
+        gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
         validations: fieldValidations.numberRequired,
       },
@@ -76,7 +74,6 @@ const usePurchaseDetailForm = (id_purchase) => {
     effect: () => {
       if (purchaseDetailSelected) {
         formikPurchaseDetail.form.setValues(purchaseDetailSelected);
-        setIsPriceless(purchaseDetailSelected.isPriceless);
       }
       dispatch(paidMethodCatalogAction());
     },
