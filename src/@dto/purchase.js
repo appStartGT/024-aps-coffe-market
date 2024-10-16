@@ -5,7 +5,8 @@ const purchaseModel = (purchase) => {
   const obj = {
     id: purchase.id_purchase,
     id_purchase: purchase.id_purchase,
-    createdAt: formatFirebaseTimestamp(purchase.createdAt),
+    createdAt: purchase.createdAt,
+    createdAtFormat: formatFirebaseTimestamp(purchase.createdAt),
     createdBy: purchase.createdBy || '',
     id_customer: purchase?.id_customer || purchase.customer?.id_customer || '',
     name: purchase?.name || purchase.customer?.name || '',
@@ -18,7 +19,9 @@ const purchaseModel = (purchase) => {
     isActive: purchase.isActive || false,
     key: purchase.key || '',
     updatedAt: formatFirebaseTimestamp(purchase.updatedAt),
-    fullName: `${purchase.customer?.name} ${purchase.customer?.surNames}`,
+    fullName: `${purchase?.name || purchase.customer?.name} ${
+      purchase?.surNames || purchase.customer?.surNames
+    }`,
   };
   return obj;
 };

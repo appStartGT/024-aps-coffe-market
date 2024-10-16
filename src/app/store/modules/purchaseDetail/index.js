@@ -4,7 +4,6 @@ import {
   cleanModel,
   firebaseCollections,
   firebaseCollectionsKey,
-  firebaseFilterBuilder,
 } from '@utils';
 import { setLoadingMainViewAction } from '../main';
 import {
@@ -14,16 +13,32 @@ import {
   updateRecordBy,
 } from '@utils/firebaseMethods';
 import { firestore, FieldValue } from '@config/firebaseConfig';
+import { updatePurchaseListDetailsAction } from '../purchase';
 
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
-  async (params, { rejectWithValue }) => {
-    const filterBy = firebaseFilterBuilder(
-      cleanModel(params, { allowNulls: true })
-    );
+  async ({ id_purchase }, { rejectWithValue, getState }) => {
+    const state = getState();
+    const purchaseListDetails = state.purchase.purchaseListDetails;
+
+    if (purchaseListDetails && purchaseListDetails.length > 0) {
+      const filteredDetails = purchaseListDetails.filter(
+        (detail) => detail.id_purchase === id_purchase
+      );
+      if (filteredDetails.length > 0) {
+        return { data: filteredDetails, totalItems: filteredDetails.length };
+      }
+    }
+
     return await getDataFrom({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
-      filterBy,
+      filterBy: [
+        {
+          field: 'id_purchase',
+          condition: '==',
+          value: id_purchase,
+        },
+      ],
       nonReferenceField: firebaseCollectionsKey.purchase_detail,
     })
       .then((res) => res)
@@ -47,6 +62,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
     })
       .then((res) => {
         dispatch(setLoadingMainViewAction(false));
+        dispatch(updatePurchaseListDetailsAction([res]));
         return { ...res };
       })
       .catch((res) => {
@@ -89,7 +105,7 @@ export const getOneAllDetallePurchaseDetailAction = createAsyncThunk(
 
 export const purchaseDetailUpdateAction = createAsyncThunk(
   'purchaseDetail/update',
-  async (data, { rejectWithValue }) => {
+  async (data, { rejectWithValue, dispatch }) => {
     const body = purchaseDetailDto.purchaseDetailPut(data);
     return await updateRecordBy({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
@@ -102,14 +118,17 @@ export const purchaseDetailUpdateAction = createAsyncThunk(
         },
       ],
     })
-      .then((res) => res)
+      .then((res) => {
+        dispatch(updatePurchaseListDetailsAction(res));
+        return res;
+      })
       .catch((res) => rejectWithValue(res));
   }
 );
 
 export const purchaseDetailDeleteAction = createAsyncThunk(
   'purchaseDetail/delete',
-  async ({ id_purchase_detail }, { rejectWithValue }) => {
+  async ({ id_purchase_detail }, { rejectWithValue, dispatch }) => {
     return await deleteRecordById({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       filterBy: [
@@ -120,14 +139,21 @@ export const purchaseDetailDeleteAction = createAsyncThunk(
         },
       ],
     })
-      .then((res) => res)
+      .then((res) => {
+        dispatch(
+          updatePurchaseListDetailsAction([
+            { id_purchase_detail, deleted: true },
+          ])
+        );
+        return res;
+      })
       .catch((res) => rejectWithValue(res));
   }
 );
 
 export const createRemateAction = createAsyncThunk(
   'purchaseDetail/createRemate',
-  async (data, { rejectWithValue }) => {
+  async (data, { rejectWithValue, dispatch }) => {
     const {
       id_purchase,
       rematePrice,
@@ -176,7 +202,7 @@ export const createRemateAction = createAsyncThunk(
 
         await Promise.all(updatePromises);
 
-        return {
+        const result = {
           success: true,
           newRemateId: newRemateRef.id,
           newRemateData: {
@@ -186,6 +212,10 @@ export const createRemateAction = createAsyncThunk(
           },
           updatedList: list,
         };
+
+        dispatch(updatePurchaseListDetailsAction(result));
+
+        return result;
       });
     } catch (error) {
       console.error('Transaction failed:', error);

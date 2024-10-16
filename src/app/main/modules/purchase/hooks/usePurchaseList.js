@@ -36,7 +36,7 @@ const usePurchaseList = () => {
   /* use Effects */
 
   useEffect(() => {
-    dispatch(purchaseListAction());
+    !purchaseList.length && dispatch(purchaseListAction()); //TODO: listen purchase_detail
   }, [dispatch]);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const usePurchaseList = () => {
       flex: 1,
     },
     {
-      field: 'createdAt',
+      field: 'createdAtFormat',
       headerName: 'Fecha',
       headerAlign: 'center',
       align: 'center',

@@ -1,12 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { customerDto, purchaseDto } from '@dto';
-import { cleanModel, firebaseCollections, firebaseFilterBuilder } from '@utils';
+import { purchaseDto } from '@dto';
+import {
+  cleanModel,
+  firebaseCollections,
+  firebaseCollectionsKey,
+  firebaseFilterBuilder,
+} from '@utils';
 import { setLoadingMainViewAction } from '../main';
 import {
   getDataFrom,
   deleteRecordById,
   insertInto,
-  updateRecordBy,
 } from '@utils/firebaseMethods';
 import { customerCreateAction, customerUpdateAction } from '../customer';
 
@@ -14,13 +18,32 @@ export const purchaseListAction = createAsyncThunk(
   'purchase/list',
   async (params, { rejectWithValue }) => {
     const filterBy = firebaseFilterBuilder(cleanModel(params));
-    return await getDataFrom({
-      collectionName: firebaseCollections.PURCHASE,
-      filterBy,
-      nonReferenceField: 'id_purchase',
-    })
-      .then((res) => res)
-      .catch((res) => rejectWithValue(res));
+    try {
+      const purchases = await getDataFrom({
+        collectionName: firebaseCollections.PURCHASE,
+        filterBy,
+        nonReferenceField: firebaseCollectionsKey.purchase,
+      });
+
+      const purchasesWithDetails = await Promise.all(
+        purchases.data.map(async (purchase) => {
+          const purchaseDetails = await getDataFrom({
+            collectionName: firebaseCollections.PURCHASE_DETAIL,
+            filterBy: [
+              {
+                field: firebaseCollectionsKey.purchase,
+                condition: '==',
+                value: purchase.id_purchase,
+              },
+            ],
+          });
+          return { ...purchase, purchase_details: purchaseDetails.data };
+        })
+      );
+      return purchasesWithDetails;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 
@@ -47,7 +70,7 @@ export const purchaseCreateAction = createAsyncThunk(
     const id_customer = customerResponse.id_customer;
 
     const purchaseData = {
-      key: 'id_purchase',
+      key: firebaseCollectionsKey.purchase,
       // ...body,
       id_customer,
     };
@@ -74,7 +97,7 @@ export const purchaseGetOneAction = createAsyncThunk(
     return await getDataFrom({
       collectionName: firebaseCollections.PURCHASE,
       docId: id,
-      nonReferenceField: 'id_purchase',
+      nonReferenceField: firebaseCollectionsKey.purchase,
     })
       .then((res) => {
         dispatch(setLoadingMainViewAction(false));
@@ -92,7 +115,7 @@ export const getOneAllDetallePurchaseAction = createAsyncThunk(
   async (_params, { rejectWithValue }) => {
     return await getDataFrom({
       collectionName: firebaseCollections.PURCHASE,
-      nonReferenceField: 'id_purchase',
+      nonReferenceField: firebaseCollectionsKey.purchase,
     })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
@@ -115,10 +138,48 @@ export const purchaseDeleteAction = createAsyncThunk(
   async ({ id_purchase }, { rejectWithValue }) => {
     return await deleteRecordById({
       collectionName: firebaseCollections.PURCHASE,
-      filterBy: [{ field: 'id_purchase', condition: '==', value: id_purchase }],
+      filterBy: [
+        {
+          field: firebaseCollectionsKey.purchase,
+          condition: '==',
+          value: id_purchase,
+        },
+      ],
     })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
+  }
+);
+
+export const updatePurchaseListDetailsAction = createAsyncThunk(
+  'purchase/updateListDetails',
+  async (newDetails, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      const currentDetails = state.purchase.purchaseListDetails;
+
+      // Merge new details with existing ones, overwriting if there's a conflict
+      let updatedDetails = [...currentDetails];
+      newDetails.forEach((newDetail) => {
+        const index = updatedDetails.findIndex(
+          (detail) => detail.id_purchase_detail === newDetail.id_purchase_detail
+        );
+        if (index !== -1) {
+          updatedDetails[index] = { ...updatedDetails[index], ...newDetail };
+        } else {
+          updatedDetails.push(newDetail);
+        }
+      });
+
+      // Remove items with deleted: true
+      updatedDetails = updatedDetails.filter(
+        (detail) => detail.deleted !== true
+      );
+
+      return updatedDetails;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 
@@ -126,6 +187,7 @@ const initialState = {
   purchaseSelected: null,
   processing: false,
   purchaseList: [],
+  purchaseListDetails: [],
   totalItems: 5,
   purchasePaymentSelected: [],
   totalPayments: 5,
@@ -155,8 +217,11 @@ export const purchaseSlice = createSlice({
       state.processing = false;
     });
     builder.addCase(purchaseListAction.fulfilled, (state, { payload }) => {
-      state.purchaseList = purchaseDto.purchaseList(payload.data);
-      state.totalItems = payload.data.totalItems;
+      state.purchaseList = purchaseDto.purchaseList(payload);
+      state.purchaseListDetails = payload
+        .map((purchase) => purchase.purchase_details)
+        .flat();
+      state.totalItems = payload.length;
       state.processing = false;
     });
 
@@ -172,6 +237,7 @@ export const purchaseSlice = createSlice({
     builder.addCase(purchaseCreateAction.fulfilled, (state, { payload }) => {
       const purchase = purchaseDto.purchaseGetOne(payload);
       state.purchaseSelected = purchase;
+      state.purchaseList = [...state.purchaseList, purchase];
       state.processing = false;
     });
     /* GET ONE */
@@ -196,7 +262,7 @@ export const purchaseSlice = createSlice({
     });
     builder.addCase(purchaseUpdateAction.rejected, (state, action) => {
       console.error(action);
-      state.error = payload;
+      state.error = action.payload;
       state.processing = false;
     });
     builder.addCase(purchaseUpdateAction.fulfilled, (state, { payload }) => {
@@ -215,7 +281,7 @@ export const purchaseSlice = createSlice({
       state.processing = true;
     });
     builder.addCase(purchaseDeleteAction.rejected, (state, action) => {
-      state.error = action;
+      state.error = action.payload;
       state.processing = false;
     });
     builder.addCase(purchaseDeleteAction.fulfilled, (state, { payload }) => {
@@ -225,6 +291,14 @@ export const purchaseSlice = createSlice({
       );
       state.processing = false;
     });
+
+    /* UPDATE PURCHASE LIST DETAILS */
+    builder.addCase(
+      updatePurchaseListDetailsAction.fulfilled,
+      (state, { payload }) => {
+        state.purchaseListDetails = payload;
+      }
+    );
   },
 });
 
