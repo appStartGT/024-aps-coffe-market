@@ -4,6 +4,7 @@ import { Paper } from '@mui/material';
 import usePurchaseList from '../hooks/usePurchaseList';
 import ApsModal from '@components/ApsModal';
 import SearchBar from '@components/SearchBar';
+import DataTableOverview from '../components/DataTableOverview';
 
 const stylesPaper = {
   padding: '16px',
@@ -17,6 +18,7 @@ const PurchaseListPage = () => {
     columns,
     searchList,
     purchaseList,
+    purchaseListDetails,
     propsModalDeletePurchase,
   } = usePurchaseList();
 
@@ -34,6 +36,7 @@ const PurchaseListPage = () => {
           )}
 
           <Paper sx={stylesPaper}>
+            <DataTableOverview purchaseList={purchaseListDetails} />
             <SearchBar {...propsSearchBarButton} />
             <ApsDatagrid
               rows={searchList || purchaseList}

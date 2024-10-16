@@ -22,7 +22,9 @@ const usePurchaseList = () => {
   const purchaseList = useSelector((state) => state.purchase.purchaseList);
   const totalItems = useSelector((state) => state.purchase.totalItems);
   const processing = useSelector((state) => state.purchase.processing);
-
+  const purchaseListDetails = useSelector(
+    (state) => state.purchase.purchaseListDetails
+  );
   const allPurchaseDetails = useSelector(
     (state) => state.purchaseDetail.allPurchaseDetails
   );
@@ -65,22 +67,69 @@ const usePurchaseList = () => {
       minWidth: 100,
       flex: 1,
     },
+
     {
-      field: 'createdAtFormat',
-      headerName: 'Fecha',
+      field: 'totalLbPriced',
+      headerName: 'Total Lb',
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1,
     },
     {
-      field: 'phone',
-      headerName: 'Teléfono',
+      field: 'totalLbPriceless',
+      headerName: 'Total Lb Sin Precio',
       headerAlign: 'center',
       align: 'center',
-      flex: 1,
-      minWidth: 150,
+      minWidth: 120,
+      flex: 1.5,
     },
+    {
+      field: 'totalLbRemate',
+      headerName: 'Total Lb Remate',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    {
+      field: 'averagePrice',
+      headerName: 'Precio Promedio',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    {
+      field: 'totalAdvancePayments',
+      headerName: 'Anticipos',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    {
+      field: 'totalDebt',
+      headerName: 'Total Deuda',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    // {
+    //   field: 'createdAtFormat',
+    //   headerName: 'Fecha',
+    //   headerAlign: 'center',
+    //   flex: 1,
+    // },
+    // {
+    //   field: 'phone',
+    //   headerName: 'Teléfono',
+    //   headerAlign: 'center',
+    //   align: 'center',
+    //   flex: 1,
+    //   minWidth: 150,
+    // },
     {
       field: 'actions',
       headerName: 'Acciones',
@@ -208,6 +257,7 @@ const usePurchaseList = () => {
   return {
     columns,
     purchaseList,
+    purchaseListDetails,
     processing,
     propsModalDeletePurchase,
     propsSearchBarButton,

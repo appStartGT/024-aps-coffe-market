@@ -217,10 +217,15 @@ export const purchaseSlice = createSlice({
       state.processing = false;
     });
     builder.addCase(purchaseListAction.fulfilled, (state, { payload }) => {
-      state.purchaseList = purchaseDto.purchaseList(payload);
-      state.purchaseListDetails = payload
+      const purchaseListDetails = payload
         .map((purchase) => purchase.purchase_details)
         .flat();
+
+      state.purchaseList = purchaseDto.purchaseList(
+        payload,
+        purchaseListDetails
+      );
+      state.purchaseListDetails = purchaseListDetails;
       state.totalItems = payload.length;
       state.processing = false;
     });
@@ -297,6 +302,10 @@ export const purchaseSlice = createSlice({
       updatePurchaseListDetailsAction.fulfilled,
       (state, { payload }) => {
         state.purchaseListDetails = payload;
+        state.purchaseList = purchaseDto.purchaseList(
+          state.purchaseList,
+          state.purchaseListDetails
+        );
       }
     );
   },

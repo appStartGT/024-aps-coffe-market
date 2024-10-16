@@ -119,7 +119,7 @@ export const purchaseDetailUpdateAction = createAsyncThunk(
       ],
     })
       .then((res) => {
-        dispatch(updatePurchaseListDetailsAction(res));
+        dispatch(updatePurchaseListDetailsAction([res]));
         return res;
       })
       .catch((res) => rejectWithValue(res));
@@ -213,7 +213,7 @@ export const createRemateAction = createAsyncThunk(
           updatedList: list,
         };
 
-        dispatch(updatePurchaseListDetailsAction(result));
+        dispatch(updatePurchaseListDetailsAction([result.newRemateData]));
 
         return result;
       });

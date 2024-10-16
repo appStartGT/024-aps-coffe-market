@@ -1,7 +1,76 @@
-import { cleanModel } from '@utils';
+import { cleanModel, formatNumber } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
-const purchaseModel = (purchase) => {
+const purchaseModel = (purchase, purchase_details) => {
+  const relevantDetails =
+    purchase_details?.filter(
+      (detail) => detail.id_purchase === purchase.id_purchase
+    ) || [];
+
+  const totalAdvancePayments = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.advancePayments?.reduce(
+        (detailSum, payment) => detailSum + (Number(payment.amount) || 0),
+        0
+      ) || 0),
+    0
+  );
+
+  const totalQuantity = relevantDetails.reduce(
+    (sum, detail) => sum + (Number(detail.quantity) || 0),
+    0
+  );
+
+  const totalAmount = relevantDetails.reduce(
+    (sum, detail) =>
+      sum + (Number(detail.quantity) || 0) * (Number(detail.price) || 0),
+    0
+  );
+
+  const averagePrice = totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
+
+  const totalLbRemate = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.isRemate && !detail.isPriceless
+        ? Number(detail.quantity) || 0
+        : 0),
+    0
+  );
+
+  const totalLbPriced = relevantDetails.reduce(
+    (sum, detail) =>
+      sum + (!detail.isPriceless ? Number(detail.quantity) || 0 : 0),
+    0
+  );
+
+  const totalLbPriceless = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.isPriceless && !detail.isRemate
+        ? Number(detail.quantity) || 0
+        : 0),
+    0
+  );
+  const totalDebt = relevantDetails.reduce((sum, detail) => {
+    if (
+      !detail.isPriceless &&
+      !detail.isRemate &&
+      detail.advancePayments &&
+      detail.advancePayments.length > 0
+    ) {
+      const detailTotal =
+        (Number(detail.quantity) || 0) * (Number(detail.price) || 0);
+      const detailAdvances = detail.advancePayments.reduce(
+        (total, payment) => total + (Number(payment.amount) || 0),
+        0
+      );
+      return sum + (detailTotal - detailAdvances);
+    }
+    return sum;
+  }, 0);
+
   const obj = {
     id: purchase.id_purchase,
     id_purchase: purchase.id_purchase,
@@ -22,12 +91,20 @@ const purchaseModel = (purchase) => {
     fullName: `${purchase?.name || purchase.customer?.name} ${
       purchase?.surNames || purchase.customer?.surNames
     }`,
+    totalAdvancePayments: `Q ${formatNumber(totalAdvancePayments)}`,
+    totalQuantity: formatNumber(totalQuantity),
+    totalAmount: `Q ${formatNumber(totalAmount)}`,
+    averagePrice: `Q ${formatNumber(averagePrice)}`,
+    totalLbRemate: formatNumber(totalLbRemate),
+    totalLbPriced: formatNumber(totalLbPriced),
+    totalLbPriceless: formatNumber(totalLbPriceless),
+    totalDebt: `Q ${formatNumber(totalDebt)}`,
   };
   return obj;
 };
 
-export const purchaseList = (data) => {
-  return data.map((item) => purchaseModel(item));
+export const purchaseList = (data, purchase_details) => {
+  return data.map((item) => purchaseModel(item, purchase_details));
 };
 
 export const purchaseGetOne = (purchase) => purchaseModel(purchase);

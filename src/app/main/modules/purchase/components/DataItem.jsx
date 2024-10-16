@@ -1,7 +1,8 @@
 import React from 'react';
-import { Typography, Paper, Box } from '@mui/material';
+import { Typography, Paper, Box, IconButton } from '@mui/material';
+import SwapVertIcon from '@mui/icons-material/SwapVert';
 
-const DataItem = ({ value, label, backgroundColor, color }) => {
+const DataItem = ({ value, label, backgroundColor, color, onClick }) => {
   return (
     <Paper
       elevation={3}
@@ -15,7 +16,10 @@ const DataItem = ({ value, label, backgroundColor, color }) => {
         flex: 1,
         minWidth: '120px',
         borderRadius: '10px',
+        position: 'relative',
+        cursor: onClick ? 'pointer' : 'default',
       }}
+      onClick={onClick}
     >
       <Box sx={{ textAlign: 'center', width: '100%' }}>
         <Typography
@@ -42,6 +46,19 @@ const DataItem = ({ value, label, backgroundColor, color }) => {
           {label}
         </Typography>
       </Box>
+      {onClick && (
+        <IconButton
+          size="small"
+          sx={{
+            position: 'absolute',
+            top: 5,
+            right: 5,
+            color,
+          }}
+        >
+          <SwapVertIcon fontSize="small" />
+        </IconButton>
+      )}
     </Paper>
   );
 };
