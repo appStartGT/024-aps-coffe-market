@@ -36,6 +36,7 @@ const DataTableOverview = ({ purchaseList }) => {
         (sum, purchase) => sum + purchase.quantity * purchase.price,
         0
       );
+      console.log({ totalAmount, totalQuantity });
       const averagePrice =
         totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
       const totalAdvancePayments = purchaseList.reduce(
