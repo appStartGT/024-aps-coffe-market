@@ -11,7 +11,8 @@ const DataTableOverview = ({ purchaseList }) => {
     averagePrice: '0.00',
     totalAmount: '0.00',
     totalAdvancePayments: '0.00',
-    balance: '0.00',
+    doubt: '0.00',
+    totalRemateQuantity: '0.00',
   });
   const [isQuintales, setIsQuintales] = useState(false);
 
@@ -28,26 +29,39 @@ const DataTableOverview = ({ purchaseList }) => {
       );
       const averagePrice =
         totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
-      const totalAdvancePayments = purchaseList.reduce(
-        (sum, purchase) =>
-          sum +
-          (purchase.advancePayments?.reduce(
+      const totalAdvancePayments = purchaseList.reduce((sum, purchase) => {
+        const purchaseTotal = purchase.quantity * purchase.price;
+        const advancePaymentsSum =
+          purchase.advancePayments?.reduce(
             (paymentSum, payment) => paymentSum + payment.amount,
             0
-          ) || 0),
-        0
-      );
-      const balance = purchaseList.reduce((sum, purchase) => {
-        if (purchase.advancePayments && purchase.advancePayments.length > 0) {
-          const purchaseTotal = purchase.quantity * purchase.price;
-          const purchaseAdvances = purchase.advancePayments.reduce(
+          ) || 0;
+        // Only include in total if advance payments sum is less than purchase total
+        return (
+          sum + (advancePaymentsSum < purchaseTotal ? advancePaymentsSum : 0)
+        );
+      }, 0);
+      const doubt = purchaseList.reduce((sum, purchase) => {
+        const purchaseTotal = purchase.quantity * purchase.price;
+        const purchaseAdvances =
+          purchase.advancePayments?.reduce(
             (total, payment) => total + payment.amount,
             0
-          );
-          return sum + (purchaseTotal - purchaseAdvances);
-        }
-        return sum;
+          ) || 0;
+        // Only include in doubt if advance payments sum is less than purchase total
+        return (
+          sum +
+          (purchase.advancePayments.length > 0 && !purchase.isRemate
+            ? purchaseTotal - purchaseAdvances
+            : 0)
+        );
       }, 0);
+      const balance = totalAmount - doubt;
+      const totalRemateQuantity = purchaseList.reduce(
+        (sum, purchase) =>
+          sum + (purchase.isRemate ? Number(purchase.quantity) : 0),
+        0
+      );
 
       setStatistics({
         totalPurchases: totalPurchases,
@@ -55,7 +69,9 @@ const DataTableOverview = ({ purchaseList }) => {
         averagePrice: formatNumber(averagePrice),
         totalAmount: formatNumber(totalAmount),
         totalAdvancePayments: formatNumber(totalAdvancePayments),
+        doubt: formatNumber(doubt),
         balance: formatNumber(balance),
+        totalRemateQuantity: formatNumber(totalRemateQuantity),
       });
     } else {
       setStatistics({
@@ -64,7 +80,9 @@ const DataTableOverview = ({ purchaseList }) => {
         averagePrice: '0.00',
         totalAmount: '0.00',
         totalAdvancePayments: '0.00',
+        doubt: '0.00',
         balance: '0.00',
+        totalRemateQuantity: '0.00',
       });
     }
   }, [purchaseList]);
@@ -92,17 +110,29 @@ const DataTableOverview = ({ purchaseList }) => {
           onClick={toggleUnit}
         />
         <DataItem
+          value={
+            isQuintales
+              ? convertToQuintales(statistics.totalRemateQuantity)
+              : statistics.totalRemateQuantity
+          }
+          label={`Total ${isQuintales ? ' Quintales' : 'Libras'} Remate`}
+          backgroundColor={theme.palette.warning.main}
+          color={theme.palette.common.white}
+          onClick={toggleUnit}
+        />
+                <DataItem
+          value={`Q${statistics.balance}`}
+          label="Total Pagado"
+          backgroundColor={theme.palette.totalAmount.background}
+          color={theme.palette.totalAmount.text}
+        />
+        <DataItem
           value={`Q${statistics.averagePrice}`}
           label="Precio Promedio"
           backgroundColor={theme.palette.averagePrice.background}
           color={theme.palette.averagePrice.text}
         />
-        <DataItem
-          value={`Q${statistics.totalAmount}`}
-          label="Monto Total"
-          backgroundColor={theme.palette.totalAmount.background}
-          color={theme.palette.totalAmount.text}
-        />
+
         <DataItem
           value={`Q${statistics.totalAdvancePayments}`}
           label="Total Anticipos"
@@ -110,8 +140,8 @@ const DataTableOverview = ({ purchaseList }) => {
           color={theme.palette.totalAdvancePayments.text}
         />
         <DataItem
-          value={`Q${statistics.balance}`}
-          label="Saldo"
+          value={`Q${statistics.doubt}`}
+          label="Deuda"
           backgroundColor={theme.palette.balance.background}
           color={theme.palette.balance.text}
         />

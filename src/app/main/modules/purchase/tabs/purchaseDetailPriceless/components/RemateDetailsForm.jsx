@@ -65,18 +65,21 @@ const RemateDetailsForm = ({ selectedItems }) => {
     </>
   );
 
-  const PriceInput = React.memo(({ value, onChange }) => (
-    <TextField
-      fullWidth
-      value={value}
-      onChange={onChange}
-      type="number"
-      InputProps={{
-        inputProps: { min: 0, step: 0.01 },
-      }}
-      focused={true}
-    />
-  ));
+  const PriceInput = React.memo(
+    ({ value, onChange }) => (
+      <TextField
+        fullWidth
+        value={value}
+        onChange={onChange}
+        type="number"
+        InputProps={{
+          inputProps: { min: 0, step: 0.01 },
+        }}
+        autoFocus
+      />
+    ),
+    []
+  );
 
   const memoizedDataRows = useMemo(
     () => [

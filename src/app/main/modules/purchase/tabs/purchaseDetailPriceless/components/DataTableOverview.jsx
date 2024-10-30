@@ -26,13 +26,16 @@ const DataTableOverview = ({ purchaseList }) => {
       (acc, purchase) => {
         const quantity = Number(purchase.quantity);
         acc.totalQuantity += quantity;
-        acc.totalAdvancePayments +=
-          purchase.advancePayments?.reduce(
-            (sum, payment) => sum + payment.amount,
-            0
-          ) || 0;
+        if (!purchase.isRemate) {
+          acc.totalAdvancePayments +=
+            purchase.advancePayments?.reduce(
+              (sum, payment) => sum + payment.amount,
+              0
+            ) || 0;
+        }
         acc.totalRematado += purchase.isRemate ? quantity : 0;
-        acc.totalPriceless += purchase.isPriceless ? quantity : 0;
+        acc.totalPriceless +=
+          purchase.isPriceless && !purchase.isRemate ? quantity : 0;
         return acc;
       },
       {
