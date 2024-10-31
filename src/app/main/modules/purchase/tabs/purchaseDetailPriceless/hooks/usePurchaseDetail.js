@@ -30,9 +30,7 @@ const usePurchaseDetail = () => {
 
   const [selectionModel, setSelectionModel] = useState([]);
   useEffect(() => {
-    if (Array.isArray(purchaseListPriceless) && !purchaseListPriceless.length) {
-      dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
-    }
+    dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
   }, [dispatch]);
 
   const totalSelectedQuantity = useMemo(() => {

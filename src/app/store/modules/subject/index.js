@@ -1,15 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { cleanModel } from '@utils';
 import {
-  getDataFrom,
-  insertInto,
+  getAllDocuments,
+  insertDocument,
   updateRecordBy,
 } from '@utils/firebaseMethods';
 
 export const subjectListAction = createAsyncThunk(
   'subject/list',
   async (_params, { rejectWithValue }) => {
-    return await getDataFrom({ collectionName: 'subject' })
+    return await getAllDocuments({ collectionName: 'subject' })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
   }
@@ -19,7 +19,7 @@ export const subjectCreateAction = createAsyncThunk(
   'subject/create',
   async (data, { rejectWithValue }) => {
     data = cleanModel(data);
-    return await insertInto({
+    return await insertDocument({
       collectionName: 'subject',
       data: { ...data, key: 'id_subject' },
     })

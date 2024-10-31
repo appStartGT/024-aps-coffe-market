@@ -117,10 +117,10 @@ const DataTableOverview = ({ purchaseList }) => {
           }
           label={`Total ${isQuintales ? ' Quintales' : 'Libras'} Remate`}
           backgroundColor={theme.palette.warning.main}
-          color={theme.palette.common.white}
+          color={theme.palette.warning.contrastText}
           onClick={toggleUnit}
         />
-                <DataItem
+        <DataItem
           value={`Q${statistics.balance}`}
           label="Total Pagado"
           backgroundColor={theme.palette.totalAmount.background}

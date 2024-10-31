@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { catalogsDto } from '@dto';
-import { getDataFrom } from '@utils/firebaseMethods';
+import { getAllDocuments } from '@utils/firebaseMethods';
 import { firebaseCollections, firebaseCollectionsKey } from '@utils/constants';
 
 export const rolesCatalogAction = createAsyncThunk(
   'catalogs/roles',
   async (_, { rejectWithValue }) => {
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: 'role',
       filterBy: [{ field: 'isActive', condition: '==', value: true }],
     })
@@ -18,7 +18,7 @@ export const rolesCatalogAction = createAsyncThunk(
 export const personCatalogAction = createAsyncThunk(
   'catalogs/person',
   async (_, { rejectWithValue }) => {
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.PERSON,
       nonReferenceField: firebaseCollectionsKey.person,
     })
@@ -38,7 +38,7 @@ export const userCatalogAction = createAsyncThunk(
 export const paidMethodCatalogAction = createAsyncThunk(
   'catalogs/paid-method',
   async (_, { rejectWithValue }) => {
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.CAT_PAYMENT_METHOD,
     })
       .then((res) => res)

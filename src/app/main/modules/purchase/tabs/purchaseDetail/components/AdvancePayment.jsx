@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, Button } from '@mui/material';
 import ApsForm from '@components/ApsForm';
 import ApsButton from '@components/ApsButton';
 import AddIcon from '@mui/icons-material/Add';
@@ -7,7 +7,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { formatNumber } from '@utils';
 import moment from 'moment';
 
-const AdvancePayment = ({ formikPurchaseDetail }) => {
+const AdvancePayment = ({
+  formikPurchaseDetail,
+  id_purchase,
+  handlePayTotal,
+}) => {
   const [showAdvancePayment, setShowAdvancePayment] = useState(false);
   const [advancePaymentAmount, setAdvancePaymentAmount] = useState('');
   const [error, setError] = useState('');
@@ -101,9 +105,19 @@ const AdvancePayment = ({ formikPurchaseDetail }) => {
   return (
     <Box mt={2} mb={2}>
       {formikPurchaseDetail.form.values.advancePayments?.length > 0 && (
-        <Typography variant="subtitle1" sx={{ mb: 1 }}>
-          Anticipos
-        </Typography>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={1}
+        >
+          <Typography variant="subtitle1">Anticipos</Typography>
+          {id_purchase && (
+            <Button variant="text" color="primary" onClick={handlePayTotal}>
+              Pagar total
+            </Button>
+          )}
+        </Box>
       )}
       {formikPurchaseDetail.form.values.advancePayments?.map(
         (payment, index) => (

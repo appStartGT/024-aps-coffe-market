@@ -10,7 +10,7 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../components/PurchaseDetailForm';
-import { IconButton, Chip } from '@mui/material';
+import { IconButton, Chip, Badge } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 
@@ -66,6 +66,17 @@ const usePurchaseDetail = () => {
       headerName: 'Libras',
       flex: 1,
       disableColumnMenu: true,
+      renderCell: (params) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {(params.row.isPaid || params.row.isRemate) && (
+            <Badge
+              color={params.row.isRemate ? 'warning' : 'success'}
+              variant="dot"
+            />
+          )}
+          {params.row.quantityFormated}
+        </div>
+      ),
     },
     {
       field: 'priceFormat',
@@ -87,7 +98,7 @@ const usePurchaseDetail = () => {
     },
     {
       field: 'createdAt',
-      headerName: 'Fecha',
+      headerName: 'Fecha y hora',
       flex: 1,
       disableColumnMenu: true,
     },

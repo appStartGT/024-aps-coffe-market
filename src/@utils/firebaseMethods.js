@@ -12,7 +12,6 @@ import Firebase, {
   increment,
 } from '../@config/firebaseConfig'; // Import the Firestore and Storage instances
 import tokens from '@config/authConfig/tokens';
-import { doc, setDoc } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
 export const defaultFilter = [
@@ -20,162 +19,228 @@ export const defaultFilter = [
   { field: 'isActive', condition: '==', value: true },
 ];
 
-/**
- * Fetches data from a Firestore collection with optional filters, ordering, and pagination.
- * @param {Object} params - The parameters for fetching data.
- * @param {string} params.collectionName - The name of the Firestore collection.
- * @param {Array} [params.filterBy] - An array of filter objects.
- * @param {string} [params.docId] - The document ID to fetch.
- * @param {string} [params.orderByField] - The field to order the documents by.
- * @param {string} [params.orderDirection='desc'] - The direction to order the documents.
- * @param {number} [params.limit] - The number of documents per page.
- * @param {DocumentSnapshot} [params.lastVisible] - The last visible document from the previous page.
- * @param {number} [params.currentPage=1] - The current page number.
- * @returns {Object} - The paginated response.
- */
-async function getDataFrom({
+const insertDocument = async ({ collectionName, data, showAlert = true }) => {
+  try {
+    const userData = sessionStorage.getItemWithDecryption(tokens.user);
+    const createdBy = userData?.id_user || 99999;
+    const idField = `id_${collectionName.toLowerCase()}`;
+    const collectionRef = firestore.collection(collectionName);
+    const newId = data.id || collectionRef.doc().id;
+    const newDocRef = collectionRef.doc(newId);
+
+    const processedData = Object.entries(data).reduce((acc, [key, value]) => {
+      if (key.startsWith('id_') && typeof value === 'string') {
+        const refCollectionName = key.replace('id_', '');
+        acc[key] = firestore.doc(`${refCollectionName}/${value}`);
+      } else {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    await newDocRef.set({
+      ...processedData,
+      [idField]: newId,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+      deleted: false,
+      isActive: true,
+      createdBy,
+    });
+
+    if (showAlert) {
+      toastAlert.showToast();
+    }
+
+    return await getDocumentById({ collectionName, docId: newId });
+  } catch (error) {
+    console.error('Error inserting data:', error);
+    if (showAlert) {
+      toastAlert.showToast({
+        variant: alertType.ERROR,
+        message: toastAlert.MESSAGES.ERROR_PERSIST,
+      });
+    }
+    throw error;
+  }
+};
+
+const getDocumentById = async ({
+  collectionName,
+  docId,
+  includeReferences = true,
+}) => {
+  try {
+    const docRef = firestore.collection(collectionName).doc(docId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      console.warn('Document not found');
+      // throw new Error('Document not found');
+    }
+
+    const data = doc.data();
+    const result = { id: doc.id, ...data };
+
+    if (includeReferences) {
+      const referenceFields = Object.entries(data).filter(
+        ([key, _]) =>
+          key.startsWith('id_') && key !== `id_${collectionName.toLowerCase()}`
+      );
+
+      const safeReferenceFields = referenceFields.filter(
+        ([_, value]) => value !== null && value !== undefined
+      );
+
+      if (safeReferenceFields.length === 0) {
+        console.warn('No valid reference fields found in the document.');
+      }
+
+      const referencePromises = referenceFields.map(async ([key, value]) => {
+        let refDoc;
+        if (value && typeof value === 'object') {
+          refDoc = await value.get();
+        } else {
+          const refCollectionName = key.replace('id_', '');
+          const refDocRef = firestore.collection(refCollectionName).doc(value);
+          refDoc = await refDocRef.get();
+        }
+
+        if (refDoc.exists) {
+          const refData = refDoc.data();
+          result[key] = value && typeof value === 'object' ? value : refDoc.ref;
+          result[key.replace('id_', '')] = refData;
+        }
+      });
+
+      await Promise.all(referencePromises);
+    }
+    Object.entries(data).forEach(([key, value]) => {
+      if (key.startsWith('id_')) {
+        result[key] = value;
+      } else {
+        result[key] = value;
+      }
+    });
+
+    Object.keys(result).forEach((key) => {
+      if (
+        key.startsWith('id_') &&
+        result[key] &&
+        typeof result[key] === 'object'
+      ) {
+        result[key] = result[key].id;
+      }
+    });
+    return result;
+  } catch (error) {
+    console.error('Error getting document:', error);
+    throw error;
+  }
+};
+
+async function getAllDocuments({
   collectionName,
   filterBy = [],
-  docId,
   orderByField,
   orderDirection = 'DESC',
   limit,
-  lastVisible,
-  currentPage = 1,
-  nonReferenceField = '', // Clave específica que no debe tratarse como referencia
+  excludeReferences = [],
 }) {
   try {
     let data = [];
-    let totalItems = 0;
-
-    // Agrega la condición por defecto para no incluir elementos "deleted"
     filterBy.push({ field: 'deleted', condition: '==', value: false });
 
-    // Resolver referencias en filtros
-    const resolveFilterReferences = async () => {
-      const filterPromises = filterBy.map(async (filter) => {
-        if (
-          filter.field !== nonReferenceField &&
-          filter.field.startsWith('id_') &&
-          typeof filter.value === 'string'
-        ) {
-          const refCollectionName = filter.field.replace('id_', '');
-          const refDoc = await firestore
-            .collection(refCollectionName)
-            .doc(filter.value)
-            .get();
-          if (refDoc.exists) {
+    let query = firestore.collection(collectionName);
+
+    filterBy = await Promise.all(
+      filterBy.map(async (filter) => {
+        if (filter.reference) {
+          const fieldName = filter.field;
+          if (fieldName.startsWith('id_')) {
+            const refCollectionName = fieldName.substring(3);
+            const refDoc = await firestore
+              .collection(refCollectionName)
+              .doc(filter.value)
+              .get();
             filter.value = firestore
               .collection(refCollectionName)
               .doc(refDoc.id);
           }
         }
-      });
+        return filter;
+      })
+    );
 
-      await Promise.all(filterPromises);
-    };
+    filterBy.forEach((filter) => {
+      query = query.where(filter.field, filter.condition, filter.value);
+    });
 
-    await resolveFilterReferences();
+    if (orderByField) {
+      query = query.orderBy(orderByField, orderDirection);
+    }
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const snapshot = await query.get();
+    const totalItems = snapshot.size;
 
     const resolveReferences = async (docData) => {
-      const resolvedData = { ...docData };
+      let resolvedData = { ...docData };
       const referenceFields = Object.keys(resolvedData).filter(
         (key) =>
-          key !== nonReferenceField && // Do not resolve if it's the specific non-reference field
           key.startsWith('id_') &&
-          typeof resolvedData[key] === 'object' &&
-          resolvedData[key].path
+          resolvedData[key] &&
+          (typeof resolvedData[key] === 'string' ||
+            typeof resolvedData[key] === 'object') &&
+          key.replace('id_', '') !== collectionName &&
+          !excludeReferences.includes(key)
       );
 
-      const refDocs = await Promise.all(
-        referenceFields.map((ref) => resolvedData[ref].get())
-      );
+      const referencePromises = referenceFields.map(async (key) => {
+        const refCollectionName = key.replace('id_', '');
+        const refDocData = await getDocumentById({
+          collectionName: refCollectionName,
+          docId:
+            typeof resolvedData[key] === 'object'
+              ? resolvedData[key].id
+              : resolvedData[key],
+          includeReferences: false,
+        });
 
-      await Promise.all(
-        referenceFields.map(async (ref, index) => {
-          const refDoc = refDocs[index];
-          if (refDoc.exists) {
-            const data = await resolveReferences(refDoc.data());
-            const collectionName = ref.replace('id_', '');
-            //set data with the collection name
-            resolvedData[collectionName] = data;
-            //set the key value
-            resolvedData[ref] = data[ref];
-          }
-        })
-      );
+        resolvedData[key] = refDocData.id;
+        resolvedData[key.replace('id_', '')] = refDocData;
+      });
+      excludeReferences.forEach((key) => {
+        if (resolvedData[key] && typeof resolvedData[key] === 'object') {
+          resolvedData[key] = resolvedData[key].id;
+        }
+      });
+
+      await Promise.all(referencePromises);
 
       return resolvedData;
     };
 
-    if (docId) {
-      const docRef = firestore.collection(collectionName).doc(docId);
-      const docSnapshot = await docRef.get();
-      if (!docSnapshot.exists || docSnapshot.data().deleted !== false) {
-        throw new Error('El documento no cumple con los criterios o no existe');
-      }
-      const resolvedData = await resolveReferences(docSnapshot.data());
-      return { id: docSnapshot.id, ...resolvedData };
-    } else {
-      // Construye la consulta para obtener los datos
-      let query = firestore.collection(collectionName);
-      filterBy.forEach((filter) => {
-        query = query.where(filter.field, filter.condition, filter.value);
-      });
+    const documents = await Promise.all(
+      snapshot.docs.map(async (doc) => {
+        const docData = doc.data();
+        const resolvedData = await resolveReferences(docData);
+        return { id: doc.id, ...resolvedData };
+      })
+    );
 
-      if (orderByField) {
-        query = query.orderBy(orderByField, orderDirection);
-      }
-      if (limit) {
-        query = query.limit(limit);
-      }
-      if (lastVisible) {
-        query = query.startAfter(lastVisible);
-      }
+    data = documents;
 
-      // Ejecuta la consulta y obtiene los datos
-      const querySnapshot = await query.get();
-      data = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const newLastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
-      const totalPages = Math.ceil(totalItems / limit);
-
-      // Resolver referencias en los documentos obtenidos
-      data = await Promise.all(
-        data.map(async (doc) => ({
-          ...doc,
-          ...(await resolveReferences(doc)),
-        }))
-      );
-
-      return {
-        data,
-        pagination: {
-          totalItems,
-          totalPages,
-          currentPage,
-          itemsPerPage: limit,
-          lastVisible: newLastVisible,
-        },
-      };
-    }
+    return { data, totalItems };
   } catch (error) {
-    console.error('Error fetching data:', error);
-    return { data: [], pagination: {} };
+    console.error('Error getting documents:', error);
+    throw error;
   }
 }
 
-/**
- * Deletes documents in a Firestore collection by marking them as deleted, based on filter criteria.
- * @param {Object} params - The parameters for deleting the document.
- * @param {string} params.collectionName - The name of the Firestore collection.
- * @param {string} params.docId - The ID of the document to delete (optional if using filterBy).
- * @param {Array} params.filterBy - The filters to apply when selecting documents to delete.
- * @returns {Object|null} - The ID(s) of the deleted document(s), or null if an error occurred.
- */
 async function deleteRecordById({ collectionName, docId, filterBy = [] }) {
   try {
     const userData = sessionStorage.getItemWithDecryption(tokens.user);
@@ -224,13 +289,6 @@ async function deleteRecordById({ collectionName, docId, filterBy = [] }) {
   }
 }
 
-/**
- * Downloads a file from a given URL.
- * @param {Object} params - The parameters for downloading the file.
- * @param {string} params.fileUrl - The URL of the file to download.
- * @param {string} [params.fileName] - The name to save the downloaded file as.
- * @throws {Error} - If there is an error during file download.
- */
 async function downloadFile({ fileUrl, fileName }) {
   try {
     const response = await fetch(fileUrl);
@@ -247,14 +305,6 @@ async function downloadFile({ fileUrl, fileName }) {
   }
 }
 
-/**
- * Uploads a file to Firebase Storage.
- * @param {Object} params - The parameters for uploading the file.
- * @param {File} params.file - The file to upload.
- * @param {string} [params.path='media'] - The path in Firebase Storage to upload the file to.
- * @returns {string} - The download URL of the uploaded file.
- * @throws {Error} - If there is an error during file upload.
- */
 async function uploadFile({ file, path = 'media' }) {
   try {
     const storageRef = storage.ref(`/${path}/${Date.now()}_${file.name}`);
@@ -267,12 +317,6 @@ async function uploadFile({ file, path = 'media' }) {
   }
 }
 
-/**
- * Performs a massive update on all documents in a Firestore collection.
- * @param {string} collectionName - The name of the Firestore collection.
- * @param {Object} data - The data to update in each document.
- * @returns {Object[]} - An array of the updated data, or an empty array if an error occurred.
- */
 async function massiveUpdate(collectionName, data) {
   try {
     const querySnapshot = await firestore.collection(collectionName).get();
@@ -330,13 +374,12 @@ const loginUser = async (email, password) => {
     if (!credential) throw new Error('Usuario invalido');
 
     if (credential) {
-      const res = await getDataFrom({
+      const res = await getAllDocuments({
         collectionName: firebaseCollections.USER,
         filterBy: [
           { field: 'id_user', condition: '==', value: credential.user.uid },
           { field: 'isActive', condition: '==', value: true },
         ],
-        nonReferenceField: 'id_user',
       });
       userData = res.data[0];
 
@@ -356,34 +399,11 @@ const loginUser = async (email, password) => {
           []
         );
       }
-
-      if (userData?.branch) {
-        const filters = [
-          {
-            field: 'id_branch',
-            condition: '==',
-            value: userData.id_branch,
-          },
-          {
-            field: 'isActive',
-            condition: '==',
-            value: true,
-          },
-        ];
-
-        const inventory = await getDataFrom({
-          collectionName: firebaseCollections.INVENTORY,
-          filterBy: filters,
-          nonReferenceField: 'id_inventory',
-        });
-
-        userData.inventory = inventory.data[0] || [];
-      }
     }
     if (userData?.id_user) {
       // Store the session in Firestore
       const sessionId = uuidv4();
-      await insertInto({
+      await insertDocument({
         collectionName: firebaseCollections.USER_SESSIONS,
         data: {
           id_user: userData?.id_user,
@@ -409,209 +429,6 @@ const loginUser = async (email, password) => {
     return undefined;
   }
 };
-
-async function insertInto({
-  collectionName,
-  reference,
-  data,
-  transaction = null,
-  showAlert = true,
-}) {
-  try {
-    const userData = sessionStorage.getItemWithDecryption(tokens.user);
-    const defaultFields = {
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-      deleted: false,
-      isActive: data?.isActive ?? true,
-      createdBy: userData?.id_user ?? 999,
-    };
-
-    // Create a copy of the data
-    const dataWithReferences = { ...data };
-
-    // Automatically detect fields that should be references
-    Object.keys(dataWithReferences).forEach((key) => {
-      if (
-        key.startsWith('id_') &&
-        typeof dataWithReferences[key] === 'string'
-      ) {
-        const relatedCollectionName = key.replace('id_', '');
-
-        // Si el campo `id_` apunta a la misma colección, no lo tratamos como referencia
-        if (relatedCollectionName !== collectionName) {
-          dataWithReferences[key] = doc(
-            firestore,
-            relatedCollectionName,
-            dataWithReferences[key]
-          );
-        }
-      }
-    });
-
-    // Handle additional references if necessary
-    if (reference) {
-      dataWithReferences[reference.field] = doc(
-        firestore,
-        reference.collection,
-        reference.docId
-      );
-    }
-
-    let docRef;
-    if (transaction) {
-      if (dataWithReferences?.id) {
-        docRef = firestore
-          .collection(collectionName)
-          .doc(dataWithReferences.id);
-        if (dataWithReferences.key) {
-          dataWithReferences[dataWithReferences.key] = dataWithReferences.id;
-        }
-        transaction.set(docRef, { ...dataWithReferences, ...defaultFields });
-      } else {
-        docRef = firestore.collection(collectionName).doc();
-        const customId = docRef.id;
-        dataWithReferences.id = customId;
-
-        if (dataWithReferences.key) {
-          dataWithReferences[dataWithReferences.key] = customId;
-        }
-
-        transaction.set(docRef, { ...dataWithReferences, ...defaultFields });
-      }
-    } else {
-      if (dataWithReferences?.id) {
-        docRef = firestore
-          .collection(collectionName)
-          .doc(dataWithReferences.id);
-        if (dataWithReferences.key) {
-          dataWithReferences[dataWithReferences.key] = dataWithReferences.id;
-        }
-        await setDoc(docRef, { ...dataWithReferences, ...defaultFields });
-      } else {
-        docRef = firestore.collection(collectionName).doc();
-        const customId = docRef.id;
-        dataWithReferences.id = customId;
-
-        if (dataWithReferences.key) {
-          dataWithReferences[dataWithReferences.key] = customId;
-        }
-
-        await setDoc(docRef, { ...dataWithReferences, ...defaultFields });
-      }
-    }
-
-    // Obtener y resolver las referencias del documento insertado
-    const resolvedData = await getDataFrom({
-      collectionName,
-      docId: dataWithReferences.id,
-    });
-    showAlert && toastAlert.showToast();
-
-    return resolvedData; // Devolver los datos con todas las referencias resueltas
-  } catch (error) {
-    console.error('Error inserting data:', error);
-    toastAlert.showToast({
-      variant: alertType.ERROR,
-      message: toastAlert.MESSAGES.ERROR_PERSIST,
-    });
-    throw new Error('Error inserting data:', error);
-  }
-}
-
-async function bulkInsertIntoReferences({
-  collectionName,
-  reference,
-  dataArray,
-}) {
-  try {
-    // Validar que dataArray sea un arreglo
-    if (!Array.isArray(dataArray)) {
-      throw new Error('dataArray must be an array');
-    }
-
-    const userData = sessionStorage.getItemWithDecryption(tokens.user);
-    const defaultFields = {
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-      deleted: false,
-      isActive: dataArray[0]?.isActive ?? true,
-      createdBy: userData?.id_user,
-    };
-
-    const insertAndResolve = async (data) => {
-      const dataWithReferences = { ...data };
-
-      // Detectar y manejar los campos que deben ser referencias
-      Object.keys(dataWithReferences).forEach((key) => {
-        if (
-          key.startsWith('id_') &&
-          typeof dataWithReferences[key] === 'string'
-        ) {
-          const relatedCollectionName = key.replace('id_', '');
-
-          if (relatedCollectionName !== collectionName) {
-            // Solo trata como referencia si no es la misma colección
-            dataWithReferences[key] = firestore
-              .collection(relatedCollectionName)
-              .doc(dataWithReferences[key]);
-          }
-        }
-      });
-
-      // Manejar referencias adicionales si es necesario
-      if (reference) {
-        dataWithReferences[reference.field] = firestore
-          .collection(reference.collection)
-          .doc(reference.docId);
-      }
-
-      let docRef;
-      if (dataWithReferences?.id) {
-        docRef = firestore
-          .collection(collectionName)
-          .doc(dataWithReferences.id);
-        await docRef.set({ ...dataWithReferences, ...defaultFields });
-      } else {
-        docRef = firestore.collection(collectionName).doc();
-        const customId = docRef.id;
-        dataWithReferences.id = customId;
-
-        // Asegurar que el campo key esté configurado correctamente
-        if (dataWithReferences.key) {
-          dataWithReferences[dataWithReferences.key] = customId;
-        }
-
-        await docRef.set({ ...dataWithReferences, ...defaultFields });
-      }
-
-      return docRef.id; // Devolver el ID del documento insertado
-    };
-
-    // Insertar todos los documentos y obtener sus IDs
-    const insertedDocIds = await Promise.all(dataArray.map(insertAndResolve));
-
-    // Ahora obtener y resolver las referencias de los documentos insertados
-    const resolvedDocs = await Promise.all(
-      insertedDocIds.map(async (id) => {
-        return getDataFrom({
-          collectionName,
-          docId: id,
-        });
-      })
-    );
-    toastAlert.showToast();
-
-    return resolvedDocs;
-  } catch (error) {
-    console.error('Error inserting data:', error);
-    toastAlert.showToast({
-      variant: alertType.ERROR,
-      message: toastAlert.MESSAGES.ERROR_PERSIST,
-    });
-    throw new Error('Error inserting data:', error);
-  }
-}
 
 async function updateRecordBy({
   collectionName,
@@ -770,14 +587,13 @@ function generateSearchTokens(text) {
 }
 
 export {
-  bulkInsertIntoReferences,
   deleteRecordById,
   downloadFile,
   firestore,
   generateSearchTokens,
-  getDataFrom,
+  getAllDocuments,
   increment,
-  insertInto,
+  insertDocument,
   loginUser,
   massiveUpdate,
   updateRecordBy,

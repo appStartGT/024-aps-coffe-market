@@ -8,11 +8,13 @@ const DataTableOverview = ({ purchaseList }) => {
   const [statistics, setStatistics] = useState({
     totalPurchases: 0,
     totalQuantity: '0.00',
-    totalQuantityPriceless: '0.00',
     averagePrice: '0.00',
     totalAmount: '0.00',
     totalAdvancePayments: '0.00',
     totalDebt: '0.00',
+    totalLbPriced: '0.00',
+    totalLbPriceless: '0.00',
+    totalLbRemate: '0.00',
   });
   const [isQuintales, setIsQuintales] = useState(false);
 
@@ -21,24 +23,24 @@ const DataTableOverview = ({ purchaseList }) => {
       const totalPurchases = purchaseList.length;
       const totalQuantity = purchaseList.reduce(
         (sum, purchase) =>
-          sum + (purchase.isPriceless ? 0 : Number(purchase.quantity)),
+          sum + (purchase.isPriceless ? 0 : Number(purchase.totalLbQuantity)),
         0
       );
-      const totalQuantityPriceless = purchaseList.reduce(
-        (sum, purchase) =>
-          sum +
-          (purchase.isPriceless && !purchase.isRemate
-            ? Number(purchase.quantity)
-            : 0),
+      const totalLbPriceless = purchaseList.reduce(
+        (sum, purchase) => sum + purchase.totalLbPriceless,
+        0
+      );
+      const totalLbRemate = purchaseList.reduce(
+        (sum, purchase) => sum + purchase.totalLbRemate,
         0
       );
       const totalAmount = purchaseList.reduce(
-        (sum, purchase) => sum + purchase.quantity * purchase.price,
+        (sum, purchase) => sum + purchase.totalPricedAmount,
         0
       );
-      console.log({ totalAmount, totalQuantity });
       const averagePrice =
         totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
+
       const totalAdvancePayments = purchaseList.reduce(
         (sum, purchase) =>
           sum +
@@ -69,25 +71,33 @@ const DataTableOverview = ({ purchaseList }) => {
           return sum;
         }, 0)
       );
+      const totalLbPriced = purchaseList.reduce(
+        (sum, purchase) => sum + Number(+purchase.totalLbPriced),
+        0
+      );
 
       setStatistics({
         totalPurchases: totalPurchases,
         totalQuantity: formatNumber(totalQuantity),
-        totalQuantityPriceless: formatNumber(totalQuantityPriceless),
+        totalLbPriceless: formatNumber(totalLbPriceless),
         averagePrice: formatNumber(averagePrice),
         totalAmount: formatNumber(totalAmount),
         totalAdvancePayments: formatNumber(totalAdvancePayments),
         totalDebt: formatNumber(totalDebt),
+        totalLbPriced: formatNumber(totalLbPriced),
+        totalLbRemate: formatNumber(totalLbRemate),
       });
     } else {
       setStatistics({
         totalPurchases: 0,
         totalQuantity: '0.00',
-        totalQuantityPriceless: '0.00',
+        totalLbPriceless: '0.00',
         averagePrice: '0.00',
         totalAmount: '0.00',
         totalAdvancePayments: '0.00',
         totalDebt: '0.00',
+        totalLbPriced: '0.00',
+        totalLbRemate: '0.00',
       });
     }
   }, [purchaseList]);
@@ -109,9 +119,18 @@ const DataTableOverview = ({ purchaseList }) => {
               ? convertToQuintales(statistics.totalQuantity)
               : statistics.totalQuantity
           }
-          label={`Total ${
-            isQuintales ? 'Quintales Pagados' : 'Libras Pagadas'
-          } `}
+          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} `}
+          backgroundColor={theme.palette.primary.main}
+          color={theme.palette.primary.contrastText}
+          onClick={toggleUnit}
+        />
+        <DataItem
+          value={
+            isQuintales
+              ? convertToQuintales(statistics.totalLbPriced)
+              : statistics.totalLbPriced
+          }
+          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Pagadas`}
           backgroundColor={theme.palette.totalQuantity.background}
           color={theme.palette.totalQuantity.text}
           onClick={toggleUnit}
@@ -119,8 +138,8 @@ const DataTableOverview = ({ purchaseList }) => {
         <DataItem
           value={
             isQuintales
-              ? convertToQuintales(statistics.totalQuantityPriceless)
-              : statistics.totalQuantityPriceless
+              ? convertToQuintales(statistics.totalLbPriceless)
+              : statistics.totalLbPriceless
           }
           label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Sin Precio`}
           backgroundColor={theme.palette.balance.background}
@@ -128,28 +147,27 @@ const DataTableOverview = ({ purchaseList }) => {
           onClick={toggleUnit}
         />
         <DataItem
-          value={`Q${statistics.averagePrice}`}
-          label="Precio Promedio"
-          backgroundColor={theme.palette.averagePrice.background}
-          color={theme.palette.averagePrice.text}
-        />
-        {/* <DataItem
-          value={`Q${statistics.totalAmount}`}
-          label="Monto Total"
-          backgroundColor={theme.palette.totalAmount.background}
-          color={theme.palette.totalAmount.text}
-        /> */}
-        <DataItem
-          value={`Q${statistics.totalAdvancePayments}`}
-          label="Total Anticipos"
-          backgroundColor={theme.palette.totalAdvancePayments.background}
-          color={theme.palette.totalAdvancePayments.text}
+          value={
+            isQuintales
+              ? convertToQuintales(statistics.totalLbRemate)
+              : statistics.totalLbRemate
+          }
+          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Remate`}
+          backgroundColor={theme.palette.warning.main}
+          color={theme.palette.warning.contrastText}
+          onClick={toggleUnit}
         />
         <DataItem
           value={`Q${statistics.totalDebt}`}
           label="Total Deuda"
           backgroundColor={theme.palette.balance.background}
           color={theme.palette.balance.text}
+        />
+        <DataItem
+          value={`Q${statistics.averagePrice}`}
+          label="Precio Promedio"
+          backgroundColor={theme.palette.info.main}
+          color={theme.palette.info.contrastText}
         />
       </Box>
     </Box>

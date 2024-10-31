@@ -3,9 +3,9 @@ import { customerDto } from '@dto';
 import { cleanModel, firebaseCollections, firebaseFilterBuilder } from '@utils';
 import { setLoadingMainViewAction } from '../main';
 import {
-  getDataFrom,
+  getAllDocuments,
   deleteRecordById,
-  insertInto,
+  insertDocument,
   updateRecordBy,
 } from '@utils/firebaseMethods';
 
@@ -13,7 +13,7 @@ export const customerListAction = createAsyncThunk(
   'customer/list',
   async (params, { rejectWithValue }) => {
     const filterBy = firebaseFilterBuilder(cleanModel(params));
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.CUSTOMER,
       filterBy,
       nonReferenceField: 'id_customer',
@@ -33,7 +33,7 @@ export const customerCreateAction = createAsyncThunk(
       ...body,
     };
 
-    return await insertInto({
+    return await insertDocument({
       collectionName: firebaseCollections.CUSTOMER,
       data: customerData,
     })
@@ -52,7 +52,7 @@ export const customerGetOneAction = createAsyncThunk(
   'customer/getOne',
   async ({ id }, { rejectWithValue, dispatch }) => {
     dispatch(setLoadingMainViewAction(true));
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.CUSTOMER,
       docId: id,
       nonReferenceField: 'id_customer',
@@ -71,7 +71,7 @@ export const customerGetOneAction = createAsyncThunk(
 export const getOneAllDetalleCustomerAction = createAsyncThunk(
   'customer/getOneAllDetalle',
   async (_params, { rejectWithValue }) => {
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.CUSTOMER,
       nonReferenceField: 'id_customer',
     })

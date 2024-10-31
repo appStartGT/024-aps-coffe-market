@@ -1,13 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { firebaseFilterBuilder } from '@utils';
-import { getDataFrom, updateRecordBy } from '@utils/firebaseMethods';
+import { getAllDocuments, updateRecordBy } from '@utils/firebaseMethods';
 import { setRoleAction } from '../role';
 
 export const permissionListAction = createAsyncThunk(
   'permission/list',
   async ({ id_role, id_subject }, { rejectWithValue }) => {
     const filterBy = firebaseFilterBuilder({ id_role, id_subject });
-    return await getDataFrom({ collectionName: 'permission', filterBy })
+    return await getAllDocuments({ collectionName: 'permission', filterBy })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
   }

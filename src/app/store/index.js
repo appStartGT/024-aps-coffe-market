@@ -7,11 +7,8 @@ import user from './modules/user';
 import subject from './modules/subject';
 import permission from './modules/permission';
 import administrator from './modules/administrator';
-
 import catalogs from './modules/catalogs';
-import settings from './modules/settings';
 import person from './modules/person';
-import employee from './modules/employee';
 import purchase from './modules/purchase';
 import customer from './modules/customer';
 import purchaseDetail from './modules/purchaseDetail';
@@ -25,11 +22,9 @@ export const store = configureStore({
     permission,
     person,
     role,
-    settings,
     subject,
     theme,
     user,
-    employee,
     purchase,
     customer,
     purchaseDetail,

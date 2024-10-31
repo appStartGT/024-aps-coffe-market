@@ -38,7 +38,7 @@ const usePurchaseList = () => {
   /* use Effects */
 
   useEffect(() => {
-    !purchaseList.length && dispatch(purchaseListAction()); //TODO: listen purchase_detail
+    dispatch(purchaseListAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const usePurchaseList = () => {
     },
 
     {
-      field: 'totalLbPriced',
+      field: 'totalLbPricedFormatted',
       headerName: 'Total Lb',
       headerAlign: 'center',
       align: 'center',
@@ -77,7 +77,7 @@ const usePurchaseList = () => {
       flex: 1,
     },
     {
-      field: 'totalLbPriceless',
+      field: 'totalLbPricelessFormatted',
       headerName: 'Total Lb Sin Precio',
       headerAlign: 'center',
       align: 'center',
@@ -85,7 +85,7 @@ const usePurchaseList = () => {
       flex: 1.5,
     },
     {
-      field: 'totalLbRemate',
+      field: 'totalLbRemateFormatted',
       headerName: 'Total Lb Remate',
       headerAlign: 'center',
       align: 'center',
@@ -93,7 +93,7 @@ const usePurchaseList = () => {
       flex: 1,
     },
     {
-      field: 'averagePrice',
+      field: 'averagePriceFormatted',
       headerName: 'Precio Promedio',
       headerAlign: 'center',
       align: 'center',
@@ -101,7 +101,7 @@ const usePurchaseList = () => {
       flex: 1,
     },
     {
-      field: 'totalAdvancePayments',
+      field: 'totalAdvancePaymentsFormatted',
       headerName: 'Anticipos',
       headerAlign: 'center',
       align: 'center',
@@ -109,7 +109,7 @@ const usePurchaseList = () => {
       flex: 1,
     },
     {
-      field: 'totalDebt',
+      field: 'totalDebtFormatted',
       headerName: 'Total Deuda',
       headerAlign: 'center',
       align: 'center',

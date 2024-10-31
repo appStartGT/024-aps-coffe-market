@@ -2,10 +2,13 @@ import { cleanModel, formatNumber } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
 const purchaseModel = (purchase, purchase_details) => {
-  const relevantDetails =
+  const relevantDetails = (
     purchase_details?.filter(
       (detail) => detail.id_purchase === purchase.id_purchase
-    ) || [];
+    ) || []
+  ).map((detail) => ({
+    ...detail,
+  }));
 
   const totalAdvancePayments = relevantDetails.reduce(
     (sum, detail) =>
@@ -17,31 +20,21 @@ const purchaseModel = (purchase, purchase_details) => {
     0
   );
 
-  const totalQuantity = relevantDetails.reduce(
-    (sum, detail) => sum + (Number(detail.quantity) || 0),
-    0
-  );
-
-  const totalAmount = relevantDetails.reduce(
-    (sum, detail) =>
-      sum + (Number(detail.quantity) || 0) * (Number(detail.price) || 0),
-    0
-  );
-
-  const averagePrice = totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
-
-  const totalLbRemate = relevantDetails.reduce(
+  const totalPricedAmount = relevantDetails.reduce(
     (sum, detail) =>
       sum +
-      (detail.isRemate && !detail.isPriceless
-        ? Number(detail.quantity) || 0
+      (!detail.isPriceless
+        ? Number(detail.quantity) * Number(detail.price) || 0
         : 0),
     0
   );
 
   const totalLbPriced = relevantDetails.reduce(
     (sum, detail) =>
-      sum + (!detail.isPriceless ? Number(detail.quantity) || 0 : 0),
+      sum +
+      (!detail.isPriceless && !detail.isRemate
+        ? Number(detail.quantity) || 0
+        : 0),
     0
   );
 
@@ -53,6 +46,21 @@ const purchaseModel = (purchase, purchase_details) => {
         : 0),
     0
   );
+
+  const totalLbRemate = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.isRemate && !detail.isPriceless
+        ? Number(detail.quantity) || 0
+        : 0),
+    0
+  );
+
+  const totalLbQuantity = totalLbPriced + totalLbPriceless + totalLbRemate;
+
+  const averagePrice =
+    totalLbPriced > 0 ? totalPricedAmount / (totalLbPriced + totalLbRemate) : 0;
+
   const totalDebt = relevantDetails.reduce((sum, detail) => {
     if (
       !detail.isPriceless &&
@@ -86,19 +94,25 @@ const purchaseModel = (purchase, purchase_details) => {
     DPI: purchase?.DPI || purchase.customer?.DPI || '',
     address: purchase?.address || purchase.customer?.address || '',
     isActive: purchase.isActive || false,
-    key: purchase.key || '',
     updatedAt: formatFirebaseTimestamp(purchase.updatedAt),
     fullName: `${purchase?.name || purchase.customer?.name} ${
       purchase?.surNames || purchase.customer?.surNames
     }`,
-    totalAdvancePayments: `Q ${formatNumber(totalAdvancePayments)}`,
-    totalQuantity: formatNumber(totalQuantity),
-    totalAmount: `Q ${formatNumber(totalAmount)}`,
-    averagePrice: `Q ${formatNumber(averagePrice)}`,
-    totalLbRemate: formatNumber(totalLbRemate),
-    totalLbPriced: formatNumber(totalLbPriced),
-    totalLbPriceless: formatNumber(totalLbPriceless),
-    totalDebt: `Q ${formatNumber(totalDebt)}`,
+    averagePriceFormatted: `Q ${formatNumber(averagePrice)}`,
+    totalAdvancePaymentsFormatted: `Q ${formatNumber(totalAdvancePayments)}`,
+    totalLbRemateFormatted: formatNumber(totalLbRemate),
+    totalLbPricedFormatted: formatNumber(totalLbPriced),
+    totalLbPricelessFormatted: formatNumber(totalLbPriceless),
+    totalDebtFormatted: `Q ${formatNumber(totalDebt)}`,
+    totalPricedAmountFormatted: formatNumber(totalPricedAmount),
+    averagePrice: averagePrice,
+    totalAdvancePayments: totalAdvancePayments,
+    totalLbRemate: totalLbRemate,
+    totalLbPriced: totalLbPriced,
+    totalLbPriceless: totalLbPriceless,
+    totalLbQuantity: totalLbQuantity,
+    totalPricedAmount: totalPricedAmount,
+    totalDebt: totalDebt,
   };
   return obj;
 };

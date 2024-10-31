@@ -3,8 +3,8 @@ import { userDto } from '@dto';
 import Firebase from '@config/firebaseConfig';
 import {
   deleteRecordById,
-  getDataFrom,
-  insertInto,
+  getAllDocuments,
+  insertDocument,
   updateRecordBy,
   uploadFile,
 } from '@utils/firebaseMethods';
@@ -14,7 +14,7 @@ export const userListAction = createAsyncThunk(
   'user/list',
   async (params, { rejectWithValue }) => {
     const filterBy = firebaseFilterBuilder(cleanModel(params));
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: 'user',
       filterBy,
       nonReferenceField: 'id_user',
@@ -58,7 +58,7 @@ export const createUserAction = createAsyncThunk(
         ...photoData,
       };
 
-      const response = await insertInto({
+      const response = await insertDocument({
         collectionName: 'user',
         data: userData,
       });

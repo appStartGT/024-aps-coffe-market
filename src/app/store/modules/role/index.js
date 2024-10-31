@@ -2,8 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { roleDto } from '@dto';
 import {
   deleteRecordById,
-  getDataFrom,
-  insertInto,
+  getAllDocuments,
+  insertDocument,
   updateRecordBy,
 } from '@utils/firebaseMethods';
 
@@ -11,7 +11,7 @@ export const createRoleAction = createAsyncThunk(
   'role/create',
   async (data, { rejectWithValue }) => {
     const body = roleDto.post(data);
-    return await insertInto({ collectionName: 'role', data: body })
+    return await insertDocument({ collectionName: 'role', data: body })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
   }
@@ -20,7 +20,7 @@ export const createRoleAction = createAsyncThunk(
 export const getOneAction = createAsyncThunk(
   'role/getOne',
   async ({ id }, { rejectWithValue }) => {
-    return await getDataFrom({ collectionName: 'role', docId: id })
+    return await getAllDocuments({ collectionName: 'role', docId: id })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
   }
@@ -43,7 +43,7 @@ export const updateRoleAction = createAsyncThunk(
 export const roleListAction = createAsyncThunk(
   'role/list',
   async (_, { rejectWithValue }) => {
-    return await getDataFrom({ collectionName: 'role' })
+    return await getAllDocuments({ collectionName: 'role' })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
   }

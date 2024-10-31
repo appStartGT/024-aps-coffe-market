@@ -69,14 +69,14 @@ const DataTableOverview = ({ purchaseList }) => {
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
         <DataItem
           value={getDisplayValue(statistics.totalRematado)}
-          label={`Total Rematado ${isQuintales ? '(quintales)' : '(libras)'}`}
+          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Remate`}
           backgroundColor={theme.palette.warning.main}
-          color={theme.palette.primary.contrastText}
+          color={theme.palette.warning.contrastText}
           onClick={toggleUnit}
         />
         <DataItem
           value={getDisplayValue(statistics.totalPriceless)}
-          label={`Total Sin Precio ${isQuintales ? '(quintales)' : '(libras)'}`}
+          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Sin Precio`}
           backgroundColor={theme.palette.info.main}
           color={theme.palette.primary.contrastText}
           onClick={toggleUnit}

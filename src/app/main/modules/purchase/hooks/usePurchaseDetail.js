@@ -41,7 +41,7 @@ const usePurchaseDetail = () => {
   useMountEffect({
     effect: () => {
       if (params.id_purchase != 0) {
-        dispatch(purchaseGetOneAction({ id: params.id_purchase }));
+        dispatch(purchaseGetOneAction({ id_purchase: params.id_purchase }));
       }
     },
   });

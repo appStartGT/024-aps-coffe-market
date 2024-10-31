@@ -95,6 +95,7 @@ const RemateDetailsForm = ({ selectedItems }) => {
   const handleCancel = () => {
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
+  console.log(auth.user);
 
   const handleConfirm = () => {
     dispatch(

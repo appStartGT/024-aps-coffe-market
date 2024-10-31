@@ -41,6 +41,24 @@ const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
     return total - totalAdvances;
   };
 
+  const handlePayTotal = () => {
+    const remainingTotal = calculateTotalToPay();
+    if (remainingTotal > 0) {
+      const newPayment = {
+        amount: remainingTotal,
+        createdAt: new Date().toISOString(),
+      };
+      const updatedAdvancePayments = [
+        ...(formikPurchaseDetail.form.values.advancePayments || []),
+        newPayment,
+      ];
+      formikPurchaseDetail.form.setFieldValue(
+        'advancePayments',
+        updatedAdvancePayments
+      );
+    }
+  };
+
   return (
     <Box display="flex" flexDirection="column">
       {/* <ApsModalLoading open={loading} message="Procesando compra..." /> */}
@@ -102,7 +120,13 @@ const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
         </Typography>
       </Box>
       <ApsForm formik={formikPurchaseDetail} />
-      <AdvancePayment formikPurchaseDetail={formikPurchaseDetail} />
+      <AdvancePayment
+        formikPurchaseDetail={formikPurchaseDetail}
+        id_purchase={
+          formikPurchaseDetail.form?.values?.isPriceless ? null : id_purchase
+        }
+        handlePayTotal={handlePayTotal}
+      />
       <ApsButton
         onClick={() => handleOnclick(nonupdate)}
         variant="contained"

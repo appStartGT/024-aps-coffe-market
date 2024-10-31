@@ -7,9 +7,9 @@ import {
 } from '@utils';
 import { setLoadingMainViewAction } from '../main';
 import {
-  getDataFrom,
+  getAllDocuments,
   deleteRecordById,
-  insertInto,
+  insertDocument,
   updateRecordBy,
 } from '@utils/firebaseMethods';
 import { firestore, FieldValue } from '@config/firebaseConfig';
@@ -17,9 +17,9 @@ import { updatePurchaseListDetailsAction } from '../purchase';
 
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
-  async ({ id_purchase }, { rejectWithValue, getState }) => {
+  async ({ id_purchase }, { rejectWithValue, getState, dispatch }) => {
     const state = getState();
-    const purchaseListDetails = state.purchase.purchaseListDetails;
+    const purchaseListDetails = state.purchase.rowPurchaseDetails;
 
     if (purchaseListDetails && purchaseListDetails.length > 0) {
       const filteredDetails = purchaseListDetails.filter(
@@ -30,18 +30,22 @@ export const purchaseDetailListAction = createAsyncThunk(
       }
     }
 
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       filterBy: [
         {
           field: 'id_purchase',
           condition: '==',
           value: id_purchase,
+          reference: true,
         },
       ],
-      nonReferenceField: firebaseCollectionsKey.purchase_detail,
+      excludeReferences: ['id_purchase_detail_remate'],
     })
-      .then((res) => res)
+      .then((res) => {
+        dispatch(updatePurchaseListDetailsAction(res.data));
+        return res;
+      })
       .catch((res) => rejectWithValue(res));
   }
 );
@@ -56,7 +60,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
       ...body,
     };
 
-    return await insertInto({
+    return await insertDocument({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       data: purchaseDetailData,
     })
@@ -71,30 +75,10 @@ export const purchaseDetailCreateAction = createAsyncThunk(
   }
 );
 
-export const purchaseDetailGetOneAction = createAsyncThunk(
-  'purchaseDetail/getOne',
-  async ({ id }, { rejectWithValue, dispatch }) => {
-    dispatch(setLoadingMainViewAction(true));
-    return await getDataFrom({
-      collectionName: firebaseCollections.PURCHASE_DETAIL,
-      docId: id,
-      nonReferenceField: firebaseCollectionsKey.purchase_detail,
-    })
-      .then((res) => {
-        dispatch(setLoadingMainViewAction(false));
-        return res;
-      })
-      .catch((res) => {
-        dispatch(setLoadingMainViewAction(false));
-        return rejectWithValue(res);
-      });
-  }
-);
-
 export const getOneAllDetallePurchaseDetailAction = createAsyncThunk(
   'purchaseDetail/getOneAllDetalle',
   async (_params, { rejectWithValue }) => {
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.PURCHASE_DETAIL,
       nonReferenceField: firebaseCollectionsKey.purchase_detail,
     })
@@ -314,27 +298,6 @@ export const purchaseDetailSlice = createSlice({
             purchaseDetail,
           ];
         }
-        state.processing = false;
-      }
-    );
-
-    /* GET ONE */
-    builder.addCase(purchaseDetailGetOneAction.pending, (state) => {
-      state.processing = true;
-    });
-    builder.addCase(
-      purchaseDetailGetOneAction.rejected,
-      (state, { payload }) => {
-        state.error = payload;
-        state.processing = false;
-      }
-    );
-    builder.addCase(
-      purchaseDetailGetOneAction.fulfilled,
-      (state, { payload }) => {
-        const selectedPurchaseDetail =
-          purchaseDetailDto.purchaseDetailGetOne(payload);
-        state.purchaseDetailSelected = selectedPurchaseDetail;
         state.processing = false;
       }
     );

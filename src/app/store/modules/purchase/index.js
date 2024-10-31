@@ -4,43 +4,58 @@ import {
   cleanModel,
   firebaseCollections,
   firebaseCollectionsKey,
-  firebaseFilterBuilder,
 } from '@utils';
 import { setLoadingMainViewAction } from '../main';
 import {
-  getDataFrom,
+  getAllDocuments,
   deleteRecordById,
-  insertInto,
+  insertDocument,
 } from '@utils/firebaseMethods';
 import { customerCreateAction, customerUpdateAction } from '../customer';
 
 export const purchaseListAction = createAsyncThunk(
   'purchase/list',
-  async (params, { rejectWithValue }) => {
-    const filterBy = firebaseFilterBuilder(cleanModel(params));
+  async (_, { rejectWithValue, getState }) => {
     try {
-      const purchases = await getDataFrom({
-        collectionName: firebaseCollections.PURCHASE,
-        filterBy,
-        nonReferenceField: firebaseCollectionsKey.purchase,
-      });
+      const state = getState();
+      let { rowPurchases, rowPurchaseDetails } = state.purchase;
 
-      const purchasesWithDetails = await Promise.all(
-        purchases.data.map(async (purchase) => {
-          const purchaseDetails = await getDataFrom({
+      if (rowPurchases.length > 0 && rowPurchaseDetails.length > 0) {
+        return { isUpdateNeeded: false, rowPurchases, rowPurchaseDetails };
+      }
+
+      const purchases = await getAllDocuments({
+        collectionName: firebaseCollections.PURCHASE,
+      });
+      rowPurchases = purchases.data;
+      rowPurchaseDetails = await Promise.all(
+        rowPurchases.map(async (purchase) => {
+          const purchaseDetails = await getAllDocuments({
             collectionName: firebaseCollections.PURCHASE_DETAIL,
             filterBy: [
               {
                 field: firebaseCollectionsKey.purchase,
                 condition: '==',
                 value: purchase.id_purchase,
+                reference: true,
               },
             ],
+            excludeReferences: [
+              firebaseCollectionsKey.purchase,
+              'id_purchase_detail_remate', //this collection does not have a reference to purchase
+            ],
           });
-          return { ...purchase, purchase_details: purchaseDetails.data };
+          return purchaseDetails.data;
         })
       );
-      return purchasesWithDetails;
+
+      rowPurchaseDetails = rowPurchaseDetails.flat();
+
+      return {
+        isUpdateNeeded: true,
+        rowPurchases,
+        rowPurchaseDetails,
+      };
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -70,12 +85,10 @@ export const purchaseCreateAction = createAsyncThunk(
     const id_customer = customerResponse.id_customer;
 
     const purchaseData = {
-      key: firebaseCollectionsKey.purchase,
-      // ...body,
       id_customer,
     };
 
-    return await insertInto({
+    return await insertDocument({
       collectionName: firebaseCollections.PURCHASE,
       data: purchaseData,
     })
@@ -92,16 +105,33 @@ export const purchaseCreateAction = createAsyncThunk(
 
 export const purchaseGetOneAction = createAsyncThunk(
   'purchase/getOne',
-  async ({ id }, { rejectWithValue, dispatch }) => {
+  async ({ id_purchase }, { rejectWithValue, dispatch, getState }) => {
     dispatch(setLoadingMainViewAction(true));
-    return await getDataFrom({
+
+    const state = getState();
+    const rowPurchases = state.purchase.rowPurchases;
+    const purchase = rowPurchases.find(
+      (purchase) => purchase.id_purchase === id_purchase
+    );
+
+    if (purchase) {
+      dispatch(setLoadingMainViewAction(false));
+      return purchase;
+    }
+
+    return await getAllDocuments({
       collectionName: firebaseCollections.PURCHASE,
-      docId: id,
-      nonReferenceField: firebaseCollectionsKey.purchase,
+      filterBy: [
+        {
+          field: 'id_purchase',
+          condition: '==',
+          value: id_purchase,
+        },
+      ],
     })
       .then((res) => {
         dispatch(setLoadingMainViewAction(false));
-        return res;
+        return res.data[0];
       })
       .catch((res) => {
         dispatch(setLoadingMainViewAction(false));
@@ -113,7 +143,7 @@ export const purchaseGetOneAction = createAsyncThunk(
 export const getOneAllDetallePurchaseAction = createAsyncThunk(
   'purchase/getOneAllDetalle',
   async (_params, { rejectWithValue }) => {
-    return await getDataFrom({
+    return await getAllDocuments({
       collectionName: firebaseCollections.PURCHASE,
       nonReferenceField: firebaseCollectionsKey.purchase,
     })
@@ -156,7 +186,7 @@ export const updatePurchaseListDetailsAction = createAsyncThunk(
   async (newDetails, { getState, rejectWithValue }) => {
     try {
       const state = getState();
-      const currentDetails = state.purchase.purchaseListDetails;
+      const currentDetails = state.purchase.rowPurchaseDetails;
 
       // Merge new details with existing ones, overwriting if there's a conflict
       let updatedDetails = [...currentDetails];
@@ -187,10 +217,11 @@ const initialState = {
   purchaseSelected: null,
   processing: false,
   purchaseList: [],
-  purchaseListDetails: [],
   totalItems: 5,
   purchasePaymentSelected: [],
   totalPayments: 5,
+  rowPurchases: [], // Updated in purchaseListAction.fulfilled
+  rowPurchaseDetails: [], // Updated in purchaseListAction.fulfilled and updatePurchaseListDetailsAction.fulfilled
 };
 
 export const purchaseSlice = createSlice({
@@ -217,15 +248,15 @@ export const purchaseSlice = createSlice({
       state.processing = false;
     });
     builder.addCase(purchaseListAction.fulfilled, (state, { payload }) => {
-      const purchaseListDetails = payload
-        .map((purchase) => purchase.purchase_details)
-        .flat();
-
-      state.purchaseList = purchaseDto.purchaseList(
-        payload,
-        purchaseListDetails
-      );
-      state.purchaseListDetails = purchaseListDetails;
+      if (payload.isUpdateNeeded) {
+        state.purchaseList = purchaseDto.purchaseList(
+          payload.rowPurchases,
+          payload.rowPurchaseDetails
+        );
+        // Update rowPurchases and rowPurchaseDetails
+        state.rowPurchases = payload.rowPurchases;
+        state.rowPurchaseDetails = payload.rowPurchaseDetails;
+      }
       state.totalItems = payload.length;
       state.processing = false;
     });
@@ -243,6 +274,8 @@ export const purchaseSlice = createSlice({
       const purchase = purchaseDto.purchaseGetOne(payload);
       state.purchaseSelected = purchase;
       state.purchaseList = [...state.purchaseList, purchase];
+      // Update rowPurchases
+      state.rowPurchases = [...state.rowPurchases, payload];
       state.processing = false;
     });
     /* GET ONE */
@@ -257,7 +290,6 @@ export const purchaseSlice = createSlice({
       const selectedPurchase = purchaseDto.purchaseGetOne(payload);
       state.purchaseSelected = selectedPurchase;
       state.purchasePaymentSelected = selectedPurchase.payments;
-
       state.processing = false;
     });
 
@@ -277,6 +309,10 @@ export const purchaseSlice = createSlice({
         state.purchaseList,
         payload
       );
+      // Update rowPurchases
+      state.rowPurchases = state.rowPurchases.map((purchase) =>
+        purchase.id_purchase === payload.id_purchase ? payload : purchase
+      );
       state.purchasePaymentSelected = updatedPurchase.payments;
       state.processing = false;
     });
@@ -294,6 +330,13 @@ export const purchaseSlice = createSlice({
       state.purchaseList = state.purchaseList.filter(
         (purchase) => purchase.id !== id_purchase
       );
+      // Update rowPurchases and rowPurchaseDetails
+      state.rowPurchases = state.rowPurchases.filter(
+        (purchase) => purchase.id_purchase !== id_purchase
+      );
+      state.rowPurchaseDetails = state.rowPurchaseDetails.filter(
+        (detail) => detail.id_purchase !== id_purchase
+      );
       state.processing = false;
     });
 
@@ -301,10 +344,11 @@ export const purchaseSlice = createSlice({
     builder.addCase(
       updatePurchaseListDetailsAction.fulfilled,
       (state, { payload }) => {
-        state.purchaseListDetails = payload;
+        // Update rowPurchaseDetails
+        state.rowPurchaseDetails = payload;
         state.purchaseList = purchaseDto.purchaseList(
-          state.purchaseList,
-          state.purchaseListDetails
+          state.rowPurchases,
+          state.rowPurchaseDetails
         );
       }
     );

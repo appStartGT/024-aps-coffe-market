@@ -18,10 +18,8 @@ const PurchaseListPage = () => {
     columns,
     searchList,
     purchaseList,
-    purchaseListDetails,
     propsModalDeletePurchase,
   } = usePurchaseList();
-
   return (
     <GeneralContainer
       title="Compras"
@@ -36,7 +34,7 @@ const PurchaseListPage = () => {
           )}
 
           <Paper sx={stylesPaper}>
-            <DataTableOverview purchaseList={purchaseListDetails} />
+            <DataTableOverview purchaseList={purchaseList} />
             <SearchBar {...propsSearchBarButton} />
             <ApsDatagrid
               rows={searchList || purchaseList}
