@@ -150,6 +150,10 @@ export const createRemateAction = createAsyncThunk(
 
     try {
       return await firestore.runTransaction(async (transaction) => {
+        const remateList = list.map((item) => ({
+          ...item,
+          isRemate: true,
+        }));
         // Create new purchase detail for remate
         const newRemateRef = firestore
           .collection(firebaseCollections.PURCHASE_DETAIL)
@@ -172,7 +176,7 @@ export const createRemateAction = createAsyncThunk(
         transaction.set(newRemateRef, newRemateData);
 
         // Update each purchase detail from data.list
-        const updatePromises = list.map(async (item) => {
+        const updatePromises = remateList.map(async (item) => {
           const detailRef = firestore
             .collection(firebaseCollections.PURCHASE_DETAIL)
             .doc(item.id_purchase_detail);
@@ -191,13 +195,20 @@ export const createRemateAction = createAsyncThunk(
           newRemateId: newRemateRef.id,
           newRemateData: {
             ...newRemateData,
+            id_purchase, //string id
             createdBy: createdBy,
             createdAt: new Date(),
           },
-          updatedList: list,
+          remateListUpdated: remateList,
         };
 
-        dispatch(updatePurchaseListDetailsAction([result.newRemateData]));
+        // Update the purchase detail list with the new remate data and the updated remate list
+        dispatch(
+          updatePurchaseListDetailsAction([
+            result.newRemateData,
+            ...result.remateListUpdated,
+          ])
+        );
 
         return result;
       });
@@ -213,7 +224,6 @@ const initialState = {
   processing: false,
   purchaseDetailList: [],
   purchaseDetailListPriceless: [],
-  allPurchaseDetails: [],
   totalItems: 5,
 };
 
@@ -231,7 +241,6 @@ export const purchaseDetailSlice = createSlice({
       state.purchaseDetailSelected = action.payload;
     },
     clearAllPurchaseDetails: (state) => {
-      state.allPurchaseDetails = [];
       state.purchaseDetailList = [];
       state.purchaseDetailListPriceless = [];
     },
@@ -251,7 +260,6 @@ export const purchaseDetailSlice = createSlice({
         const allPurchaseDetails = purchaseDetailDto.purchaseDetailList(
           payload.data
         );
-        state.allPurchaseDetails = allPurchaseDetails;
         state.purchaseDetailList = allPurchaseDetails.filter(
           (detail) => detail.isPriceless === false
         );
@@ -293,10 +301,6 @@ export const purchaseDetailSlice = createSlice({
               purchaseDetail,
             ];
           }
-          state.allPurchaseDetails = [
-            ...state.allPurchaseDetails,
-            purchaseDetail,
-          ];
         }
         state.processing = false;
       }
@@ -338,14 +342,6 @@ export const purchaseDetailSlice = createSlice({
           state.purchaseDetailList.push(updatedPurchaseDetail);
         }
 
-        // Update the record in allPurchaseDetails
-        state.allPurchaseDetails = state.allPurchaseDetails.map((detail) =>
-          detail[firebaseCollectionsKey.purchase_detail] ===
-          updatedPurchaseDetail[firebaseCollectionsKey.purchase_detail]
-            ? updatedPurchaseDetail
-            : detail
-        );
-
         state.processing = false;
       }
     );
@@ -373,11 +369,6 @@ export const purchaseDetailSlice = createSlice({
               purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
               id_purchaseDetail
           );
-        state.allPurchaseDetails = state.allPurchaseDetails.filter(
-          (purchaseDetail) =>
-            purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
-            id_purchaseDetail
-        );
         state.processing = false;
       }
     );
@@ -392,40 +383,24 @@ export const purchaseDetailSlice = createSlice({
       state.processing = false;
     });
     builder.addCase(createRemateAction.fulfilled, (state, { payload }) => {
-      const { newRemateId, newRemateData, updatedList } = payload;
+      const { newRemateId, newRemateData, remateListUpdated } = payload;
       // Add the new remate to the lists
       const newRemateDetail = purchaseDetailDto.purchaseDetailGetOne({
         ...newRemateData,
         [firebaseCollectionsKey.purchase_detail]: newRemateId,
       });
       state.purchaseDetailList.push(newRemateDetail);
-      state.allPurchaseDetails.push(newRemateDetail);
 
-      // Update the existing purchase details
-      state.allPurchaseDetails = state.allPurchaseDetails.map((detail) => {
-        const updatedDetail = updatedList.find(
-          (item) =>
-            item.id_purchase_detail ===
-            detail[firebaseCollectionsKey.purchase_detail]
+      remateListUpdated.forEach((item) => {
+        const index = state.purchaseDetailListPriceless.findIndex(
+          (detail) =>
+            detail[firebaseCollectionsKey.purchase_detail] ===
+            item.id_purchase_detail
         );
-        if (updatedDetail) {
-          return {
-            ...detail,
-            isRemate: true,
-            id_purchase_detail_remate: newRemateId,
-          };
+        if (index !== -1) {
+          state.purchaseDetailListPriceless[index] = item;
         }
-        return detail;
       });
-
-      // Update purchaseDetailList and purchaseDetailListPriceless
-      state.purchaseDetailList = state.allPurchaseDetails.filter(
-        (detail) => !detail.isPriceless
-      );
-      state.purchaseDetailListPriceless = state.allPurchaseDetails.filter(
-        (detail) => detail.isPriceless
-      );
-
       state.processing = false;
     });
   },

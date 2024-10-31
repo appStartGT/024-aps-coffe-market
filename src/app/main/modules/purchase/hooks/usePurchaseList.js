@@ -25,9 +25,9 @@ const usePurchaseList = () => {
   const purchaseListDetails = useSelector(
     (state) => state.purchase.purchaseListDetails
   );
-  const allPurchaseDetails = useSelector(
-    (state) => state.purchaseDetail.allPurchaseDetails
-  );
+  // const allPurchaseDetails = useSelector(
+  //   (state) => state.purchaseDetail.allPurchaseDetails
+  // );
   /* STATES */
   /* Search */
   const [searchList, setSearchList] = useState(null);
@@ -42,9 +42,9 @@ const usePurchaseList = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (allPurchaseDetails && allPurchaseDetails.length > 0) {
-      dispatch(clearAllPurchaseDetails());
-    }
+    // if (allPurchaseDetails && allPurchaseDetails.length > 0) {
+    dispatch(clearAllPurchaseDetails());
+    // }
   }, [dispatch]);
   const handleOpenPurchaseDetailModal = (id_purchase) => {
     dispatch(

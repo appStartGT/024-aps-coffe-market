@@ -345,7 +345,7 @@ export const purchaseSlice = createSlice({
       updatePurchaseListDetailsAction.fulfilled,
       (state, { payload }) => {
         // Update rowPurchaseDetails
-        state.rowPurchaseDetails = payload;
+        state.rowPurchaseDetails = [...payload];
         state.purchaseList = purchaseDto.purchaseList(
           state.rowPurchases,
           state.rowPurchaseDetails

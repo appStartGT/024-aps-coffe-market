@@ -24,9 +24,9 @@ const usePurchaseDetail = () => {
   const { id_purchase } = useParams();
 
   useEffect(() => {
-    if (Array.isArray(purchaseList) && !purchaseList.length) {
-      dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
-    }
+    // if (Array.isArray(purchaseList) && !purchaseList.length) {
+    dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
+    // }
   }, [dispatch]);
 
   const onClose = () => {

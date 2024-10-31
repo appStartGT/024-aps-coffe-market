@@ -157,12 +157,12 @@ const DataTableOverview = ({ purchaseList }) => {
           color={theme.palette.warning.contrastText}
           onClick={toggleUnit}
         />
-        <DataItem
+        {/* <DataItem
           value={`Q${statistics.totalDebt}`}
           label="Total Deuda"
           backgroundColor={theme.palette.balance.background}
           color={theme.palette.balance.text}
-        />
+        /> */}
         <DataItem
           value={`Q${statistics.averagePrice}`}
           label="Precio Promedio"

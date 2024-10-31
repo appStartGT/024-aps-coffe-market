@@ -207,13 +207,22 @@ const usePurchaseDetail = () => {
       selectionModel.includes(item.id)
     );
 
+    const handleComplete = () => {
+      setSelectionModel([]);
+    };
+
     dispatch(
       setApsGlobalModalPropsAction({
         open: true,
         maxWidth: 'sm',
         title: 'Resumen del Remate',
         description: 'Detalles de los items seleccionados para remate',
-        content: <RemateDetailsForm selectedItems={selectedItems} />,
+        content: (
+          <RemateDetailsForm
+            selectedItems={selectedItems}
+            handleComplete={handleComplete}
+          />
+        ),
         titleOk: 'Confirmar Remate',
         okProps: {
           color: 'primary',

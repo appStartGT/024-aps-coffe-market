@@ -7,7 +7,7 @@ import { createRemateAction } from '../../../../../../store/modules/purchaseDeta
 import ApsButton from '@components/ApsButton';
 import { useAuth } from '@hooks';
 
-const RemateDetailsForm = ({ selectedItems }) => {
+const RemateDetailsForm = ({ selectedItems, handleComplete }) => {
   const dispatch = useDispatch();
   const purchaseSelected = useSelector(
     (state) => state.purchase.purchaseSelected
@@ -95,7 +95,6 @@ const RemateDetailsForm = ({ selectedItems }) => {
   const handleCancel = () => {
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
-  console.log(auth.user);
 
   const handleConfirm = () => {
     dispatch(
@@ -108,7 +107,14 @@ const RemateDetailsForm = ({ selectedItems }) => {
         createdBy: auth.user.id_user,
         quantity: totalLibras,
       })
-    );
+    )
+      .unwrap()
+      .then(() => {
+        handleComplete && handleComplete();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
 
