@@ -20,6 +20,7 @@ import {
 
 import { useAuth } from '@hooks';
 import MainThemeDrawer from './MainThemeDrawer';
+import DailyBudget from './DailyBudget';
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   backgroundColor: theme.palette.secondary['50'],
@@ -88,10 +89,11 @@ const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
           </IconButton>
         </Box>
         <Box>
-          <MainThemeDrawer
+          {/* <MainThemeDrawer
             open={openDrawerTheme}
             setOpen={setOpenDrawerTheme}
-          />
+          /> */}
+          <DailyBudget />
           <Tooltip title="Account settings">
             <IconButton
               color="primary"
