@@ -183,7 +183,7 @@ const CollapsibleSection = ({
       <List component="div" disablePadding>
         {items?.map((item) => (
           <BudgetListItem
-            key={item.id}
+            key={item.id_budget_item}
             item={item}
             onEdit={onEdit}
             onDelete={onDelete}
@@ -338,7 +338,7 @@ const BudgetContent = () => {
       />
 
       <CollapsibleSection
-        title="Gastos"
+        title="Egresos"
         total={expenseTotal}
         isOpen={openExpense}
         onToggle={() => setOpenExpense(!openExpense)}

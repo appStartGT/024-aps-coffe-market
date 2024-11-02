@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -19,7 +19,7 @@ import {
 } from '@mui/icons-material';
 
 import { useAuth } from '@hooks';
-import MainThemeDrawer from './MainThemeDrawer';
+// import MainThemeDrawer from './MainThemeDrawer';
 import DailyBudget from './DailyBudget';
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
@@ -32,7 +32,7 @@ const AppBar = styled(MuiAppBar)(({ theme }) => ({
 
 const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
   const auth = useAuth();
-  const [openDrawerTheme, setOpenDrawerTheme] = useState(false);
+  // const [openDrawerTheme, setOpenDrawerTheme] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 

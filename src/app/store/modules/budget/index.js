@@ -50,7 +50,7 @@ export const createBudgetAction = createAsyncThunk(
         // Create the budget items if exists
         if (budgetItem) {
           const newItemRef = budgetItemRef.doc();
-          budgetItem.id_budget = newBudgetRef.id;
+          budgetItem.id_budget = newBudgetRef;
           transaction.set(newItemRef, {
             ...budgetItem,
             id_budget_item: newItemRef.id,
@@ -69,7 +69,7 @@ export const createBudgetAction = createAsyncThunk(
       let budgetItems = [];
       if (budgetItem) {
         const itemsSnapshot = await budgetItemRef
-          .where('id_budget', '==', budgetDoc.id)
+          .where('id_budget', '==', budgetDoc)
           .get();
         budgetItems = itemsSnapshot.docs.map((doc) => ({
           ...doc.data(),
@@ -206,7 +206,7 @@ export const budgetSlice = createSlice({
       .addCase(createBudgetAction.fulfilled, (state, action) => {
         state.processing = false;
         const { budget, budget_items } = action.payload;
-        state.budget = budget;
+         state.budget = budget;
         state.budget_items = budget_items;
       })
       .addCase(createBudgetAction.rejected, (state, action) => {
