@@ -35,6 +35,7 @@ import {
   deleteBudgetItemAction,
   updateBudgetItemAction,
 } from '../../../../store/modules/budget';
+import { useAuth } from '@hooks';
 
 // New Budget Dialog Component
 const NewBudgetDialog = ({ open, onClose, onConfirm, previousBalance }) => (
@@ -202,7 +203,7 @@ const BudgetContent = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [openNewBudgetDialog, setOpenNewBudgetDialog] = useState(false);
   const [previousBalance, setPreviousBalance] = useState(0);
-
+  const auth = useAuth();
   // Get budget data from Redux store
   const budget = useSelector((state) => state.budget.budget);
   const budget_items = useSelector((state) => state.budget.budget_items);
@@ -237,11 +238,14 @@ const BudgetContent = () => {
   };
 
   const handleDeleteItem = (itemToDelete, isBudget) => {
-    dispatch(deleteBudgetItemAction({ id: itemToDelete.id, isBudget })).catch(
-      (error) => {
-        console.error('Error deleting budget item:', error);
-      }
-    );
+    dispatch(
+      deleteBudgetItemAction({
+        id_budget_item: itemToDelete.id_budget_item,
+        isBudget,
+      })
+    ).catch((error) => {
+      console.error('Error deleting budget item:', error);
+    });
   };
 
   const handleSaveNewItem = () => {
@@ -251,7 +255,12 @@ const BudgetContent = () => {
     };
 
     if (editingItem) {
-      dispatch(updateBudgetItemAction(newItemWithId))
+      dispatch(
+        updateBudgetItemAction({
+          ...newItemWithId,
+          id_budget_item: editingItem.id,
+        })
+      )
         .then(() => {
           setOpenNewItemDialog(false);
           setNewItem({ rubro: '', amount: '' });
@@ -287,13 +296,17 @@ const BudgetContent = () => {
   };
 
   const handleConfirmNewBudget = () => {
-    dispatch(createBudgetAction({ initialBalance: previousBalance }))
-      .then((res) => {
+    dispatch(
+      createBudgetAction({
+        initialBalance: previousBalance,
+        createdBy: auth.user?.id_user || '',
+      })
+    )
+      .then(() => {
         setOpenNewBudgetDialog(false);
       })
       .catch((error) => {
         console.error('Error creating new budget:', error);
-        // Optionally add error handling UI
       });
   };
 

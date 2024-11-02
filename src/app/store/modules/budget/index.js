@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import {
+  firestore,
   getAllDocuments,
   insertDocument,
   updateRecordBy,
@@ -13,35 +14,76 @@ export const createBudgetAction = createAsyncThunk(
     const data = {
       ...item,
       isClosed: false,
+      createdAt: new Date(),
+      deleted: false,
+      isActive: true,
     };
     let budgetItem = null;
     if (item.initialBalance) {
       budgetItem = {
         rubro: 'Saldo Inicial',
         amount: item.initialBalance,
+        createdAt: new Date(),
+        deleted: false,
+        isActive: true,
       };
     }
     try {
-      const budgetResponse = await insertDocument({
-        collectionName: firebaseCollections.BUDGET,
-        data,
-      });
-      let budgetItemResponse = null;
+      const budgetRef = firestore.collection(firebaseCollections.BUDGET);
+      const budgetItemRef = firestore.collection(
+        firebaseCollections.BUDGET_ITEM
+      );
+      let budgetDoc = null;
 
-      if (budgetItem) {
-        budgetItem.id_budget = budgetResponse.id_budget;
-        budgetItemResponse = await insertDocument({
-          collectionName: firebaseCollections.BUDGET_ITEM,
-          data: budgetItem,
-          excludeReferences: ['id_budget'], //to avoid circular reference
+      await firestore.runTransaction(async (transaction) => {
+        // Update all budgets to deleted:true
+        const budgets = await budgetRef.get();
+        budgets.docs.forEach((doc) => {
+          transaction.update(doc.ref, { deleted: true, isClosed: true });
         });
+
+        // Create a new budget
+        const newBudgetRef = budgetRef.doc();
+        transaction.set(newBudgetRef, { ...data, id_budget: newBudgetRef.id });
+        budgetDoc = newBudgetRef;
+
+        // Create the budget items if exists
+        if (budgetItem) {
+          const newItemRef = budgetItemRef.doc();
+          budgetItem.id_budget = newBudgetRef.id;
+          transaction.set(newItemRef, {
+            ...budgetItem,
+            id_budget_item: newItemRef.id,
+          });
+        }
+      });
+
+      // Fetch the newly created budget
+      const budgetSnapshot = await budgetDoc.get();
+      const budgetData = {
+        ...budgetSnapshot.data(),
+        id_budget: budgetDoc.id,
+      };
+
+      // Fetch budget items if they exist
+      let budgetItems = [];
+      if (budgetItem) {
+        const itemsSnapshot = await budgetItemRef
+          .where('id_budget', '==', budgetDoc.id)
+          .get();
+        budgetItems = itemsSnapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id_budget_item: doc.id,
+        }));
       }
+
       return {
-        budget: budgetResponse,
-        budget_items: budgetItemResponse?.data || [],
+        budget: budgetData,
+        budget_items: budgetItems,
       };
     } catch (error) {
-      return rejectWithValue(error);
+      console.error('Create Budget Error:', error);
+      return rejectWithValue(error.message || 'Failed to create budget');
     }
   }
 );
@@ -111,14 +153,14 @@ export const addBudgetItemAction = createAsyncThunk(
 
 export const updateBudgetItemAction = createAsyncThunk(
   'budget/updateItem',
-  async ({ id_budget_item, item }, { rejectWithValue }) => {
+  async ({ id_budget_item, ...data }, { rejectWithValue }) => {
     try {
       await updateRecordBy({
         collectionName: firebaseCollections.BUDGET_ITEM,
         docId: id_budget_item,
-        data: item,
+        data,
       });
-      return { id_budget_item, ...item };
+      return { id_budget_item, ...data };
     } catch (error) {
       return rejectWithValue(error);
     }
@@ -127,7 +169,7 @@ export const updateBudgetItemAction = createAsyncThunk(
 
 export const deleteBudgetItemAction = createAsyncThunk(
   'budget/deleteItem',
-  async (id_budget_item, { rejectWithValue }) => {
+  async ({ id_budget_item }, { rejectWithValue }) => {
     try {
       await deleteRecordById({
         collectionName: firebaseCollections.BUDGET_ITEM,
