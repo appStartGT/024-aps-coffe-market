@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   List,
   ListItemButton,
@@ -26,6 +26,15 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
+import { useDispatch, useSelector } from 'react-redux';
+
+import {
+  createBudgetAction,
+  getBudgetAction,
+  addBudgetItemAction,
+  deleteBudgetItemAction,
+  updateBudgetItemAction,
+} from '../../../../store/modules/budget';
 
 // New Budget Dialog Component
 const NewBudgetDialog = ({ open, onClose, onConfirm, previousBalance }) => (
@@ -136,6 +145,7 @@ const CollapsibleSection = ({
   showAddButton,
   onAdd,
   backgroundColor,
+  id_budget,
 }) => (
   <Paper
     elevation={2}
@@ -151,12 +161,12 @@ const CollapsibleSection = ({
     <ListItemButton onClick={onToggle}>
       <ListItemText
         primary={<Typography variant="h6">{title}</Typography>}
-        secondary={`Q ${total.toLocaleString()}`}
+        secondary={`Q ${total?.toLocaleString()}`}
       />
       {isOpen ? <ExpandLess /> : <ExpandMore />}
     </ListItemButton>
     <Collapse in={isOpen} timeout="auto" unmountOnExit>
-      {showAddButton && (
+      {showAddButton && id_budget && (
         <Box sx={{ p: 1, display: 'flex', justifyContent: 'start' }}>
           <Button
             variant="outlined"
@@ -170,7 +180,7 @@ const CollapsibleSection = ({
         </Box>
       )}
       <List component="div" disablePadding>
-        {items.map((item) => (
+        {items?.map((item) => (
           <BudgetListItem
             key={item.id}
             item={item}
@@ -185,6 +195,7 @@ const CollapsibleSection = ({
 
 // Main Budget Content Component
 const BudgetContent = () => {
+  const dispatch = useDispatch();
   const [openBudget, setOpenBudget] = useState(false);
   const [openExpense, setOpenExpense] = useState(false);
   const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
@@ -192,22 +203,21 @@ const BudgetContent = () => {
   const [openNewBudgetDialog, setOpenNewBudgetDialog] = useState(false);
   const [previousBalance, setPreviousBalance] = useState(0);
 
+  // Get budget data from Redux store
+  const budget = useSelector((state) => state.budget.budget);
+  const budget_items = useSelector((state) => state.budget.budget_items);
+  const expense_items = useSelector((state) => state.budget.expense_items);
+  // Replace mock data with Redux data
+  useEffect(() => {
+    dispatch(getBudgetAction());
+  }, [dispatch]);
+
   // Mock data - replace with your actual data
   const rubros = [
     { id: 1, name: 'Materia Prima' },
     { id: 2, name: 'Mano de Obra' },
     { id: 3, name: 'Gastos Operativos' },
   ];
-
-  const [budgetItems, setBudgetItems] = useState([
-    { id: 1, rubro: 'Materia Prima', amount: 5000 },
-    { id: 2, rubro: 'Mano de Obra', amount: 3000 },
-  ]);
-
-  const [expenseItems, setExpenseItems] = useState([
-    { id: 1, rubro: 'Materia Prima', amount: 3500 },
-    { id: 2, rubro: 'Gastos Operativos', amount: 1500 },
-  ]);
 
   const [newItem, setNewItem] = useState({
     rubro: '',
@@ -227,68 +237,64 @@ const BudgetContent = () => {
   };
 
   const handleDeleteItem = (itemToDelete, isBudget) => {
-    if (isBudget) {
-      setBudgetItems(budgetItems.filter((item) => item.id !== itemToDelete.id));
-    } else {
-      setExpenseItems(
-        expenseItems.filter((item) => item.id !== itemToDelete.id)
-      );
-    }
+    dispatch(deleteBudgetItemAction({ id: itemToDelete.id, isBudget })).catch(
+      (error) => {
+        console.error('Error deleting budget item:', error);
+      }
+    );
   };
 
   const handleSaveNewItem = () => {
     const newItemWithId = {
-      id: editingItem?.id || Date.now(), // Use existing ID or create new one
+      id_budget: budget?.id_budget,
       ...newItem,
     };
 
     if (editingItem) {
-      // Update existing item
-      setBudgetItems(
-        budgetItems.map((item) =>
-          item.id === editingItem.id ? newItemWithId : item
-        )
-      );
+      dispatch(updateBudgetItemAction(newItemWithId))
+        .then(() => {
+          setOpenNewItemDialog(false);
+          setNewItem({ rubro: '', amount: '' });
+          setEditingItem(null);
+        })
+        .catch((error) => {
+          console.error('Error updating budget item:', error);
+        });
     } else {
-      // Add new item to budget
-      setBudgetItems([...budgetItems, newItemWithId]);
+      dispatch(addBudgetItemAction(newItemWithId))
+        .then(() => {
+          setOpenNewItemDialog(false);
+          setNewItem({ rubro: '', amount: '' });
+        })
+        .catch((error) => {
+          console.error('Error adding budget item:', error);
+        });
     }
-
-    setOpenNewItemDialog(false);
-    setNewItem({ rubro: '', amount: '' });
-    setEditingItem(null);
   };
 
   const calculateTotal = (items) => {
-    return items.reduce((sum, item) => sum + item.amount, 0);
+    return items?.reduce((sum, item) => sum + item.amount, 0) || 0;
   };
 
-  const budgetTotal = calculateTotal(budgetItems);
-  const expenseTotal = calculateTotal(expenseItems);
+  const budgetTotal = calculateTotal(budget_items || []);
+  const expenseTotal = calculateTotal(expense_items || []);
   const balance = budgetTotal - expenseTotal;
 
   const handleNewBudget = () => {
-    // Calculate current balance before resetting
     const currentBalance = budgetTotal - expenseTotal;
     setPreviousBalance(currentBalance);
     setOpenNewBudgetDialog(true);
   };
 
   const handleConfirmNewBudget = () => {
-    // If there's a positive balance, add it as first item in new budget
-    const newBudgetItems = [];
-    if (previousBalance > 0) {
-      newBudgetItems.push({
-        id: Date.now(),
-        rubro: 'Balance Anterior',
-        amount: previousBalance,
+    dispatch(createBudgetAction({ initialBalance: previousBalance }))
+      .then((res) => {
+        setOpenNewBudgetDialog(false);
+      })
+      .catch((error) => {
+        console.error('Error creating new budget:', error);
+        // Optionally add error handling UI
       });
-    }
-
-    // Reset budget and expenses
-    setBudgetItems(newBudgetItems);
-    setExpenseItems([]);
-    setOpenNewBudgetDialog(false);
   };
 
   return (
@@ -309,12 +315,13 @@ const BudgetContent = () => {
         total={budgetTotal}
         isOpen={openBudget}
         onToggle={() => setOpenBudget(!openBudget)}
-        items={budgetItems}
+        items={budget_items || []}
         onEdit={handleEditItem}
         onDelete={(item) => handleDeleteItem(item, true)}
         showAddButton={true}
         onAdd={handleNewItem}
         backgroundColor="rgba(25, 118, 210, 0.08)"
+        id_budget={budget?.id_budget}
       />
 
       <CollapsibleSection
@@ -322,11 +329,12 @@ const BudgetContent = () => {
         total={expenseTotal}
         isOpen={openExpense}
         onToggle={() => setOpenExpense(!openExpense)}
-        items={expenseItems}
+        items={expense_items || []}
         onEdit={handleEditItem}
         onDelete={(item) => handleDeleteItem(item, false)}
         showAddButton={false}
         backgroundColor="rgba(211, 47, 47, 0.08)"
+        id_budget={budget?.id_budget}
       />
 
       <Paper

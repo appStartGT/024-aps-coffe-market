@@ -12,7 +12,7 @@ import person from './modules/person';
 import purchase from './modules/purchase';
 import customer from './modules/customer';
 import purchaseDetail from './modules/purchaseDetail';
-
+import budget from './modules/budget';
 export const store = configureStore({
   reducer: {
     administrator,
@@ -28,6 +28,7 @@ export const store = configureStore({
     purchase,
     customer,
     purchaseDetail,
+    budget,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

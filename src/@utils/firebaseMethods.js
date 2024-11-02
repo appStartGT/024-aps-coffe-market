@@ -19,7 +19,12 @@ export const defaultFilter = [
   { field: 'isActive', condition: '==', value: true },
 ];
 
-const insertDocument = async ({ collectionName, data, showAlert = true }) => {
+const insertDocument = async ({
+  collectionName,
+  data,
+  excludeReferences = [],
+  showAlert = true,
+}) => {
   try {
     const userData = sessionStorage.getItemWithDecryption(tokens.user);
     const createdBy = userData?.id_user || 99999;
@@ -52,7 +57,11 @@ const insertDocument = async ({ collectionName, data, showAlert = true }) => {
       toastAlert.showToast();
     }
 
-    return await getDocumentById({ collectionName, docId: newId });
+    return await getDocumentById({
+      collectionName,
+      docId: newId,
+      excludeReferences,
+    });
   } catch (error) {
     console.error('Error inserting data:', error);
     if (showAlert) {
@@ -69,6 +78,7 @@ const getDocumentById = async ({
   collectionName,
   docId,
   includeReferences = true,
+  excludeReferences = [],
 }) => {
   try {
     const docRef = firestore.collection(collectionName).doc(docId);
@@ -85,7 +95,9 @@ const getDocumentById = async ({
     if (includeReferences) {
       const referenceFields = Object.entries(data).filter(
         ([key, _]) =>
-          key.startsWith('id_') && key !== `id_${collectionName.toLowerCase()}`
+          key.startsWith('id_') &&
+          key !== `id_${collectionName.toLowerCase()}` &&
+          !excludeReferences.includes(key)
       );
 
       const safeReferenceFields = referenceFields.filter(
@@ -129,7 +141,11 @@ const getDocumentById = async ({
         result[key] &&
         typeof result[key] === 'object'
       ) {
-        result[key] = result[key].id;
+        if (excludeReferences.includes(key)) {
+          result[key] = result[key].id;
+        } else {
+          result[key] = result[key].id;
+        }
       }
     });
     return result;
