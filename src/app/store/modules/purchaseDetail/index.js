@@ -52,8 +52,10 @@ export const purchaseDetailListAction = createAsyncThunk(
 
 export const purchaseDetailCreateAction = createAsyncThunk(
   'purchaseDetail/create',
-  async (data, { rejectWithValue, dispatch }) => {
-    let body = cleanModel(data);
+  async (data, { rejectWithValue, dispatch, getState }) => {
+    const state = getState();
+    const id_budget = state.budget.budget.id_budget;
+    let body = cleanModel({ ...data, id_budget });
     body.isPriceless = Boolean(data.isPriceless);
     const purchaseDetailData = {
       key: firebaseCollectionsKey.purchase_detail,

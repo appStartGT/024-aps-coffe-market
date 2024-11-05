@@ -12,21 +12,30 @@ import {
   insertDocument,
 } from '@utils/firebaseMethods';
 import { customerCreateAction, customerUpdateAction } from '../customer';
+import { setOldBudget } from '../budget';
 
 export const purchaseListAction = createAsyncThunk(
   'purchase/list',
-  async (_, { rejectWithValue, getState }) => {
+  async ({ id_budget }, { rejectWithValue, getState, dispatch }) => {
     try {
       const state = getState();
+      const old_budget = state.budget.old_budget;
       let { rowPurchases, rowPurchaseDetails } = state.purchase;
-
-      if (rowPurchases.length > 0 && rowPurchaseDetails.length > 0) {
+      const isNewBudget = Boolean(
+        old_budget && old_budget?.id_budget !== id_budget
+      );
+      if (
+        !isNewBudget &&
+        rowPurchases.length > 0 &&
+        rowPurchaseDetails.length > 0
+      ) {
         return { isUpdateNeeded: false, rowPurchases, rowPurchaseDetails };
       }
 
       const purchases = await getAllDocuments({
         collectionName: firebaseCollections.PURCHASE,
       });
+
       rowPurchases = purchases.data;
       rowPurchaseDetails = await Promise.all(
         rowPurchases.map(async (purchase) => {
@@ -39,6 +48,12 @@ export const purchaseListAction = createAsyncThunk(
                 value: purchase.id_purchase,
                 reference: true,
               },
+              {
+                field: firebaseCollectionsKey.budget,
+                condition: '==',
+                value: id_budget,
+                reference: true,
+              },
             ],
             excludeReferences: [
               firebaseCollectionsKey.purchase,
@@ -48,7 +63,9 @@ export const purchaseListAction = createAsyncThunk(
           return purchaseDetails.data;
         })
       );
-
+      // Clear old budget when a new budget is created
+      if (isNewBudget) dispatch(setOldBudget(null));
+      // Flatten the array of arrays
       rowPurchaseDetails = rowPurchaseDetails.flat();
 
       return {
@@ -64,9 +81,11 @@ export const purchaseListAction = createAsyncThunk(
 
 export const purchaseCreateAction = createAsyncThunk(
   'purchase/create',
-  async (data, { rejectWithValue, dispatch }) => {
+  async (data, { rejectWithValue, dispatch, getState }) => {
     dispatch(setLoadingMainViewAction(true));
-    let body = cleanModel(data);
+    const state = getState();
+    const id_budget = state.budget.budget.id_budget;
+    let body = cleanModel({ ...data });
 
     // Create customer first
     const customerData = {
@@ -86,6 +105,7 @@ export const purchaseCreateAction = createAsyncThunk(
 
     const purchaseData = {
       id_customer,
+      id_budget,
     };
 
     return await insertDocument({

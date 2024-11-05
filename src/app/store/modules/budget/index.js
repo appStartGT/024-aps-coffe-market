@@ -10,7 +10,9 @@ import { firebaseCollections, firebaseCollectionsKey } from '@utils/constants';
 
 export const createBudgetAction = createAsyncThunk(
   'budget/createBudget',
-  async (item, { rejectWithValue }) => {
+  async (item, { rejectWithValue, getState }) => {
+    const state = getState();
+    const old_budget = state.budget.budget?.id_budget;
     const data = {
       ...item,
       isClosed: false,
@@ -80,6 +82,7 @@ export const createBudgetAction = createAsyncThunk(
       return {
         budget: budgetData,
         budget_items: budgetItems,
+        old_budget,
       };
     } catch (error) {
       console.error('Create Budget Error:', error);
@@ -187,6 +190,7 @@ const initialState = {
   budget_items: [],
   processing: false,
   error: null,
+  old_budget: null,
 };
 
 export const budgetSlice = createSlice({
@@ -196,6 +200,10 @@ export const budgetSlice = createSlice({
     clearBudget: (state) => {
       state.budget = null;
       state.budget_items = [];
+      state.old_budget = null;
+    },
+    setOldBudget: (state, action) => {
+      state.old_budget = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -206,8 +214,9 @@ export const budgetSlice = createSlice({
       .addCase(createBudgetAction.fulfilled, (state, action) => {
         state.processing = false;
         const { budget, budget_items } = action.payload;
-         state.budget = budget;
+        state.budget = budget;
         state.budget_items = budget_items;
+        state.old_budget = action.payload.old_budget;
       })
       .addCase(createBudgetAction.rejected, (state, action) => {
         state.processing = false;
@@ -245,6 +254,6 @@ export const budgetSlice = createSlice({
   },
 });
 
-export const { clearBudget } = budgetSlice.actions;
+export const { clearBudget, setOldBudget } = budgetSlice.actions;
 
 export default budgetSlice.reducer;

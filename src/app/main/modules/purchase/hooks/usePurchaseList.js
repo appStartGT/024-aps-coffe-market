@@ -8,6 +8,7 @@ import {
   purchaseListAction,
   purchaseDeleteAction,
 } from '../../../../store/modules/purchase';
+import { getBudgetAction } from '../../../../store/modules/budget';
 import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetail';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
@@ -25,11 +26,8 @@ const usePurchaseList = () => {
   const purchaseListDetails = useSelector(
     (state) => state.purchase.purchaseListDetails
   );
-  // const allPurchaseDetails = useSelector(
-  //   (state) => state.purchaseDetail.allPurchaseDetails
-  // );
-  /* STATES */
-  /* Search */
+  const id_budget = useSelector((state) => state.budget.budget?.id_budget);
+  /* States */
   const [searchList, setSearchList] = useState(null);
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [purchaseToDelete, setPurchaseToDelete] = useState({});
@@ -38,7 +36,12 @@ const usePurchaseList = () => {
   /* use Effects */
 
   useEffect(() => {
-    dispatch(purchaseListAction());
+    id_budget && dispatch(purchaseListAction({ id_budget }));
+  }, [dispatch, id_budget]);
+
+  /* get budget */
+  useEffect(() => {
+    dispatch(getBudgetAction());
   }, [dispatch]);
 
   useEffect(() => {

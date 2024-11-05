@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   List,
   ListItemButton,
@@ -30,7 +30,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import {
   createBudgetAction,
-  getBudgetAction,
   addBudgetItemAction,
   deleteBudgetItemAction,
   updateBudgetItemAction,
@@ -208,10 +207,10 @@ const BudgetContent = () => {
   const budget = useSelector((state) => state.budget.budget);
   const budget_items = useSelector((state) => state.budget.budget_items);
   const expense_items = useSelector((state) => state.budget.expense_items);
-  // Replace mock data with Redux data
-  useEffect(() => {
-    dispatch(getBudgetAction());
-  }, [dispatch]);
+  // // Replace mock data with Redux data
+  // useEffect(() => {
+  //   dispatch(getBudgetAction());
+  // }, [dispatch]);
 
   // Mock data - replace with your actual data
   const rubros = [
