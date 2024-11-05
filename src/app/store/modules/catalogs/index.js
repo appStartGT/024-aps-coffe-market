@@ -46,12 +46,24 @@ export const paidMethodCatalogAction = createAsyncThunk(
   }
 );
 
+export const catExpenseTypeCatalogAction = createAsyncThunk(
+  'catalogs/cat-expense-type',
+  async (_, { rejectWithValue }) => {
+    return await getAllDocuments({
+      collectionName: firebaseCollections.CAT_EXPENSE_TYPE,
+    })
+      .then((res) => res)
+      .catch((res) => rejectWithValue(res));
+  }
+);
+
 const initialState = {
   processing: false,
   roles: [],
   users: [],
   person: [],
   paidMethod: [],
+  catExpenseType: [],
 };
 
 export const catalogsSlice = createSlice({
@@ -125,6 +137,29 @@ export const catalogsSlice = createSlice({
       }
       state.processing = false;
     });
+
+    builder.addCase(catExpenseTypeCatalogAction.pending, (state) => {
+      state.processing = true;
+    });
+    builder.addCase(
+      catExpenseTypeCatalogAction.rejected,
+      (state, { payload }) => {
+        state.error = payload.data;
+        state.processing = false;
+      }
+    );
+
+    builder.addCase(
+      catExpenseTypeCatalogAction.fulfilled,
+      (state, { payload }) => {
+        if (payload?.data) {
+          state.catExpenseType = catalogsDto.list({
+            data: payload.data,
+            valueKey: 'id_cat_expense_type',
+          });
+        }
+      }
+    );
   },
 });
 

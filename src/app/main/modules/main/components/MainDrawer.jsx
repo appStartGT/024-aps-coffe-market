@@ -72,6 +72,12 @@ const MainDrawer = ({ openDrawer, setOpenDrawer }) => {
         icon: <MoveToInbox sx={styledIcon} />,
         name: 'Compras',
       },
+      {
+        id: 2,
+        to: 'expense',
+        icon: <MoveToInbox sx={styledIcon} />,
+        name: 'Egresos Varios',
+      },
     ];
     setRoutes(userRoutes);
   }, [auth.user]);

@@ -113,9 +113,11 @@ export const firebaseCollections = {
   ROLE: 'role',
   PERSON_TYPE: 'person_type',
   CAT_PAYMENT_METHOD: 'cat_payment_method',
+  CAT_EXPENSE_TYPE: 'cat_expense_type',
   PERSON: 'person',
   BUDGET: 'budget',
   BUDGET_ITEM: 'budget_item',
+  EXPENSE: 'expense',
 };
 
 export const firebaseCollectionsKey = {
@@ -133,6 +135,8 @@ export const firebaseCollectionsKey = {
   person: 'id_person',
   budget: 'id_budget',
   budget_item: 'id_budget_item',
+  expense: 'id_expense',
+  cat_expense_type: 'id_cat_expense_type',
 };
 
 export const alertType = {
