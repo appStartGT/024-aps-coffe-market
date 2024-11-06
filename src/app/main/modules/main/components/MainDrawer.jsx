@@ -7,7 +7,12 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
-import { Person as PersonIcon, MoveToInbox } from '@mui/icons-material';
+import {
+  Person as PersonIcon,
+  MonetizationOn,
+  ReceiptLong,
+  PointOfSale,
+} from '@mui/icons-material';
 import ListNav from './ListNav';
 import { useAuth } from '@hooks';
 import MainDrawerToolbar from './MainDrawerToolbar';
@@ -66,17 +71,25 @@ const MainDrawer = ({ openDrawer, setOpenDrawer }) => {
 
   useEffect(() => {
     const userRoutes = [
+      // Start of Selection
+      // Start of Selection
       {
         id: 1,
         to: 'purchase',
-        icon: <MoveToInbox sx={styledIcon} />,
-        name: 'Compras',
+        icon: <ReceiptLong sx={styledIcon} />,
+        name: 'Compra',
       },
       {
         id: 2,
         to: 'expense',
-        icon: <MoveToInbox sx={styledIcon} />,
+        icon: <MonetizationOn sx={styledIcon} />,
         name: 'Egresos Varios',
+      },
+      {
+        id: 3,
+        to: 'sale',
+        icon: <PointOfSale sx={styledIcon} />,
+        name: 'Venta',
       },
     ];
     setRoutes(userRoutes);
