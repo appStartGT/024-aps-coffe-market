@@ -20,12 +20,17 @@ const DataTableOverview = ({ purchaseList }) => {
 
   useEffect(() => {
     if (purchaseList && purchaseList.length > 0) {
-      const totalPurchases = purchaseList.length;
+      console.log({ purchaseList });
       const totalQuantity = purchaseList.reduce(
-        (sum, purchase) =>
-          sum + (purchase.isPriceless ? 0 : Number(purchase.totalLbQuantity)),
+        (sum, purchase) => sum + Number(purchase.totalLbQuantity),
         0
       );
+
+      const totalLbPriced = purchaseList.reduce(
+        (sum, purchase) => sum + Number(+purchase.totalLbPriced),
+        0
+      );
+
       const totalLbPriceless = purchaseList.reduce(
         (sum, purchase) => sum + purchase.totalLbPriceless,
         0
@@ -71,13 +76,8 @@ const DataTableOverview = ({ purchaseList }) => {
           return sum;
         }, 0)
       );
-      const totalLbPriced = purchaseList.reduce(
-        (sum, purchase) => sum + Number(+purchase.totalLbPriced),
-        0
-      );
 
       setStatistics({
-        totalPurchases: totalPurchases,
         totalQuantity: formatNumber(totalQuantity),
         totalLbPriceless: formatNumber(totalLbPriceless),
         averagePrice: formatNumber(averagePrice),
@@ -89,7 +89,6 @@ const DataTableOverview = ({ purchaseList }) => {
       });
     } else {
       setStatistics({
-        totalPurchases: 0,
         totalQuantity: '0.00',
         totalLbPriceless: '0.00',
         averagePrice: '0.00',

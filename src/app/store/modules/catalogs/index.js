@@ -5,7 +5,11 @@ import { firebaseCollections, firebaseCollectionsKey } from '@utils/constants';
 
 export const rolesCatalogAction = createAsyncThunk(
   'catalogs/roles',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.catalogs.roles.length > 0) {
+      return { data: state.catalogs.roles };
+    }
     return await getAllDocuments({
       collectionName: 'role',
       filterBy: [{ field: 'isActive', condition: '==', value: true }],
@@ -17,7 +21,11 @@ export const rolesCatalogAction = createAsyncThunk(
 
 export const personCatalogAction = createAsyncThunk(
   'catalogs/person',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.catalogs.person.length > 0) {
+      return { data: state.catalogs.person };
+    }
     return await getAllDocuments({
       collectionName: firebaseCollections.PERSON,
       nonReferenceField: firebaseCollectionsKey.person,
@@ -31,13 +39,20 @@ export const userCatalogAction = createAsyncThunk(
   'catalogs/user',
   async (_, { getState }) => {
     const state = getState();
+    if (state.catalogs.users.length > 0) {
+      return state.catalogs.users;
+    }
     return state.user.userList;
   }
 );
 
 export const paidMethodCatalogAction = createAsyncThunk(
   'catalogs/paid-method',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.catalogs.paidMethod.length > 0) {
+      return { data: state.catalogs.paidMethod };
+    }
     return await getAllDocuments({
       collectionName: firebaseCollections.CAT_PAYMENT_METHOD,
     })
@@ -48,9 +63,28 @@ export const paidMethodCatalogAction = createAsyncThunk(
 
 export const catExpenseTypeCatalogAction = createAsyncThunk(
   'catalogs/cat-expense-type',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.catalogs.catExpenseType.length > 0) {
+      return { data: state.catalogs.catExpenseType };
+    }
     return await getAllDocuments({
       collectionName: firebaseCollections.CAT_EXPENSE_TYPE,
+    })
+      .then((res) => res)
+      .catch((res) => rejectWithValue(res));
+  }
+);
+
+export const catTruckloadLicensePlateCatalogAction = createAsyncThunk(
+  'catalogs/cat-truckload-license-plate',
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.catalogs.catTruckloadLicensePlate.length > 0) {
+      return { data: state.catalogs.catTruckloadLicensePlate };
+    }
+    return await getAllDocuments({
+      collectionName: firebaseCollections.CAT_TRUCKLOAD_LICENSE_PLATE,
     })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
@@ -64,6 +98,7 @@ const initialState = {
   person: [],
   paidMethod: [],
   catExpenseType: [],
+  catTruckloadLicensePlate: [],
 };
 
 export const catalogsSlice = createSlice({
@@ -158,6 +193,29 @@ export const catalogsSlice = createSlice({
             valueKey: 'id_cat_expense_type',
           });
         }
+      }
+    );
+
+    builder.addCase(catTruckloadLicensePlateCatalogAction.pending, (state) => {
+      state.processing = true;
+    });
+    builder.addCase(
+      catTruckloadLicensePlateCatalogAction.rejected,
+      (state, { payload }) => {
+        state.error = payload.data;
+        state.processing = false;
+      }
+    );
+    builder.addCase(
+      catTruckloadLicensePlateCatalogAction.fulfilled,
+      (state, { payload }) => {
+        if (payload?.data) {
+          state.catTruckloadLicensePlate = catalogsDto.list({
+            data: payload.data,
+            valueKey: 'id_cat_truckload_license_plate',
+          });
+        }
+        state.processing = false;
       }
     );
   },

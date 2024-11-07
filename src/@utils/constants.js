@@ -114,10 +114,13 @@ export const firebaseCollections = {
   PERSON_TYPE: 'person_type',
   CAT_PAYMENT_METHOD: 'cat_payment_method',
   CAT_EXPENSE_TYPE: 'cat_expense_type',
+  CAT_TRUCKLOAD_LICENSE_PLATE: 'cat_truckload_license_plate',
   PERSON: 'person',
   BUDGET: 'budget',
   BUDGET_ITEM: 'budget_item',
   EXPENSE: 'expense',
+  BENEFICIO: 'beneficio',
+  BENEFICIO_TRUCKLOAD: 'beneficio_truckload',
 };
 
 export const firebaseCollectionsKey = {
@@ -137,6 +140,9 @@ export const firebaseCollectionsKey = {
   budget_item: 'id_budget_item',
   expense: 'id_expense',
   cat_expense_type: 'id_cat_expense_type',
+  beneficio: 'id_beneficio',
+  beneficio_truckload: 'id_beneficio_truckload',
+  cat_truckload_license_plate: 'id_cat_truckload_license_plate',
 };
 
 export const alertType = {

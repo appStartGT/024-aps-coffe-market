@@ -9,9 +9,9 @@ import { Timestamp } from 'firebase/firestore';
  */
 export const formatFirebaseTimestamp = (timestamp, format = 'DD/MM/YYYY') => {
   if (timestamp instanceof Timestamp) {
-    return moment.utc(timestamp.toDate()).format(format);
+    return moment(timestamp.toDate()).format(format);
   } else if (timestamp instanceof Date) {
-    return moment.utc(timestamp).format(format);
+    return moment(timestamp).format(format);
   }
   return '';
 };

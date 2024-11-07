@@ -1,108 +1,155 @@
-import {
-  cleanModel,
-  firebaseCollectionsKey,
-  firebaseMethods,
-  dates,
-} from '@utils';
-const { generateSearchTokens } = firebaseMethods;
-const { formatFirebaseTimestamp } = dates;
+import { cleanModel, formatNumber } from '@utils';
+import { formatFirebaseTimestamp } from '@utils/dates';
 
-const calculateSubtotal = (item) => {
-  const quantity = item.quantity || 0;
-  const price = parseFloat(item.sale_price.replace('Q', ''));
-  return quantity * price;
-};
+const saleModel = (sale, sale_details, truckloads) => {
+  const relevantDetails = (
+    sale_details?.filter((detail) => detail.id_sale === sale.id_sale) || []
+  ).map((detail) => ({
+    ...detail,
+  }));
 
-const calculateTotal = (items) => {
-  const total = items.reduce((total, item) => {
-    return total + calculateSubtotal(item);
-  }, 0);
-  return total;
-};
-
-const saleDetailModel = (detail = []) => {
-  const newDetail = detail.map((det) =>
-    cleanModel({
-      id_product: det.id_product.id_product,
-      id_inventory: det.id_inventory.id_inventory,
-      id_inventory_branch: det.id_inventory_branch,
-      name: det.name,
-      quantity: +det.quantity,
-      sale_price: det.sale_price,
-      mayor_sale_price: det.mayor_sale_price,
-      subTotal: +det.quantity * +det.sale_price,
-    })
+  const totalAdvancePayments = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.advancePayments?.reduce(
+        (detailSum, payment) => detailSum + (Number(payment.amount) || 0),
+        0
+      ) || 0),
+    0
   );
 
-  return [...newDetail];
-};
+  const totalPricedAmount = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (!detail.isPriceless
+        ? Number(detail.quantity) * Number(detail.price) || 0
+        : 0),
+    0
+  );
 
-const salePostModel = (data) =>
-  cleanModel({
-    key: firebaseCollectionsKey.sale,
-    // id: data.id_sale,
-    id_organization: data.id_organization,
-    id_branch: data.id_branch,
-    names: data.names,
-    surNames: data.surNames,
-    address: data.address,
-    email: data.email,
-    NIT: data.NIT,
-    phone: data.phone,
-    description: data.description,
-    searchTokens: [
-      ...generateSearchTokens(data.names),
-      ...generateSearchTokens(data.surNames),
-      ...generateSearchTokens(data.email),
-      ...generateSearchTokens(data.NIT),
-      ...generateSearchTokens(data.phone),
-    ],
-    detail: saleDetailModel(data.detail),
-    /* When the product is a combo, add the quantity of each product that is part of the combo */
-    comoboProducts: data.detail.reduce((acc, item) => {
-      if (item.quantityProduct) {
-        acc.push(
-          ...item.quantityProduct.map((product) => ({
-            ...product,
-          }))
-        );
-      }
-      return acc;
-    }, []),
-    total: calculateTotal(data.detail),
-  });
+  const totalLbPriced = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (!detail.isPriceless && !detail.isRemate
+        ? Number(detail.quantity) || 0
+        : 0),
+    0
+  );
 
-const saleGetModel = (data) =>
-  cleanModel({
-    id: data.sale.id_sale,
-    id_sale: data.sale.id_sale,
-    client: `${data.sale.names || ''} ${data.sale.surNames || ''}`,
-    names: data.sale.names || '',
-    surNames: data.sale.surNames || '',
-    address: data.sale.address || 'Sin dirección',
-    email: data.sale.email || '',
-    NIT: data.sale.NIT || 'C/F',
-    phone: data.sale.phone || '',
-    description: data.sale.description || '',
-    total: data.sale.total,
-    createdAt: data.sale.createdAt,
-    createdAtFormated: formatFirebaseTimestamp(data.sale.createdAt),
-    deleted: data.sale.deleted,
-  });
+  const totalLbPriceless = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.isPriceless && !detail.isRemate
+        ? Number(detail.quantity) || 0
+        : 0),
+    0
+  );
 
-export const post = (data) => salePostModel(data);
-export const list = (data) => {
-  const groupedData = data.reduce((acc, item) => {
-    if (!acc[item.id_sale]) {
-      acc[item.id_sale] = {
-        ...saleGetModel(item),
-        detail: [],
-      };
+  const totalLbRemate = relevantDetails.reduce(
+    (sum, detail) =>
+      sum +
+      (detail.isRemate && !detail.isPriceless
+        ? Number(detail.quantity) || 0
+        : 0),
+    0
+  );
+
+  const totalLbQuantity = totalLbPriced + totalLbPriceless + totalLbRemate;
+
+  const averagePrice =
+    totalLbPriced > 0 ? totalPricedAmount / (totalLbPriced + totalLbRemate) : 0;
+
+  const totalDebt = relevantDetails.reduce((sum, detail) => {
+    if (
+      !detail.isPriceless &&
+      !detail.isRemate &&
+      detail.advancePayments &&
+      detail.advancePayments.length > 0
+    ) {
+      const detailTotal =
+        (Number(detail.quantity) || 0) * (Number(detail.price) || 0);
+      const detailAdvances = detail.advancePayments.reduce(
+        (total, payment) => total + (Number(payment.amount) || 0),
+        0
+      );
+      return sum + (detailTotal - detailAdvances);
     }
-    acc[item.id_sale].detail.push(item);
-    return acc;
-  }, {});
+    return sum;
+  }, 0);
 
-  return Object.values(groupedData);
+  const totalTruckloadsSent = truckloads?.reduce(
+    (sum, truckload) =>
+      truckload.id_sale === sale.id_sale
+        ? sum + (Number(truckload.totalSent) || 0)
+        : sum,
+    0
+  );
+
+  const totalTruckloadsReceived = truckloads?.reduce(
+    (sum, truckload) =>
+      truckload.id_sale === sale.id_sale
+        ? sum + (Number(truckload.totalReceived) || 0)
+        : sum,
+    0
+  );
+
+  const obj = {
+    id: sale.id_sale,
+    id_sale: sale.id_sale,
+    createdAt: sale.createdAt,
+    createdAtFormat: formatFirebaseTimestamp(sale.createdAt),
+    createdBy: sale.createdBy || '',
+    id_beneficio: sale?.id_beneficio || sale.beneficio?.id_beneficio || '',
+    name: sale?.name || sale.beneficio?.name || '',
+    email: sale?.email || sale.beneficio?.email || '',
+    phone: sale?.phone || sale.beneficio?.phone || '',
+    nit: sale?.nit || sale.beneficio?.nit || '',
+    DPI: sale?.DPI || sale.beneficio?.DPI || '',
+    address: sale?.address || sale.beneficio?.address || '',
+    isActive: sale.isActive || false,
+    updatedAt: formatFirebaseTimestamp(sale.updatedAt),
+    averagePriceFormatted: `Q ${formatNumber(averagePrice)}`,
+    totalAdvancePaymentsFormatted: `Q ${formatNumber(totalAdvancePayments)}`,
+    totalLbRemateFormatted: formatNumber(totalLbRemate),
+    totalLbPricedFormatted: formatNumber(totalLbPriced),
+    totalLbPricelessFormatted: formatNumber(totalLbPriceless),
+    totalDebtFormatted: `Q ${formatNumber(totalDebt)}`,
+    totalPricedAmountFormatted: formatNumber(totalPricedAmount),
+    averagePrice: averagePrice,
+    totalAdvancePayments: totalAdvancePayments,
+    totalLbRemate: totalLbRemate,
+    totalLbPriced: totalLbPriced,
+    totalLbPriceless: totalLbPriceless,
+    totalLbQuantity: totalLbQuantity,
+    totalPricedAmount: totalPricedAmount,
+    totalDebt: totalDebt,
+    totalTruckloadsSent: totalTruckloadsSent,
+    totalTruckloadsReceived: totalTruckloadsReceived,
+  };
+  return obj;
 };
-export const getOne = (data) => saleGetModel(data);
+
+export const saleList = (data, sale_details, truckloads) => {
+  return data.map((item) => saleModel(item, sale_details, truckloads));
+};
+
+export const saleGetOne = (sale) => saleModel(sale);
+
+export const salePut = (sale) => {
+  const model = saleModel(sale);
+  delete model.createdAt;
+  delete model.id;
+  return cleanModel(model);
+};
+
+export const updateListSale = (oldData, updatedEntry) => {
+  return oldData.map((ce) => {
+    if (ce.id == updatedEntry.id_sale) {
+      return saleModel({
+        ...updatedEntry,
+      });
+    } else {
+      return ce;
+    }
+  });
+};

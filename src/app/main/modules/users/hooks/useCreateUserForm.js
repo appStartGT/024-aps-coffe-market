@@ -24,7 +24,7 @@ const useCreateUserForm = ({ id_user_type, id_organization, id_branch }) => {
   const roles = useSelector((state) => state.catalogs.roles);
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-console.log(roles);
+  console.log(roles);
   const formik = useFormikFields({
     fields: [
       {
@@ -210,7 +210,6 @@ console.log(roles);
       dispatch(
         createUserAction({
           ...formik.form.values,
-          // roles: [formik.form.values.id_role],
           id_role: formik.form.values.id_role?.value,
           id_user_type,
           id_organization,
