@@ -17,6 +17,7 @@ import { catTruckloadLicensePlateCatalogAction } from '../../../../../../store/m
 const useTruckload = () => {
   const dispatch = useDispatch();
   const [searchList, setSearchList] = useState(null);
+  const [selectionModel, setSelectionModel] = useState([]);
   const processing = useSelector((state) => state.truckload.processing);
   const truckloadList = useSelector((state) => state.truckload.truckloadList);
   const { id_sale } = useParams();
@@ -160,12 +161,30 @@ const useTruckload = () => {
     );
   };
 
+  const totalReceivedSelected = selectionModel.reduce((sum, id) => {
+    const selectedItem = truckloadList.find((item) => item.id === id);
+    return sum + (selectedItem ? Number(selectedItem.totalReceived) : 0);
+  }, 0);
+
+  const handleRemate = (selectedIds) => {
+    const selectedTruckloads = truckloadList.filter((truckload) =>
+      selectedIds.includes(truckload.id)
+    );
+    // Implement the logic for handling the remate action with the selected truckloads
+    console.log('Selected truckloads for remate:', selectedTruckloads);
+    // You can dispatch an action here to handle the remate process
+  };
+
   return {
     processing,
     propsSearchBarButton,
     columns,
     searchList,
     truckloadList,
+    selectionModel,
+    setSelectionModel,
+    handleRemate,
+    totalReceivedSelected,
   };
 };
 

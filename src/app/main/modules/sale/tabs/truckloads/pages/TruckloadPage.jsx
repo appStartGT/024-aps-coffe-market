@@ -1,5 +1,5 @@
 import ApsDatagrid from '@components/ApsDatagrid';
-import { Paper } from '@mui/material';
+import { Box, Paper, Typography, Button } from '@mui/material';
 import useTruckload from '../hooks/useTruckload';
 import SearchBar from '@components/SearchBar';
 import DataTableOverview from '../components/DataTableOverview';
@@ -16,6 +16,10 @@ const TruckloadPage = () => {
     columns,
     searchList,
     truckloadList,
+    selectionModel,
+    setSelectionModel,
+    handleRemate,
+    totalReceivedSelected,
   } = useTruckload();
 
   return (
@@ -23,12 +27,39 @@ const TruckloadPage = () => {
       <Paper sx={PAPER_STYLES}>
         <DataTableOverview truckloadList={truckloadList} />
         <SearchBar {...propsSearchBarButton} />
+        {selectionModel.length > 0 && (
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+            }}
+          >
+            <Typography>
+              Total ( Lb recibidas): {totalReceivedSelected.toFixed(2)}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => handleRemate(selectionModel)}
+            >
+              Remate
+            </Button>
+          </Box>
+        )}
         <ApsDatagrid
           rows={searchList || truckloadList}
           columns={columns}
           loading={processing}
           sxContainerProps={{ height: 500 }}
           autoHeight={false}
+          checkboxSelection
+          onSelectionModelChange={(newSelectionModel) => {
+            setSelectionModel(newSelectionModel);
+            console.log('Selected items:', newSelectionModel);
+          }}
+          selectionModel={selectionModel}
         />
       </Paper>
     </>
