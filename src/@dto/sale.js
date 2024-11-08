@@ -125,6 +125,8 @@ const saleModel = (sale, sale_details, truckloads) => {
     totalDebt: totalDebt,
     totalTruckloadsSent: totalTruckloadsSent,
     totalTruckloadsReceived: totalTruckloadsReceived,
+    totalTruckloadsSentFormatted: formatNumber(totalTruckloadsSent),
+    totalTruckloadsReceivedFormatted: formatNumber(totalTruckloadsReceived),
   };
   return obj;
 };

@@ -16,14 +16,14 @@ import { setOldBudget } from '../budget';
 
 export const saleListAction = createAsyncThunk(
   'sale/list',
-  async (_, { rejectWithValue, getState, dispatch }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const state = getState();
       let { rowSales, rowSaleDetails, rowTruckloads } = state.sale;
 
       if (
         rowSales.length > 0 &&
-        rowSaleDetails.length > 0 &&
+        // rowSaleDetails.length > 0 &&
         rowTruckloads.length > 0
       ) {
         return {
@@ -244,6 +244,39 @@ export const updateSaleListDetailsAction = createAsyncThunk(
   }
 );
 
+export const updateSaleListTruckloadsAction = createAsyncThunk(
+  'sale/updateListTruckloads',
+  async (newDetails, { getState, rejectWithValue }) => {
+    try {
+      const state = getState();
+      const currentDetails = state.sale.rowTruckloads;
+
+      // Merge new details with existing ones, overwriting if there's a conflict
+      let updatedDetails = [...currentDetails];
+      newDetails.forEach((newDetail) => {
+        const index = updatedDetails.findIndex(
+          (detail) =>
+            detail.id_beneficio_truckload === newDetail.id_beneficio_truckload
+        );
+        if (index !== -1) {
+          updatedDetails[index] = { ...updatedDetails[index], ...newDetail };
+        } else {
+          updatedDetails.push(newDetail);
+        }
+      });
+
+      // Remove items with deleted: true
+      updatedDetails = updatedDetails.filter(
+        (detail) => detail.deleted !== true
+      );
+
+      return updatedDetails;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 const initialState = {
   saleSelected: null,
   processing: false,
@@ -378,6 +411,17 @@ export const saleSlice = createSlice({
       (state, { payload }) => {
         // Update rowSaleDetails
         state.rowSaleDetails = [...payload];
+        state.saleList = saleDto.saleList(
+          state.rowSales,
+          state.rowSaleDetails,
+          state.rowTruckloads
+        );
+      }
+    );
+    builder.addCase(
+      updateSaleListTruckloadsAction.fulfilled,
+      (state, { payload }) => {
+        state.rowTruckloads = [...payload];
         state.saleList = saleDto.saleList(
           state.rowSales,
           state.rowSaleDetails,

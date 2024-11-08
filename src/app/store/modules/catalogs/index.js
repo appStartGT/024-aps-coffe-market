@@ -81,7 +81,10 @@ export const catTruckloadLicensePlateCatalogAction = createAsyncThunk(
   async (_, { getState, rejectWithValue }) => {
     const state = getState();
     if (state.catalogs.catTruckloadLicensePlate.length > 0) {
-      return { data: state.catalogs.catTruckloadLicensePlate };
+      return {
+        data: state.catalogs.catTruckloadLicensePlate,
+        isLocal: true,
+      };
     }
     return await getAllDocuments({
       collectionName: firebaseCollections.CAT_TRUCKLOAD_LICENSE_PLATE,
@@ -210,10 +213,12 @@ export const catalogsSlice = createSlice({
       catTruckloadLicensePlateCatalogAction.fulfilled,
       (state, { payload }) => {
         if (payload?.data) {
-          state.catTruckloadLicensePlate = catalogsDto.list({
-            data: payload.data,
-            valueKey: 'id_cat_truckload_license_plate',
-          });
+          if (!payload.isLocal) {
+            state.catTruckloadLicensePlate = catalogsDto.list({
+              data: payload.data,
+              valueKey: 'id_cat_truckload_license_plate',
+            });
+          }
         }
         state.processing = false;
       }

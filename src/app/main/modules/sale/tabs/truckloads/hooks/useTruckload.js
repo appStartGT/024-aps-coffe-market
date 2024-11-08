@@ -61,6 +61,12 @@ const useTruckload = () => {
 
   const columns = [
     {
+      field: 'licensePlate',
+      headerName: 'Placa',
+      flex: 1,
+      disableColumnMenu: true,
+    },
+    {
       field: 'totalSentFormated',
       headerName: 'Total enviado',
       flex: 1,

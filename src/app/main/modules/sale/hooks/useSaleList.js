@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Delete, Edit, ShoppingCart } from '@mui/icons-material';
+import { Delete, Edit, LocalShipping, ShoppingCart } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { Typography } from '@mui/material';
 import {
@@ -11,7 +11,8 @@ import {
 import { clearAllSaleDetails } from '../../../../store/modules/saleDetail';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
-import SaleDetailForm from '../components/SaleDetailForm';
+import TruckLoadForm from '../tabs/truckloads/components/TruckloadForm';
+import { catTruckloadLicensePlateCatalogAction } from '../../../../store/modules/catalogs';
 
 const useSaleList = () => {
   const dispatch = useDispatch();
@@ -30,6 +31,7 @@ const useSaleList = () => {
   console.log(saleList);
   useEffect(() => {
     dispatch(saleListAction());
+    dispatch(catTruckloadLicensePlateCatalogAction());
   }, [dispatch]);
 
   useEffect(() => {
@@ -41,9 +43,9 @@ const useSaleList = () => {
       setApsGlobalModalPropsAction({
         open: true,
         maxWidth: 'xs',
-        title: 'Detalle de Venta',
-        description: 'Registre un nuevo detalle de venta',
-        content: <SaleDetailForm id_sale={id_sale} nonupdate />,
+        title: 'Detalle de Camionada',
+        description: 'Registre un nuevo detalle de camionada',
+        content: <TruckLoadForm id_sale={id_sale} nonupdate />,
       })
     );
   };
@@ -58,14 +60,21 @@ const useSaleList = () => {
       flex: 1,
     },
     {
-      field: 'totalAmountFormatted',
-      headerName: 'Total Venta',
+      field: 'totalTruckloadsSentFormatted',
+      headerName: 'Total Lb Enviadas',
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1,
     },
-
+    {
+      field: 'totalTruckloadsReceivedFormatted',
+      headerName: 'Total Lb Recibidas',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
     {
       field: 'createdAtFormat',
       headerName: 'Fecha',
@@ -119,9 +128,9 @@ const useSaleList = () => {
               />
             )}
             <ApsIconButton
-              tooltip={{ title: 'Agregar detalle' }}
+              tooltip={{ title: 'Camionada' }}
               onClick={() => handleOpenSaleDetailModal(params.row.id_sale)}
-              children={<ShoppingCart color="primary" />}
+              children={<LocalShipping color="primary" />}
               can={{
                 key: `can-add-sale-detail-${params.row.id_sale}`,
                 I: Actions.CREATE,

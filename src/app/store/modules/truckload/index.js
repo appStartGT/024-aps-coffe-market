@@ -12,6 +12,7 @@ import {
   updateRecordBy,
   uploadFile,
 } from '@utils/firebaseMethods';
+import { updateSaleListTruckloadsAction } from '../sale';
 
 export const truckloadListAction = createAsyncThunk(
   'truckload/list',
@@ -34,7 +35,7 @@ export const truckloadListAction = createAsyncThunk(
 
 export const truckloadCreateAction = createAsyncThunk(
   'truckload/create',
-  async (data, { rejectWithValue }) => {
+  async (data, { rejectWithValue, dispatch }) => {
     let body = cleanModel(data);
     if (data.colilla && data.colilla instanceof File) {
       let url = await uploadFile({
@@ -58,6 +59,7 @@ export const truckloadCreateAction = createAsyncThunk(
       data: truckloadData,
     })
       .then((res) => {
+        dispatch(updateSaleListTruckloadsAction([res]));
         return { ...res };
       })
       .catch((res) => {
@@ -68,7 +70,7 @@ export const truckloadCreateAction = createAsyncThunk(
 
 export const truckloadUpdateAction = createAsyncThunk(
   'truckload/update',
-  async (data, { rejectWithValue }) => {
+  async (data, { rejectWithValue, dispatch }) => {
     let body = truckloadDto.truckloadPut(data);
     if (data.colilla && data.colilla instanceof File) {
       let url = await uploadFile({
@@ -93,7 +95,10 @@ export const truckloadUpdateAction = createAsyncThunk(
         },
       ],
     })
-      .then((res) => res)
+      .then((res) => {
+        dispatch(updateSaleListTruckloadsAction([res]));
+        return res;
+      })
       .catch((res) => rejectWithValue(res));
   }
 );

@@ -2,6 +2,7 @@ import { cleanModel, formatNumber } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
 const truckloadModel = (truckload) => {
+  console.log('truckload', truckload);
   const obj = {
     id: truckload.id_beneficio_truckload,
     id_beneficio_truckload: truckload.id_beneficio_truckload,
@@ -16,6 +17,7 @@ const truckloadModel = (truckload) => {
     totalSent: truckload?.totalSent || 0,
     totalReceived: truckload?.totalReceived || 0,
     colilla: truckload?.colilla || null,
+    licensePlate: truckload?.cat_truckload_license_plate?.name || null,
   };
   return obj;
 };
