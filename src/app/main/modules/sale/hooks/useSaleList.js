@@ -28,7 +28,7 @@ const useSaleList = () => {
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [saleToDelete, setSaleToDelete] = useState({});
   const [searchText, setSearchText] = useState('');
-  console.log(saleList);
+
   useEffect(() => {
     dispatch(saleListAction());
     dispatch(catTruckloadLicensePlateCatalogAction());

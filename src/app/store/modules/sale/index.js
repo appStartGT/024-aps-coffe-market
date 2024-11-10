@@ -77,8 +77,7 @@ export const saleListAction = createAsyncThunk(
           return truckloads.data;
         })
       );
-      // Clear old budget when a new budget is created
-      // if (isNewBudget) dispatch(setOldBudget(null));
+
       // Flatten the array of arrays
       rowSaleDetails = rowSaleDetails.flat();
       rowTruckloads = rowTruckloads.flat();

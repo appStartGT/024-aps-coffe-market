@@ -121,6 +121,7 @@ export const firebaseCollections = {
   EXPENSE: 'expense',
   BENEFICIO: 'beneficio',
   BENEFICIO_TRUCKLOAD: 'beneficio_truckload',
+  AVERAGE_PRICE: 'average_price',
 };
 
 export const firebaseCollectionsKey = {
@@ -143,6 +144,8 @@ export const firebaseCollectionsKey = {
   beneficio: 'id_beneficio',
   beneficio_truckload: 'id_beneficio_truckload',
   cat_truckload_license_plate: 'id_cat_truckload_license_plate',
+  average_price: 'id_average_price',
+  sale_detail: 'id_sale_detail',
 };
 
 export const alertType = {

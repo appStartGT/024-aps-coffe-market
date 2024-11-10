@@ -20,7 +20,6 @@ const DataTableOverview = ({ purchaseList }) => {
 
   useEffect(() => {
     if (purchaseList && purchaseList.length > 0) {
-      console.log({ purchaseList });
       const totalQuantity = purchaseList.reduce(
         (sum, purchase) => sum + Number(purchase.totalLbQuantity),
         0

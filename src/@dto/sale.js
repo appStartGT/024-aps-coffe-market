@@ -93,6 +93,10 @@ const saleModel = (sale, sale_details, truckloads) => {
     0
   );
 
+  const totalLbsSold = sale_details
+    ?.filter((detail) => detail.id_sale === sale.id_sale)
+    .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0);
+
   const obj = {
     id: sale.id_sale,
     id_sale: sale.id_sale,
@@ -127,6 +131,8 @@ const saleModel = (sale, sale_details, truckloads) => {
     totalTruckloadsReceived: totalTruckloadsReceived,
     totalTruckloadsSentFormatted: formatNumber(totalTruckloadsSent),
     totalTruckloadsReceivedFormatted: formatNumber(totalTruckloadsReceived),
+    totalLbsSold: totalLbsSold,
+    totalLbsSoldFormatted: formatNumber(totalLbsSold),
   };
   return obj;
 };

@@ -7,19 +7,26 @@ export const getUnaveragesPurchaseDetailsAction = createAsyncThunk(
   'averagePrice/getUnaveragesPurchaseDetails',
   async (_, { rejectWithValue }) => {
     try {
-      const result = await getAllDocuments({
-        collectionName: firebaseCollections.PURCHASE_DETAIL,
-        filterBy: [
-          { field: 'isAveraged', condition: '==', value: false },
-          { field: 'isPriceless', condition: '==', value: false },
-        ],
-        excludeReferences: [
-          'id_purchase',
-          'id_cat_payment_method',
-          'id_budget',
-        ],
-      });
-      return result.data;
+      const [result, getAveragePrices] = await Promise.all([
+        getAllDocuments({
+          collectionName: firebaseCollections.PURCHASE_DETAIL,
+          filterBy: [
+            // { field: 'isAveraged', condition: '==', value: false },
+            { field: 'isPriceless', condition: '==', value: false },
+            { field: 'isSold', condition: '==', value: false },
+          ],
+          excludeReferences: [
+            'id_purchase',
+            'id_cat_payment_method',
+            'id_budget',
+          ],
+        }),
+        getAllDocuments({
+          collectionName: firebaseCollections.AVERAGE_PRICE,
+          filterBy: [{ field: 'isSold', condition: '==', value: false }],
+        }),
+      ]);
+      return { result, getAveragePrices };
     } catch (error) {
       return rejectWithValue(
         error.message || 'Failed to fetch unaveraged purchase details'
@@ -48,8 +55,10 @@ export const averagePriceSlice = createSlice({
         getUnaveragesPurchaseDetailsAction.fulfilled,
         (state, action) => {
           state.loading = false;
-          console.log(action.payload);
-          state.unaveragesPurchaseDetails = averagePriceListDto(action.payload);
+          state.unaveragesPurchaseDetails = averagePriceListDto([
+            ...action.payload.result.data,
+            ...action.payload.getAveragePrices.data,
+          ]);
         }
       )
       .addCase(getUnaveragesPurchaseDetailsAction.rejected, (state, action) => {

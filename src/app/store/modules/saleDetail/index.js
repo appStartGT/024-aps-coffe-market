@@ -13,7 +13,10 @@ import {
   updateRecordBy,
 } from '@utils/firebaseMethods';
 import { firestore, FieldValue } from '@config/firebaseConfig';
-import { updateSaleListDetailsAction } from '../sale';
+import {
+  updateSaleListDetailsAction,
+  updateSaleListTruckloadsAction,
+} from '../sale';
 
 export const saleDetailListAction = createAsyncThunk(
   'saleDetail/list',
@@ -132,6 +135,127 @@ export const saleDetailDeleteAction = createAsyncThunk(
         return res;
       })
       .catch((res) => rejectWithValue(res));
+  }
+);
+
+export const createRemateBeneficioAction = createAsyncThunk(
+  'saleDetail/createRemateBeneficio',
+  async (
+    { selectedPrices, data, accumulated, truckloadsSelected },
+    { rejectWithValue, dispatch }
+  ) => {
+    try {
+      const batch = firestore.batch();
+
+      // 1. Create a new average price from accumulated prop
+      let accumulatedAveragePriceRef;
+      if (accumulated) {
+        accumulatedAveragePriceRef = firestore
+          .collection(firebaseCollections.AVERAGE_PRICE)
+          .doc();
+        batch.set(accumulatedAveragePriceRef, {
+          id_average_price: accumulatedAveragePriceRef.id,
+          quantity: accumulated.quantity,
+          price: accumulated.price,
+          deleted: false,
+          createdAt: FieldValue.serverTimestamp(),
+          isSold: false,
+        });
+      }
+
+      // 2. Create a new average price from the prop data
+      const dataAveragePriceRef = firestore
+        .collection(firebaseCollections.AVERAGE_PRICE)
+        .doc();
+      batch.set(dataAveragePriceRef, {
+        id_average_price: dataAveragePriceRef.id,
+        price: data.price,
+        total: data.total,
+        isSold: true,
+        deleted: false,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      // 3. Update each purchase from selectedPrices with isSold: true in parallel
+      await Promise.all(
+        selectedPrices.flatMap((price) =>
+          price.purchases.map((purchaseId) => {
+            const purchaseRef = firestore
+              .collection(firebaseCollections.PURCHASE_DETAIL)
+              .doc(purchaseId);
+            return batch.update(purchaseRef, {
+              isSold: true,
+              id_average_price: dataAveragePriceRef,
+            });
+          })
+        )
+      );
+
+      // 4. Update each truckload in truckloadsSelected
+      if (truckloadsSelected && truckloadsSelected.length > 0) {
+        await Promise.all(
+          truckloadsSelected.map((truckload) => {
+            const truckloadRef = firestore
+              .collection(firebaseCollections.BENEFICIO_TRUCKLOAD)
+              .doc(truckload.id_beneficio_truckload);
+            return batch.update(truckloadRef, {
+              isSold: true,
+              id_average_price: dataAveragePriceRef,
+            });
+          })
+        );
+      }
+
+      // 5. Create a new sale_detail
+      const saleDetailRef = firestore
+        .collection(firebaseCollections.SALE_DETAIL)
+        .doc();
+      const saleDetailData = {
+        id_sale: data.id_sale,
+        id_sale_detail: saleDetailRef.id,
+        price: data.price,
+        quantity: data.quantity,
+        id_average_price: dataAveragePriceRef,
+        createdAt: FieldValue.serverTimestamp(),
+      };
+      batch.set(saleDetailRef, saleDetailData);
+
+      // Commit the batch
+      await batch.commit();
+
+      // Fetch the newly created sale detail document
+      const saleDetail = await getAllDocuments({
+        collectionName: firebaseCollections.SALE_DETAIL,
+        filterBy: [
+          {
+            field: firebaseCollectionsKey.sale_detail,
+            condition: '==',
+            value: saleDetailRef.id,
+          },
+        ],
+      });
+      // Update the truckloadsSelected with the new average price
+      dispatch(
+        updateSaleListTruckloadsAction(
+          truckloadsSelected.map((truckload) => ({
+            ...truckload,
+            id_average_price: dataAveragePriceRef.id,
+            isSold: true,
+          }))
+        )
+      );
+
+      //Update the sale with the new average price
+      dispatch(updateSaleListDetailsAction([saleDetail.data[0]]));  
+
+      return {
+        accumulatedAveragePriceId: accumulatedAveragePriceRef?.id,
+        dataAveragePriceId: dataAveragePriceRef.id,
+        saleDetail: saleDetail.data[0],
+      };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 

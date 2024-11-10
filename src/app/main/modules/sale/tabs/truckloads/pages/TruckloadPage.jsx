@@ -27,7 +27,7 @@ const TruckloadPage = () => {
       <Paper sx={PAPER_STYLES}>
         <DataTableOverview truckloadList={truckloadList} />
         <SearchBar {...propsSearchBarButton} />
-        {selectionModel.length > 0 && (
+        {selectionModel.length > 0 && totalReceivedSelected > 0 && (
           <Box
             sx={{
               display: 'flex',
@@ -57,9 +57,9 @@ const TruckloadPage = () => {
           checkboxSelection
           onSelectionModelChange={(newSelectionModel) => {
             setSelectionModel(newSelectionModel);
-            console.log('Selected items:', newSelectionModel);
           }}
           selectionModel={selectionModel}
+          isRowSelectable={(params) => !params.row.isSold}
         />
       </Paper>
     </>

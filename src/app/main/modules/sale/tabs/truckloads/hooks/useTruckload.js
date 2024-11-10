@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { Actions, Subjects } from '@config/permissions';
 import TruckloadForm from '../components/TruckloadForm';
+import PriceList from '../components/PriceList';
 import {
   truckloadListAction,
   truckloadDeleteAction,
@@ -13,6 +14,7 @@ import {
 } from '../../../../../../store/modules/truckload';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { catTruckloadLicensePlateCatalogAction } from '../../../../../../store/modules/catalogs';
+import { getUnaveragesPurchaseDetailsAction } from '../../../../../../store/modules/averagePrice';
 
 const useTruckload = () => {
   const dispatch = useDispatch();
@@ -20,12 +22,14 @@ const useTruckload = () => {
   const [selectionModel, setSelectionModel] = useState([]);
   const processing = useSelector((state) => state.truckload.processing);
   const truckloadList = useSelector((state) => state.truckload.truckloadList);
+  const rowTruckloads = useSelector((state) => state.sale.rowTruckloads);
   const { id_sale } = useParams();
 
   useEffect(() => {
     dispatch(truckloadListAction({ id_sale }));
     dispatch(catTruckloadLicensePlateCatalogAction());
-  }, [dispatch, id_sale]);
+    dispatch(getUnaveragesPurchaseDetailsAction());
+  }, [dispatch, rowTruckloads, id_sale]);
 
   const onClose = () => {
     dispatch(clearTruckloadSelected());
@@ -59,7 +63,6 @@ const useTruckload = () => {
       },
     },
   };
-
   const columns = [
     {
       field: 'licensePlate',
@@ -106,20 +109,42 @@ const useTruckload = () => {
       disableColumnMenu: true,
       renderCell: (params) => (
         <>
-          <IconButton
-            onClick={() => handleEdit(params.row)}
-            color="primary"
-            size="small"
+          <Tooltip
+            title={
+              params.row.isSold
+                ? 'No se puede editar una camionada vendida'
+                : ''
+            }
           >
-            <Edit />
-          </IconButton>
-          <IconButton
-            onClick={() => handleDelete(params.row.id_beneficio_truckload)}
-            color="error"
-            size="small"
+            <span>
+              <IconButton
+                onClick={() => handleEdit(params.row)}
+                color="primary"
+                size="small"
+                disabled={params.row.isSold}
+              >
+                <Edit />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip
+            title={
+              params.row.isSold
+                ? 'No se puede eliminar una camionada vendida'
+                : ''
+            }
           >
-            <Delete />
-          </IconButton>
+            <span>
+              <IconButton
+                onClick={() => handleDelete(params.row.id_beneficio_truckload)}
+                color="error"
+                size="small"
+                disabled={params.row.isSold}
+              >
+                <Delete />
+              </IconButton>
+            </span>
+          </Tooltip>
         </>
       ),
     },
@@ -170,9 +195,30 @@ const useTruckload = () => {
     const selectedTruckloads = truckloadList.filter((truckload) =>
       selectedIds.includes(truckload.id)
     );
-    // Implement the logic for handling the remate action with the selected truckloads
-    console.log('Selected truckloads for remate:', selectedTruckloads);
-    // You can dispatch an action here to handle the remate process
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'xs',
+        title: 'Remate a Beneficio',
+        description: 'Seleccione los precios para el remate',
+        content: (
+          <PriceList
+            selectedTruckloads={selectedTruckloads}
+            totalNeeded={totalReceivedSelected}
+            id_sale={id_sale}
+            onClose={() => {
+              onClose();
+              setSelectionModel([]); // Unselect everything when handleRemate finishes
+            }}
+          />
+        ),
+        onClose: () => {
+          onClose();
+          setSelectionModel([]); // Unselect everything when modal is closed
+        },
+        closeBtn: true,
+      })
+    );
   };
 
   return {

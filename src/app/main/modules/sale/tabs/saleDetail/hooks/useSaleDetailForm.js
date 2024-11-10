@@ -79,6 +79,7 @@ const useSaleDetailForm = (id_sale) => {
     },
     deps: [saleDetailSelected],
   });
+  
   useUpdateEffect(() => {
     if (formikSaleDetail.form.values.isPriceless) {
       formikSaleDetail.form.setFieldValue('price', 0);

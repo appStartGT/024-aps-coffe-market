@@ -41,6 +41,7 @@ const purchaseDetailModel = (purchaseDetail) => {
     ),
     isRemate: purchaseDetail?.isRemate || false,
     id_purchase_detail_remate: purchaseDetail?.id_purchase_detail_remate || '',
+    isSold: purchaseDetail?.isSold || false,  
   };
   return obj;
 };

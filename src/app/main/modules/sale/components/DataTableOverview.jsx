@@ -29,7 +29,6 @@ const DataTableOverview = ({ saleList }) => {
         0
       );
 
-      console.log({ saleList });
       const totalTruckloadsSent = saleList.reduce(
         (sum, sale) => sum + Number(sale.totalTruckloadsSent || 0),
         0
