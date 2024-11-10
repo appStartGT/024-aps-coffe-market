@@ -1,7 +1,6 @@
 import ApsDatagrid from '@components/ApsDatagrid';
 import { Paper } from '@mui/material';
 import useSaleList from '../hooks/useSaleList';
-import ApsModal from '@components/ApsModal';
 import SearchBar from '@components/SearchBar';
 import DataTableOverview from '../components/DataTableOverview';
 import GeneralContainer from '@components/generalContainer/GeneralContainer';
@@ -12,14 +11,8 @@ const stylesPaper = {
 };
 
 const SaleListPage = () => {
-  const {
-    processing,
-    propsSearchBarButton,
-    columns,
-    searchList,
-    saleList,
-    propsModalDeleteSale,
-  } = useSaleList();
+  const { processing, propsSearchBarButton, columns, searchList, saleList } =
+    useSaleList();
   return (
     <GeneralContainer
       title="Venta"
@@ -27,8 +20,6 @@ const SaleListPage = () => {
       actions={[]}
       container={
         <>
-          {propsModalDeleteSale?.open && <ApsModal {...propsModalDeleteSale} />}
-
           <Paper sx={stylesPaper}>
             <DataTableOverview saleList={saleList} />
             <SearchBar {...propsSearchBarButton} />

@@ -35,13 +35,13 @@ const purchaseDetailModel = (purchaseDetail) => {
       !purchaseDetail.isPriceless &&
       (!purchaseDetail?.advancePayments?.length ||
         purchaseDetail?.advancePayments?.reduce(
-        (sum, payment) => sum + (payment.amount || 0),
-        0
-        ) === purchaseDetail?.quantity * purchaseDetail?.price
-    ),
+          (sum, payment) => sum + (payment.amount || 0),
+          0
+        ) ===
+          purchaseDetail?.quantity * purchaseDetail?.price),
     isRemate: purchaseDetail?.isRemate || false,
     id_purchase_detail_remate: purchaseDetail?.id_purchase_detail_remate || '',
-    isSold: purchaseDetail?.isSold || false,  
+    isSold: purchaseDetail?.isSold || false,
   };
   return obj;
 };

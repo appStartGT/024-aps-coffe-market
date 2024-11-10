@@ -97,7 +97,8 @@ const GeneralContainer = ({
   const [breadcrumb, setBreadcrumb] = useState([]);
 
   useLayoutEffect(() => {
-    if (location && !disableBreadcrumb) setBreadcrumb(generateBreadcrumb(location));
+    if (location && !disableBreadcrumb)
+      setBreadcrumb(generateBreadcrumb(location));
   }, [location, disableBreadcrumb]);
 
   const handleBackFunction = () => {

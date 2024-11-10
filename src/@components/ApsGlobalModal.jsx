@@ -18,10 +18,7 @@ const ApsGlobalModal = () => {
 
   const modalProps = { ...apsGlobalModalProps };
 
-  if (
-    typeof modalProps.handleCancel === 'boolean' &&
-    modalProps.handleCancel
-  ) {
+  if (typeof modalProps.handleCancel === 'boolean' && modalProps.handleCancel) {
     modalProps.handleCancel = onClose;
   }
 

@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Delete, Edit, LocalShipping, ShoppingCart } from '@mui/icons-material';
+import { Edit, LocalShipping } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
-import { Typography } from '@mui/material';
-import {
-  saleListAction,
-  saleDeleteAction,
-} from '../../../../store/modules/sale';
+import { saleListAction } from '../../../../store/modules/sale';
 import { clearAllSaleDetails } from '../../../../store/modules/saleDetail';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
@@ -22,11 +18,8 @@ const useSaleList = () => {
   const totalItems = useSelector((state) => state.sale.totalItems);
   const processing = useSelector((state) => state.sale.processing);
   const saleListDetails = useSelector((state) => state.sale.saleListDetails);
-  const id_budget = useSelector((state) => state.budget.budget?.id_budget);
 
   const [searchList, setSearchList] = useState(null);
-  const [openModalDelete, setOpenModalDelete] = useState(false);
-  const [saleToDelete, setSaleToDelete] = useState({});
   const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
@@ -125,18 +118,6 @@ const useSaleList = () => {
                 }}
               />
             )}
-            {/* {params.row.id_sale && (
-              <ApsIconButton
-                tooltip={{ title: 'Eliminar venta' }}
-                onClick={() => handleOpenDelete(params.row)}
-                children={<Delete color="error" />}
-                can={{
-                  key: `can-delete-sale-${params.row.id_sale}`,
-                  I: Actions.DELETE,
-                  a: Subjects.SALES,
-                }}
-              />
-            )} */}
           </div>
         );
       },
@@ -162,42 +143,6 @@ const useSaleList = () => {
     },
   };
 
-  const handleCloseDelete = () => {
-    setSaleToDelete({});
-    setOpenModalDelete(false);
-  };
-
-  const handleOpenDelete = (data) => {
-    setOpenModalDelete(true);
-    setSaleToDelete(data);
-  };
-
-  const handleDelete = () => {
-    dispatch(
-      saleDeleteAction({
-        id_sale: saleToDelete.id_sale,
-      })
-    );
-    setOpenModalDelete(false);
-  };
-
-  const propsModalDeleteSale = {
-    open: openModalDelete,
-    onClose: () => handleCloseDelete(),
-    title: 'Eliminar venta',
-    content: (
-      <Typography>{`¿Está seguro que desea eliminar la venta de "${saleToDelete.fullName}" permanentemente?`}</Typography>
-    ),
-    handleOk: () => handleDelete(),
-    titleOk: 'Eliminar',
-    handleCancel: () => handleCloseDelete(),
-    titleCancel: 'Cancelar',
-    okProps: {
-      color: 'error',
-      endIcon: <Delete />,
-    },
-  };
-
   const labels = {
     fullName: 'Nombre Completo',
     createdAtFormatted: 'Fecha',
@@ -210,7 +155,6 @@ const useSaleList = () => {
     saleList,
     saleListDetails,
     processing,
-    propsModalDeleteSale,
     propsSearchBarButton,
     searchList,
     setSearchList,

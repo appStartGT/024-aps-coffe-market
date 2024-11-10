@@ -110,7 +110,9 @@ export const beneficioDeleteAction = createAsyncThunk(
   async ({ id_beneficio }, { rejectWithValue }) => {
     return await deleteRecordById({
       collectionName: firebaseCollections.BENEFICIO,
-      filterBy: [{ field: 'id_beneficio', condition: '==', value: id_beneficio }],
+      filterBy: [
+        { field: 'id_beneficio', condition: '==', value: id_beneficio },
+      ],
     })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));

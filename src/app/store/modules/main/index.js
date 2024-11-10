@@ -40,7 +40,7 @@ export const mainSlice = createSlice({
     },
     setApsGlobalModalPropsAction: (state, action) => {
       const newValue = action.payload;
-      state.components.apsGlobalModalProps = {...newValue};
+      state.components.apsGlobalModalProps = { ...newValue };
     },
   },
 });

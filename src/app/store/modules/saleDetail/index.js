@@ -297,7 +297,7 @@ export const saleDetailSlice = createSlice({
     });
     builder.addCase(saleDetailListAction.fulfilled, (state, { payload }) => {
       const allSaleDetails = saleDetailDto.saleDetailList(payload.data);
-      state.saleDetailList = allSaleDetails
+      state.saleDetailList = allSaleDetails;
       // state.saleDetailListPriceless = allSaleDetails.filter(
       //   (detail) => detail.isPriceless === true
       // );
