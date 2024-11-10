@@ -59,7 +59,9 @@ const TruckloadPage = () => {
             setSelectionModel(newSelectionModel);
           }}
           selectionModel={selectionModel}
-          isRowSelectable={(params) => !params.row.isSold}
+          isRowSelectable={(params) =>
+            !params.row.isSold && +params.row.totalReceived > 0
+          }
         />
       </Paper>
     </>

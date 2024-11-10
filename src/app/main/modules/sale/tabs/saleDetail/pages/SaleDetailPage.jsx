@@ -1,7 +1,7 @@
 import ApsDatagrid from '@components/ApsDatagrid';
 import { Paper } from '@mui/material';
-import usePurchaseDetail from '../hooks/usePurchaseDetail';
-import SearchBar from '@components/SearchBar';
+import useSaleDetail from '../hooks/useSaleDetail';
+// import SearchBar from '@components/SearchBar';
 import DataTableOverview from '../components/DataTableOverview';
 
 const PAPER_STYLES = {
@@ -9,22 +9,21 @@ const PAPER_STYLES = {
   borderRadius: '12px',
 };
 
-const PurchaseDetailPage = () => {
+const SaleDetailPage = () => {
   const {
     processing,
-    propsSearchBarButton,
-    columns,
+    /* propsSearchBarButton, */ columns,
     searchList,
-    purchaseList,
-  } = usePurchaseDetail();
+    saleList,
+  } = useSaleDetail();
 
   return (
     <>
       <Paper sx={PAPER_STYLES}>
-        <DataTableOverview purchaseList={purchaseList} />
-        <SearchBar {...propsSearchBarButton} />
+        <DataTableOverview purchaseList={saleList} />
+        {/* <SearchBar {...propsSearchBarButton} /> */}
         <ApsDatagrid
-          rows={searchList || purchaseList}
+          rows={searchList || saleList}
           columns={columns}
           loading={processing}
           sxContainerProps={{ height: 500 }}
@@ -35,4 +34,4 @@ const PurchaseDetailPage = () => {
   );
 };
 
-export default PurchaseDetailPage;
+export default SaleDetailPage;

@@ -12,7 +12,9 @@ const SaleDetailPage = () => {
   return (
     <GeneralContainer
       title={
-        params.id_sale !== '0' ? `Venta ${saleSelected?.name}` : 'Nueva Venta'
+        params.id_sale !== '0'
+          ? `Beneficio ${saleSelected?.name}`
+          : 'Nuevo Beneficio'
       }
       subtitle={
         params.id_sale !== '0'

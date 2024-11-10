@@ -9,7 +9,7 @@ import {
 } from '../../../../../../store/modules/saleDetail';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
-import SaleDetailForm from '../components/SaleDetailForm';
+// import SaleDetailForm from '../components/SaleDetailForm';
 import { IconButton, Chip, Badge } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
@@ -44,7 +44,7 @@ const useSaleDetail = () => {
             maxWidth: 'xs',
             title: 'Venta',
             description: 'Registre un nuevo detalle de venta',
-            content: <SaleDetailForm id_sale={id_sale} />,
+            // content: <SaleDetailForm id_sale={id_sale} />,
             onClose,
           })
         ),
@@ -140,7 +140,7 @@ const useSaleDetail = () => {
         maxWidth: 'xs',
         title: 'Editar Venta',
         description: 'Edite los detalles de la venta',
-        content: <SaleDetailForm id_sale={id_sale} initialValues={row} />,
+        // content: <SaleDetailForm id_sale={id_sale} initialValues={row} />,
         onClose,
       })
     );

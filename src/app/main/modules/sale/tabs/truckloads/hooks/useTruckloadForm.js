@@ -20,7 +20,7 @@ const useTruckloadForm = (id_sale) => {
   );
   const catTruckloadLicensePlate = useSelector(
     (state) => state.catalogs.catTruckloadLicensePlate
-  );  
+  );
 
   const [selectedFile, setSelectedFile] = useState(null);
 

@@ -101,6 +101,16 @@ const useSaleList = () => {
               justifyContent: 'center',
             }}
           >
+            <ApsIconButton
+              tooltip={{ title: 'Camionada' }}
+              onClick={() => handleOpenSaleDetailModal(params.row.id_sale)}
+              children={<LocalShipping color="primary" />}
+              can={{
+                key: `can-add-sale-detail-${params.row.id_sale}`,
+                I: Actions.CREATE,
+                a: Subjects.SALES,
+              }}
+            />
             {params.row.id_sale && (
               <ApsIconButton
                 tooltip={{ title: 'Editar venta' }}
@@ -115,7 +125,7 @@ const useSaleList = () => {
                 }}
               />
             )}
-            {params.row.id_sale && (
+            {/* {params.row.id_sale && (
               <ApsIconButton
                 tooltip={{ title: 'Eliminar venta' }}
                 onClick={() => handleOpenDelete(params.row)}
@@ -126,17 +136,7 @@ const useSaleList = () => {
                   a: Subjects.SALES,
                 }}
               />
-            )}
-            <ApsIconButton
-              tooltip={{ title: 'Camionada' }}
-              onClick={() => handleOpenSaleDetailModal(params.row.id_sale)}
-              children={<LocalShipping color="primary" />}
-              can={{
-                key: `can-add-sale-detail-${params.row.id_sale}`,
-                I: Actions.CREATE,
-                a: Subjects.SALES,
-              }}
-            />
+            )} */}
           </div>
         );
       },

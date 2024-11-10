@@ -6,10 +6,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   saleCreateAction,
   saleUpdateAction,
+  saleDeleteAction,
 } from '../../../../store/modules/sale';
 import { fieldValidations } from '@utils';
 import { useParams } from 'react-router-dom';
 import Email from '@mui/icons-material/Email';
+import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 
 const useSaleForm = ({ navigate }) => {
   /* HOOKS */
@@ -141,9 +143,35 @@ const useSaleForm = ({ navigate }) => {
     }
   };
 
+  const handleDelete = async () => {
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'xs',
+        title: 'Eliminar Venta',
+        description: '¿Está seguro que desea eliminar esta venta?',
+        content: null,
+        handleOk: () => {
+          dispatch(saleDeleteAction({ id_sale }))
+            .unwrap()
+            .then(() => {
+              navigate('/main/sale');
+              dispatch(setApsGlobalModalPropsAction({ open: false }));
+            });
+        },
+        handleCancel: true,
+        titleOk: 'Eliminar',
+        okProps: {
+          color: 'error',
+        },
+      })
+    );
+  };
+
   return {
     formikSale,
     handleOnclick,
+    handleDelete,
     saleSelected,
     loading,
   };

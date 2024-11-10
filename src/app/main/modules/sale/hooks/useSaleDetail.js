@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Save } from '@mui/icons-material';
-import { Paper } from '@mui/material';
+import { Paper, Box } from '@mui/material';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMountEffect } from '@hooks';
 import ApsForm from '@components/ApsForm';
@@ -18,6 +18,7 @@ import {
   saleGetOneAction,
 } from '../../../../store/modules/sale';
 import TruckloadPage from '../tabs/truckloads/pages/TruckloadPage';
+import SaleDetailPage from '../tabs/saleDetail/pages/SaleDetailPage';
 
 const stylesPaper = {
   padding: '16px',
@@ -35,7 +36,7 @@ const useSaleDetail = () => {
     0,
     location.lastIndexOf('/', location.lastIndexOf('/') - 1)
   );
-  const { formikSale, handleOnclick, loading } = useSaleForm({
+  const { formikSale, handleOnclick, handleDelete, loading } = useSaleForm({
     navigate,
   });
   const saleSelected = useSelector((state) => state.sale.saleSelected);
@@ -74,6 +75,15 @@ const useSaleDetail = () => {
     can: canDetails,
   };
 
+  const propsButtonDelete = {
+    children: 'Eliminar',
+    color: 'error',
+    size: 'large',
+    variant: 'outlined',
+    onClick: handleDelete,
+    can: canDetails,
+  };
+
   const propsTabsComponent = () => {
     const tabs = [];
     if (ability.can(Actions.SALES_TAB_DETALLES, Subjects.SALES)) {
@@ -97,7 +107,17 @@ const useSaleDetail = () => {
                 marginTop: '32px',
               }}
             >
-              <ApsButton {...propsButtonSaveDetails} />
+              <Box
+                display="flex"
+                justifyContent={
+                  params.id_sale !== '0' ? 'space-between' : 'flex-end'
+                }
+                gap={2}
+                width="100%"
+              >
+                {params.id_sale !== '0' && <ApsButton {...propsButtonDelete} />}
+                <ApsButton {...propsButtonSaveDetails} />
+              </Box>
             </div>
           </Paper>
         ),
@@ -110,10 +130,10 @@ const useSaleDetail = () => {
           title: 'Camionadas',
           content: <TruckloadPage />,
         });
-        // tabs.push({
-        //   title: 'Ventas (Sin precio)',
-        //   content: <SaleDetailPricelessPage />,
-        // });
+        tabs.push({
+          title: 'Ventas',
+          content: <SaleDetailPage />,
+        });
       }
     }
     return { tabs };

@@ -13,10 +13,24 @@ import {
   uploadFile,
 } from '@utils/firebaseMethods';
 import { updateSaleListTruckloadsAction } from '../sale';
-
 export const truckloadListAction = createAsyncThunk(
   'truckload/list',
-  async ({ id_sale }, { rejectWithValue }) => {
+  async ({ id_sale }, { rejectWithValue, getState, dispatch }) => {
+    const state = getState();
+    const saleListTruckloads = state.sale.rowTruckloads;
+
+    if (saleListTruckloads && saleListTruckloads.length > 0) {
+      const filteredTruckloads = saleListTruckloads.filter(
+        (truckload) => truckload.id_sale === id_sale
+      );
+      if (filteredTruckloads.length > 0) {
+        return {
+          data: filteredTruckloads,
+          totalItems: filteredTruckloads.length,
+        };
+      }
+    }
+
     return await getAllDocuments({
       collectionName: firebaseCollections.BENEFICIO_TRUCKLOAD,
       filterBy: [
@@ -28,7 +42,10 @@ export const truckloadListAction = createAsyncThunk(
         },
       ],
     })
-      .then((res) => res)
+      .then((res) => {
+        dispatch(updateSaleListTruckloadsAction(res.data));
+        return res;
+      })
       .catch((res) => rejectWithValue(res));
   }
 );

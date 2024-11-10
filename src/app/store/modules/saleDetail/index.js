@@ -43,7 +43,7 @@ export const saleDetailListAction = createAsyncThunk(
           reference: true,
         },
       ],
-      excludeReferences: ['id_sale_detail_remate'],
+      // excludeReferences: ['id_sale_detail_remate'],
     })
       .then((res) => {
         dispatch(updateSaleListDetailsAction(res.data));
@@ -169,8 +169,8 @@ export const createRemateBeneficioAction = createAsyncThunk(
         .doc();
       batch.set(dataAveragePriceRef, {
         id_average_price: dataAveragePriceRef.id,
-        price: data.price,
-        total: data.total,
+        price: accumulated.price,
+        quantity: data.quantity,
         isSold: true,
         deleted: false,
         createdAt: FieldValue.serverTimestamp(),
@@ -211,12 +211,13 @@ export const createRemateBeneficioAction = createAsyncThunk(
         .collection(firebaseCollections.SALE_DETAIL)
         .doc();
       const saleDetailData = {
-        id_sale: data.id_sale,
+        id_sale: firestore.doc(`${firebaseCollections.SALE}/${data.id_sale}`),
         id_sale_detail: saleDetailRef.id,
         price: data.price,
         quantity: data.quantity,
         id_average_price: dataAveragePriceRef,
         createdAt: FieldValue.serverTimestamp(),
+        deleted: false,
       };
       batch.set(saleDetailRef, saleDetailData);
 
@@ -246,7 +247,7 @@ export const createRemateBeneficioAction = createAsyncThunk(
       );
 
       //Update the sale with the new average price
-      dispatch(updateSaleListDetailsAction([saleDetail.data[0]]));  
+      dispatch(updateSaleListDetailsAction([saleDetail.data[0]]));
 
       return {
         accumulatedAveragePriceId: accumulatedAveragePriceRef?.id,
@@ -296,12 +297,10 @@ export const saleDetailSlice = createSlice({
     });
     builder.addCase(saleDetailListAction.fulfilled, (state, { payload }) => {
       const allSaleDetails = saleDetailDto.saleDetailList(payload.data);
-      state.saleDetailList = allSaleDetails.filter(
-        (detail) => detail.isPriceless === false
-      );
-      state.saleDetailListPriceless = allSaleDetails.filter(
-        (detail) => detail.isPriceless === true
-      );
+      state.saleDetailList = allSaleDetails
+      // state.saleDetailListPriceless = allSaleDetails.filter(
+      //   (detail) => detail.isPriceless === true
+      // );
       state.totalItems = payload.data.totalItems;
       state.processing = false;
     });
