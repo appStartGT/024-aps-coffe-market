@@ -8,8 +8,8 @@ import {
 import { setLoadingMainViewAction } from '../main';
 import {
   getAllDocuments,
-  deleteRecordById,
   insertDocument,
+  firestore,
 } from '@utils/firebaseMethods';
 import { beneficioCreateAction, beneficioUpdateAction } from '../beneficio';
 
@@ -222,22 +222,51 @@ export const saleUpdateAction = createAsyncThunk(
     };
   }
 );
-
 export const saleDeleteAction = createAsyncThunk(
   'sale/delete',
   async ({ id_sale }, { rejectWithValue }) => {
-    return await deleteRecordById({
-      collectionName: firebaseCollections.SALE,
-      filterBy: [
-        {
-          field: firebaseCollectionsKey.sale,
-          condition: '==',
-          value: id_sale,
-        },
-      ],
-    })
-      .then((res) => res)
-      .catch((res) => rejectWithValue(res));
+    const batch = firestore.batch();
+
+    try {
+      // Update Sale
+      const saleRef = firestore
+        .collection(firebaseCollections.SALE)
+        .doc(id_sale);
+      batch.update(saleRef, { deleted: true });
+
+      // Update Sale Details
+      const saleDetailsSnapshot = await firestore
+        .collection(firebaseCollections.SALE_DETAIL)
+        .where(
+          firebaseCollectionsKey.sale,
+          '==',
+          firestore.doc(`${firebaseCollections.SALE}/${id_sale}`)
+        )
+        .get();
+      saleDetailsSnapshot.forEach((doc) => {
+        batch.update(doc.ref, { deleted: true });
+      });
+
+      // Update Truckloads
+      const truckloadsSnapshot = await firestore
+        .collection(firebaseCollections.BENEFICIO_TRUCKLOAD)
+        .where(
+          firebaseCollectionsKey.sale,
+          '==',
+          firestore.doc(`${firebaseCollections.SALE}/${id_sale}`)
+        )
+        .get();
+      truckloadsSnapshot.forEach((doc) => {
+        batch.update(doc.ref, { deleted: true });
+      });
+
+      // Commit the batch
+      await batch.commit();
+
+      return { ids: [id_sale] };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 

@@ -8,8 +8,8 @@ import {
 import { setLoadingMainViewAction } from '../main';
 import {
   getAllDocuments,
-  deleteRecordById,
   insertDocument,
+  firestore,
 } from '@utils/firebaseMethods';
 import { customerCreateAction, customerUpdateAction } from '../customer';
 import { setOldBudget } from '../budget';
@@ -186,35 +186,32 @@ export const purchaseUpdateAction = createAsyncThunk(
 export const purchaseDeleteAction = createAsyncThunk(
   'purchase/delete',
   async ({ id_purchase }, { rejectWithValue }) => {
-    try {
-      const deletePromises = [
-        // Delete purchase record
-        deleteRecordById({
-          collectionName: firebaseCollections.PURCHASE,
-          filterBy: [
-            {
-              field: firebaseCollectionsKey.purchase,
-              condition: '==',
-              value: id_purchase,
-            },
-          ],
-        }),
-        // Delete associated purchase details
-        deleteRecordById({
-          collectionName: firebaseCollections.PURCHASE_DETAIL,
-          filterBy: [
-            {
-              field: firebaseCollectionsKey.purchase,
-              condition: '==',
-              value: id_purchase,
-              reference: true,
-            },
-          ],
-        }),
-      ];
+    const batch = firestore.batch();
 
-      const [purchase] = await Promise.all(deletePromises);
-      return purchase;
+    try {
+      // Update Purchase
+      const purchaseRef = firestore
+        .collection(firebaseCollections.PURCHASE)
+        .doc(id_purchase);
+      batch.update(purchaseRef, { deleted: true });
+
+      // Update Purchase Details
+      const purchaseDetailsSnapshot = await firestore
+        .collection(firebaseCollections.PURCHASE_DETAIL)
+        .where(
+          firebaseCollectionsKey.purchase,
+          '==',
+          firestore.doc(`${firebaseCollections.PURCHASE}/${id_purchase}`)
+        )
+        .get();
+      purchaseDetailsSnapshot.forEach((doc) => {
+        batch.update(doc.ref, { deleted: true });
+      });
+
+      // Commit the batch
+      await batch.commit();
+
+      return { ids: [id_purchase] };
     } catch (error) {
       return rejectWithValue(error);
     }
