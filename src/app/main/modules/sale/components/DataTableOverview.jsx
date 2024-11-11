@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
+import { useSelector } from 'react-redux';
 import DataItem from './DataItem';
 import { formatNumber } from '@utils';
 
 const DataTableOverview = ({ saleList }) => {
   const theme = useTheme();
+  const purchaseDetailsResult = useSelector(
+    (state) => state.sale.purchaseDetailsResult
+  );
   const [statistics, setStatistics] = useState({
     totalQuantity: '0.00',
     totalLbPriceless: '0.00',
     totalTruckloadsSent: '0.00',
     totalTruckloadsReceived: '0.00',
     totalLbSold: '0.00',
+    totalLbAvailable: '0.00',
+    totalLbAvailablePriceless: '0.00',
   });
   const [isQuintales, setIsQuintales] = useState(false);
 
@@ -45,6 +51,12 @@ const DataTableOverview = ({ saleList }) => {
         totalTruckloadsSent: formatNumber(totalTruckloadsSent),
         totalTruckloadsReceived: formatNumber(totalTruckloadsReceived),
         totalLbSold: formatNumber(totalLbSold),
+        totalLbAvailable: formatNumber(
+          purchaseDetailsResult?.totalLbAvailable || 0
+        ),
+        totalLbAvailablePriceless: formatNumber(
+          purchaseDetailsResult?.totalLbAvailablePriceless || 0
+        ),
       });
     } else {
       setStatistics({
@@ -53,9 +65,15 @@ const DataTableOverview = ({ saleList }) => {
         totalTruckloadsSent: '0.00',
         totalTruckloadsReceived: '0.00',
         totalLbSold: '0.00',
+        totalLbAvailable: formatNumber(
+          purchaseDetailsResult?.totalLbAvailable || 0
+        ),
+        totalLbAvailablePriceless: formatNumber(
+          purchaseDetailsResult?.totalLbAvailablePriceless || 0
+        ),
       });
     }
-  }, [saleList]);
+  }, [saleList, purchaseDetailsResult]);
 
   const toggleUnit = () => {
     setIsQuintales(!isQuintales);
@@ -71,10 +89,10 @@ const DataTableOverview = ({ saleList }) => {
         <DataItem
           value={
             isQuintales
-              ? convertToQuintales(statistics.totalQuantity)
-              : statistics.totalQuantity
+              ? convertToQuintales(statistics.totalLbAvailable)
+              : statistics.totalLbAvailable
           }
-          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Disponibles`}
+          label={`Total ${isQuintales ? 'qq' : 'lb'} disponibles`}
           backgroundColor={theme.palette.primary.main}
           color={theme.palette.primary.contrastText}
           onClick={toggleUnit}
@@ -82,10 +100,10 @@ const DataTableOverview = ({ saleList }) => {
         <DataItem
           value={
             isQuintales
-              ? convertToQuintales(statistics.totalLbPriceless)
-              : statistics.totalLbPriceless
+              ? convertToQuintales(statistics.totalLbAvailablePriceless)
+              : statistics.totalLbAvailablePriceless
           }
-          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Sin Precio`}
+          label={`Total ${isQuintales ? 'qq' : 'lb'} sin precio`}
           backgroundColor={theme.palette.balance.background}
           color={theme.palette.balance.text}
           onClick={toggleUnit}
@@ -96,9 +114,9 @@ const DataTableOverview = ({ saleList }) => {
               ? convertToQuintales(statistics.totalTruckloadsSent)
               : statistics.totalTruckloadsSent
           }
-          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} ${
-            isQuintales ? 'Enviados' : 'Enviadas'
-          }`}
+          label={`Total ${isQuintales ? 'qq' : 'lb'} ${
+            isQuintales ? 'enviados' : 'enviadas'
+          } a Beneficio`}
           backgroundColor={theme.palette.totalQuantity.background}
           color={theme.palette.totalQuantity.text}
           onClick={toggleUnit}
@@ -109,9 +127,9 @@ const DataTableOverview = ({ saleList }) => {
               ? convertToQuintales(statistics.totalTruckloadsReceived)
               : statistics.totalTruckloadsReceived
           }
-          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} ${
-            isQuintales ? 'Recibidos' : 'Recibidas'
-          }`}
+          label={`Total ${isQuintales ? 'qq' : 'lb'} ${
+            isQuintales ? 'recibidos' : 'recibidas'
+          } en Beneficio`}
           backgroundColor={theme.palette.info.main}
           color={theme.palette.info.contrastText}
           onClick={toggleUnit}
@@ -122,8 +140,8 @@ const DataTableOverview = ({ saleList }) => {
               ? convertToQuintales(statistics.totalLbSold)
               : statistics.totalLbSold
           }
-          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} ${
-            isQuintales ? 'Vendidos' : 'Vendidas'
+          label={`Total ${isQuintales ? 'qq' : 'lb'} ${
+            isQuintales ? 'vendidos' : 'vendidas'
           }`}
           backgroundColor={theme.palette.success.main}
           color={theme.palette.success.contrastText}

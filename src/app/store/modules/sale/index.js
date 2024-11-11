@@ -12,25 +12,34 @@ import {
   insertDocument,
 } from '@utils/firebaseMethods';
 import { beneficioCreateAction, beneficioUpdateAction } from '../beneficio';
-import { setOldBudget } from '../budget';
 
 export const saleListAction = createAsyncThunk(
   'sale/list',
   async (_, { rejectWithValue, getState }) => {
     try {
       const state = getState();
-      let { rowSales, rowSaleDetails, rowTruckloads } = state.sale;
+      let { rowSales, rowSaleDetails, rowTruckloads, rowPurchaseDetails } =
+        state.sale;
 
       if (
         rowSales.length > 0 &&
-        // rowSaleDetails.length > 0 &&
-        rowTruckloads.length > 0
+        rowTruckloads.length > 0 &&
+        rowPurchaseDetails.length > 0
       ) {
+        const { saleList, purchaseDetailsResult } = saleDto.saleList(
+          rowSales,
+          rowSaleDetails,
+          rowTruckloads,
+          rowPurchaseDetails
+        );
         return {
           isUpdateNeeded: false,
           rowSales,
           rowSaleDetails,
           rowTruckloads,
+          rowPurchaseDetails,
+          saleList,
+          purchaseDetailsResult,
         };
       }
 
@@ -78,15 +87,36 @@ export const saleListAction = createAsyncThunk(
         })
       );
 
+      // Get all purchase details
+      rowPurchaseDetails = await getAllDocuments({
+        collectionName: firebaseCollections.PURCHASE_DETAIL,
+        excludeReferences: [
+          'id_purchase_detail_remate',
+          firebaseCollectionsKey.purchase,
+          firebaseCollectionsKey.budget,
+        ],
+      });
+
       // Flatten the array of arrays
       rowSaleDetails = rowSaleDetails.flat();
       rowTruckloads = rowTruckloads.flat();
+      rowPurchaseDetails = rowPurchaseDetails.data;
+
+      const { saleList, purchaseDetailsResult } = saleDto.saleList(
+        rowSales,
+        rowSaleDetails,
+        rowTruckloads,
+        rowPurchaseDetails
+      );
 
       return {
         isUpdateNeeded: true,
         rowSales,
         rowSaleDetails,
         rowTruckloads,
+        rowPurchaseDetails,
+        saleList,
+        purchaseDetailsResult,
       };
     } catch (error) {
       return rejectWithValue(error);
@@ -286,6 +316,8 @@ const initialState = {
   rowSales: [], // Updated in saleListAction.fulfilled
   rowSaleDetails: [], // Updated in saleListAction.fulfilled and updateSaleListDetailsAction.fulfilled
   rowTruckloads: [], // Updated in saleListAction.fulfilled
+  rowPurchaseDetails: [], // Updated in saleListAction.fulfilled
+  purchaseDetailsResult: null,
 };
 
 export const saleSlice = createSlice({
@@ -313,17 +345,15 @@ export const saleSlice = createSlice({
     });
     builder.addCase(saleListAction.fulfilled, (state, { payload }) => {
       if (payload.isUpdateNeeded) {
-        state.saleList = saleDto.saleList(
-          payload.rowSales,
-          payload.rowSaleDetails,
-          payload.rowTruckloads
-        );
-        // Update rowSales, rowSaleDetails, and rowTruckloads
+        state.saleList = payload.saleList;
+        state.purchaseDetailsResult = payload.purchaseDetailsResult;
+        // Update rowSales, rowSaleDetails, rowTruckloads, and rowPurchaseDetails
         state.rowSales = payload.rowSales;
         state.rowSaleDetails = payload.rowSaleDetails;
         state.rowTruckloads = payload.rowTruckloads;
+        state.rowPurchaseDetails = payload.rowPurchaseDetails;
       }
-      state.totalItems = payload.length;
+      state.totalItems = payload.rowSales.length;
       state.processing = false;
     });
 
@@ -401,6 +431,14 @@ export const saleSlice = createSlice({
       state.rowTruckloads = state.rowTruckloads.filter(
         (truckload) => truckload.id_sale !== id_sale
       );
+      const { saleList, purchaseDetailsResult } = saleDto.saleList(
+        state.rowSales,
+        state.rowSaleDetails,
+        state.rowTruckloads,
+        state.rowPurchaseDetails
+      );
+      state.saleList = saleList;
+      state.purchaseDetailsResult = purchaseDetailsResult;
       state.processing = false;
     });
 
@@ -410,28 +448,37 @@ export const saleSlice = createSlice({
       (state, { payload }) => {
         // Update rowSaleDetails
         state.rowSaleDetails = [...payload];
-        state.saleList = saleDto.saleList(
+        const { saleList, purchaseDetailsResult } = saleDto.saleList(
           state.rowSales,
           state.rowSaleDetails,
-          state.rowTruckloads
+          state.rowTruckloads,
+          state.rowPurchaseDetails
         );
+        state.saleList = saleList;
+        state.purchaseDetailsResult = purchaseDetailsResult;
       }
     );
     builder.addCase(
       updateSaleListTruckloadsAction.fulfilled,
       (state, { payload }) => {
         state.rowTruckloads = [...payload];
-        state.saleList = saleDto.saleList(
+        const { saleList, purchaseDetailsResult } = saleDto.saleList(
           state.rowSales,
           state.rowSaleDetails,
-          state.rowTruckloads
+          state.rowTruckloads,
+          state.rowPurchaseDetails
         );
+        state.saleList = saleList;
+        state.purchaseDetailsResult = purchaseDetailsResult;
       }
     );
   },
 });
 
-export const { clearSaleSelected, clearSalePaymentSelected } =
-  saleSlice.actions;
+export const {
+  clearSaleSelected,
+  clearSalePaymentSelected,
+  setNewGeneralTotal,
+} = saleSlice.actions;
 
 export default saleSlice.reducer;

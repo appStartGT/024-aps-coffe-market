@@ -169,7 +169,7 @@ export const createRemateBeneficioAction = createAsyncThunk(
         .doc();
       batch.set(dataAveragePriceRef, {
         id_average_price: dataAveragePriceRef.id,
-        price: accumulated.price,
+        price: accumulated ? accumulated.price : data.price,
         quantity: data.quantity,
         isSold: true,
         deleted: false,

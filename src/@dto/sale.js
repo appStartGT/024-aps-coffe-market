@@ -107,14 +107,43 @@ const saleModel = (sale, sale_details, truckloads) => {
     )} qq`,
     totalLbsSold: totalLbsSold,
     totalLbsSoldFormatted: `${formatNumber(totalLbsSold)} lb`,
-    totalQQSold: formatNumber(totalLbsSold / 100), 
+    totalQQSold: formatNumber(totalLbsSold / 100),
     totalQQSoldFormatted: `${formatNumber(totalLbsSold / 100)} qq`,
   };
   return obj;
 };
 
-export const saleList = (data, sale_details, truckloads) => {
-  return data.map((item) => saleModel(item, sale_details, truckloads));
+const calculatePurchaseDetailsResult = (purchase_details) => {
+  const totalLbAvailable = purchase_details
+    ?.filter((detail) => !detail.isPriceless && !detail.isSold)
+    .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0);
+  const totalLbAvailablePriceless = purchase_details
+    ?.filter((detail) => detail.isPriceless && !detail.isSold)
+    .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0);
+
+  return {
+    totalLbAvailable: totalLbAvailable,
+    totalLbAvailableFormatted: `${formatNumber(totalLbAvailable)} lb`,
+    totalQQAvailable: formatNumber(totalLbAvailable / 100),
+    totalQQAvailableFormatted: `${formatNumber(totalLbAvailable / 100)} qq`,
+    totalLbAvailablePriceless: totalLbAvailablePriceless,
+    totalLbAvailablePricelessFormatted: `${formatNumber(
+      totalLbAvailablePriceless
+    )} lb`,
+    totalQQAvailablePriceless: formatNumber(totalLbAvailablePriceless / 100),
+    totalQQAvailablePricelessFormatted: `${formatNumber(
+      totalLbAvailablePriceless / 100
+    )} qq`,
+  };
+};
+
+export const saleList = (data, sale_details, truckloads, purchase_details) => {
+  return {
+    saleList: data.map((item) =>
+      saleModel(item, sale_details, truckloads, purchase_details)
+    ),
+    purchaseDetailsResult: calculatePurchaseDetailsResult(purchase_details),
+  };
 };
 
 export const saleGetOne = (sale) => saleModel(sale);

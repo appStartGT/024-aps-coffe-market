@@ -65,15 +65,23 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   };
 
   const onButtonClick = async () => {
-    const selectedPricesData = purchaseDetails.filter((detail) =>
-      selectedPrices.includes(detail.price)
-    );
+    if (!manualPrice || !isPriceValid) {
+      console.error('Invalid manual price');
+      return;
+    }
+
+    const selectedPricesData =
+      purchaseDetails?.filter((detail) =>
+        selectedPrices.includes(detail.price)
+      ) || [];
+
     const data = {
       price: parseFloat(manualPrice),
       quantity: totalNeeded,
       total: totalNeeded * parseFloat(manualPrice),
       id_sale,
     };
+
     const accumulated =
       excedent > 0
         ? {
@@ -82,18 +90,19 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
           }
         : null;
 
-    await dispatch(
-      createRemateBeneficioAction({
-        selectedPrices: selectedPricesData,
-        data,
-        accumulated,
-        truckloadsSelected: selectedTruckloads,
-      })
-    )
-      .unwrap()
-      .then(() => {
-        onClose();
-      });
+    try {
+      await dispatch(
+        createRemateBeneficioAction({
+          selectedPrices: selectedPricesData,
+          data,
+          accumulated,
+          truckloadsSelected: selectedTruckloads,
+        })
+      ).unwrap();
+      onClose();
+    } catch (error) {
+      console.error('Error in createRemateBeneficioAction:', error);
+    }
   };
 
   return (
