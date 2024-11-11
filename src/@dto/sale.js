@@ -8,16 +8,6 @@ const saleModel = (sale, sale_details, truckloads) => {
     ...detail,
   }));
 
-  const totalAdvancePayments = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (detail.advancePayments?.reduce(
-        (detailSum, payment) => detailSum + (Number(payment.amount) || 0),
-        0
-      ) || 0),
-    0
-  );
-
   const totalPricedAmount = relevantDetails.reduce(
     (sum, detail) =>
       sum +
@@ -29,10 +19,7 @@ const saleModel = (sale, sale_details, truckloads) => {
 
   const totalLbPriced = relevantDetails.reduce(
     (sum, detail) =>
-      sum +
-      (!detail.isPriceless && !detail.isRemate
-        ? Number(detail.quantity) || 0
-        : 0),
+      sum + (!detail.isPriceless ? Number(detail.quantity) || 0 : 0),
     0
   );
 
@@ -44,20 +31,6 @@ const saleModel = (sale, sale_details, truckloads) => {
         : 0),
     0
   );
-
-  const totalLbRemate = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (detail.isRemate && !detail.isPriceless
-        ? Number(detail.quantity) || 0
-        : 0),
-    0
-  );
-
-  const totalLbQuantity = totalLbPriced + totalLbPriceless + totalLbRemate;
-
-  const averagePrice =
-    totalLbPriced > 0 ? totalPricedAmount / (totalLbPriced + totalLbRemate) : 0;
 
   const totalDebt = relevantDetails.reduce((sum, detail) => {
     if (
@@ -112,27 +85,30 @@ const saleModel = (sale, sale_details, truckloads) => {
     address: sale?.address || sale.beneficio?.address || '',
     isActive: sale.isActive || false,
     updatedAt: formatFirebaseTimestamp(sale.updatedAt),
-    averagePriceFormatted: `Q ${formatNumber(averagePrice)}`,
-    totalAdvancePaymentsFormatted: `Q ${formatNumber(totalAdvancePayments)}`,
-    totalLbRemateFormatted: formatNumber(totalLbRemate),
     totalLbPricedFormatted: formatNumber(totalLbPriced),
     totalLbPricelessFormatted: formatNumber(totalLbPriceless),
     totalDebtFormatted: `Q ${formatNumber(totalDebt)}`,
     totalPricedAmountFormatted: formatNumber(totalPricedAmount),
-    averagePrice: averagePrice,
-    totalAdvancePayments: totalAdvancePayments,
-    totalLbRemate: totalLbRemate,
     totalLbPriced: totalLbPriced,
     totalLbPriceless: totalLbPriceless,
-    totalLbQuantity: totalLbQuantity,
     totalPricedAmount: totalPricedAmount,
     totalDebt: totalDebt,
     totalTruckloadsSent: totalTruckloadsSent,
+    totalTruckloadsSentFormatted: `${formatNumber(totalTruckloadsSent)} lb`,
+    totalTruckloadsSentQQFormatted: `${formatNumber(
+      totalTruckloadsSent / 100
+    )} qq`,
     totalTruckloadsReceived: totalTruckloadsReceived,
-    totalTruckloadsSentFormatted: formatNumber(totalTruckloadsSent),
-    totalTruckloadsReceivedFormatted: formatNumber(totalTruckloadsReceived),
+    totalTruckloadsReceivedFormatted: `${formatNumber(
+      totalTruckloadsReceived
+    )} lb`,
+    totalTruckloadsReceivedQQFormatted: `${formatNumber(
+      totalTruckloadsReceived / 100
+    )} qq`,
     totalLbsSold: totalLbsSold,
-    totalLbsSoldFormatted: formatNumber(totalLbsSold),
+    totalLbsSoldFormatted: `${formatNumber(totalLbsSold)} lb`,
+    totalQQSold: formatNumber(totalLbsSold / 100), 
+    totalQQSoldFormatted: `${formatNumber(totalLbsSold / 100)} qq`,
   };
   return obj;
 };

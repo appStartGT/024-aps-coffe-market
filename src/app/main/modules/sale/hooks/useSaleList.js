@@ -17,17 +17,14 @@ const useSaleList = () => {
   const saleList = useSelector((state) => state.sale.saleList);
   const totalItems = useSelector((state) => state.sale.totalItems);
   const processing = useSelector((state) => state.sale.processing);
-  const saleListDetails = useSelector((state) => state.sale.saleListDetails);
 
   const [searchList, setSearchList] = useState(null);
   const [searchText, setSearchText] = useState('');
+  const [isQuintales, setIsQuintales] = useState(false);
 
   useEffect(() => {
     dispatch(saleListAction());
     dispatch(catTruckloadLicensePlateCatalogAction());
-  }, [dispatch]);
-
-  useEffect(() => {
     dispatch(clearAllSaleDetails());
   }, [dispatch]);
 
@@ -43,6 +40,10 @@ const useSaleList = () => {
     );
   };
 
+  const toggleUnit = () => {
+    setIsQuintales((prevState) => !prevState);
+  };
+
   const columns = [
     {
       field: 'name',
@@ -54,19 +55,54 @@ const useSaleList = () => {
     },
     {
       field: 'totalTruckloadsSentFormatted',
-      headerName: 'Total Lb Enviadas',
+      headerName: `Total ${isQuintales ? 'Enviados' : 'Enviadas'} (${
+        isQuintales ? 'qq' : 'lb'
+      })`,
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalTruckloadsSentQQFormatted
+            : params.row.totalTruckloadsSentFormatted}
+        </div>
+      ),
     },
     {
       field: 'totalTruckloadsReceivedFormatted',
-      headerName: 'Total Lb Recibidas',
+      headerName: `Total ${isQuintales ? 'Recibidos' : 'Recibidas'} (${
+        isQuintales ? 'qq' : 'lb'
+      }) `,
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalTruckloadsReceivedQQFormatted
+            : params.row.totalTruckloadsReceivedFormatted}
+        </div>
+      ),
+    },
+    {
+      field: 'totalLbsSoldFormatted',
+      headerName: `Total ${isQuintales ? 'Vendidos' : 'Vendidas'} (${
+        isQuintales ? 'qq' : 'lb'
+      })`,
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalQQSoldFormatted
+            : params.row.totalLbsSoldFormatted}
+        </div>
+      ),
     },
     {
       field: 'createdAtFormat',
@@ -143,25 +179,17 @@ const useSaleList = () => {
     },
   };
 
-  const labels = {
-    fullName: 'Nombre Completo',
-    createdAtFormatted: 'Fecha',
-    totalAmountFormatted: 'Total Venta',
-  };
-  const fields = ['fullName', 'createdAtFormatted', 'totalAmountFormatted'];
-
   return {
     columns,
     saleList,
-    saleListDetails,
     processing,
     propsSearchBarButton,
     searchList,
     setSearchList,
     totalItems,
-    labels,
-    fields,
     searchText,
+    isQuintales,
+    toggleUnit,
   };
 };
 

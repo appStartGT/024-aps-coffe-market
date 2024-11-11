@@ -20,6 +20,7 @@ const useTruckload = () => {
   const dispatch = useDispatch();
   const [searchList, setSearchList] = useState(null);
   const [selectionModel, setSelectionModel] = useState([]);
+  const [isQuintales, setIsQuintales] = useState(false);
   const processing = useSelector((state) => state.truckload.processing);
   const truckloadList = useSelector((state) => state.truckload.truckloadList);
   const rowTruckloads = useSelector((state) => state.sale.rowTruckloads);
@@ -36,12 +37,16 @@ const useTruckload = () => {
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
 
+  const toggleUnit = () => {
+    setIsQuintales((prevState) => !prevState);
+  };
+
   const propsSearchBarButton = {
-    label: 'Buscar por Libras / Precio / Total',
+    label: 'Buscar por Placa',
     type: 'text',
     searchList: truckloadList,
     searchResults: (results) => setSearchList(results),
-    searchKey: 'quantity, priceFormat, totalFormat',
+    searchKey: 'licensePlate',
     rightButton: {
       icon: 'add_circle',
       onClick: () =>
@@ -72,15 +77,29 @@ const useTruckload = () => {
     },
     {
       field: 'totalSentFormated',
-      headerName: 'Total enviado',
+      headerName: `Total enviado (${isQuintales ? 'qq' : 'lb'})`,
       flex: 1,
       disableColumnMenu: true,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalSentQQFormated
+            : params.row.totalSentFormated}
+        </div>
+      ),
     },
     {
       field: 'totalReceivedFormated',
-      headerName: 'Total recibido',
+      headerName: `Total recibido (${isQuintales ? 'qq' : 'lb'})`,
       flex: 1,
       disableColumnMenu: true,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalReceivedQQFormated
+            : params.row.totalReceivedFormated}
+        </div>
+      ),
     },
     {
       field: 'colillaUrl',
@@ -231,6 +250,8 @@ const useTruckload = () => {
     setSelectionModel,
     handleRemate,
     totalReceivedSelected,
+    isQuintales,
+    toggleUnit,
   };
 };
 

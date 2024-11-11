@@ -10,34 +10,17 @@ const saleDetailModel = (saleDetail) => {
     price: saleDetail?.price,
     quantity: saleDetail?.quantity,
     quantityFormated: `${formatNumber(saleDetail?.quantity)} lb`,
+    quantityQQFormated: `${formatNumber(saleDetail?.quantity / 100)} qq`,
     total: saleDetail?.total,
     totalFormat: `Q${formatNumber(saleDetail?.quantity * saleDetail?.price)}`,
     isPriceless: saleDetail?.isPriceless,
-    id_cat_payment_method: saleDetail?.id_cat_payment_method,
     createdAt: formatFirebaseTimestamp(
       saleDetail.createdAt,
       'DD/MM/YYYY:HH:mm'
     ),
     createdBy: saleDetail.createdBy || '',
     isActive: saleDetail.isActive || false,
-    key: saleDetail.key || '',
     updatedAt: formatFirebaseTimestamp(saleDetail.updatedAt),
-    advancePayments: saleDetail?.advancePayments || [],
-    advancePaymentAmount: `Q${formatNumber(
-      saleDetail?.advancePayments?.reduce(
-        (sum, payment) => sum + (payment.amount || 0),
-        0
-      )
-    )}`,
-    isPaid:
-      !saleDetail.isPriceless &&
-      (!saleDetail?.advancePayments?.length ||
-        saleDetail?.advancePayments?.reduce(
-          (sum, payment) => sum + (payment.amount || 0),
-          0
-        ) ===
-          saleDetail?.quantity * saleDetail?.price),
-    isRemate: saleDetail?.isRemate || false,
     id_sale_detail_remate: saleDetail?.id_sale_detail_remate || '',
   };
   return obj;

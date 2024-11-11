@@ -27,6 +27,8 @@ const truckloadGetModel = (truckload) => {
     ...truckloadModel(truckload),
     totalSentFormated: `${formatNumber(truckload.totalSent)} lb`,
     totalReceivedFormated: `${formatNumber(truckload.totalReceived)} lb`,
+    totalSentQQFormated: `${formatNumber(truckload.totalSent / 100)} qq`,
+    totalReceivedQQFormated: `${formatNumber(truckload.totalReceived / 100)} qq`, 
     colillaUrl: truckload.colilla?.url,
   };
 };
