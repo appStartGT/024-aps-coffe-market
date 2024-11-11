@@ -4,7 +4,6 @@ import { Paper } from '@mui/material';
 import useExpensesList from '../hooks/useExpensesList';
 import ApsModal from '@components/ApsModal';
 import SearchBar from '@components/SearchBar';
-import DataTableOverview from '../components/DataTableOverview';
 
 const stylesPaper = {
   padding: '16px',
@@ -20,7 +19,7 @@ const ExpensesListPage = () => {
     expensesList,
     propsModalDeleteExpense,
   } = useExpensesList();
-  
+
   return (
     <GeneralContainer
       title="Egresos Varios"

@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Delete, Edit, ShoppingCart } from '@mui/icons-material';
+import { Edit, ShoppingCart } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
-import { Typography } from '@mui/material';
-import {
-  purchaseListAction,
-  purchaseDeleteAction,
-} from '../../../../store/modules/purchase';
+import { purchaseListAction } from '../../../../store/modules/purchase';
 import { getBudgetAction } from '../../../../store/modules/budget';
 import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetail';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
@@ -29,8 +25,6 @@ const usePurchaseList = () => {
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
   /* States */
   const [searchList, setSearchList] = useState(null);
-  const [openModalDelete, setOpenModalDelete] = useState(false);
-  const [purchaseToDelete, setPurchaseToDelete] = useState({});
   const [, setText] = useState('');
   const [isQuintales, setIsQuintales] = useState(false);
 
@@ -162,6 +156,18 @@ const usePurchaseList = () => {
               justifyContent: 'center',
             }}
           >
+            <ApsIconButton
+              tooltip={{ title: 'Comprar' }}
+              onClick={() =>
+                handleOpenPurchaseDetailModal(params.row.id_purchase)
+              }
+              children={<ShoppingCart color="primary" />}
+              can={{
+                key: `can-buy-purchase-${params.row.id_purchase}`,
+                I: Actions.CREATE,
+                a: Subjects.PURCHASES,
+              }}
+            />
             {params.row.id_purchase && (
               <ApsIconButton
                 tooltip={{ title: 'Editar registro' }}
@@ -176,30 +182,6 @@ const usePurchaseList = () => {
                 }}
               />
             )}
-            {params.row.id_purchase && (
-              <ApsIconButton
-                tooltip={{ title: 'Eliminar compra' }}
-                onClick={() => handleOpenDelete(params.row)}
-                children={<Delete color="error" />}
-                can={{
-                  key: `can-delete-purchase-${params.row.id_purchase}`,
-                  I: Actions.DELETE,
-                  a: Subjects.PURCHASES,
-                }}
-              />
-            )}
-            <ApsIconButton
-              tooltip={{ title: 'Comprar' }}
-              onClick={() =>
-                handleOpenPurchaseDetailModal(params.row.id_purchase)
-              }
-              children={<ShoppingCart color="primary" />}
-              can={{
-                key: `can-buy-purchase-${params.row.id_purchase}`,
-                I: Actions.CREATE,
-                a: Subjects.PURCHASES,
-              }}
-            />
           </div>
         );
       },
@@ -225,41 +207,6 @@ const usePurchaseList = () => {
     },
   };
 
-  const handleCloseDelete = () => {
-    setPurchaseToDelete({});
-    setOpenModalDelete(false);
-  };
-
-  const handleOpenDelete = (data) => {
-    setOpenModalDelete(true);
-    setPurchaseToDelete(data);
-  };
-
-  const handleDelete = () => {
-    dispatch(
-      purchaseDeleteAction({
-        id_purchase: purchaseToDelete.id_purchase,
-      })
-    );
-    setOpenModalDelete(false);
-  };
-
-  const propsModalDeletePurchase = {
-    open: openModalDelete,
-    onClose: () => handleCloseDelete(),
-    title: 'Eliminar compra',
-    content: (
-      <Typography>{`Está seguro que desea eliminar la compra "${purchaseToDelete.name}" permanentemente?`}</Typography>
-    ),
-    handleOk: () => handleDelete(),
-    titleOk: 'Eliminar',
-    handleCancel: () => handleCloseDelete(),
-    titleCancel: 'Cancelar',
-    okProps: {
-      color: 'error',
-      endIcon: <Delete />,
-    },
-  };
   const labels = {
     fullName: 'Nombre Completo',
     createdAt: 'Fecha',
@@ -272,7 +219,6 @@ const usePurchaseList = () => {
     purchaseList,
     purchaseListDetails,
     processing,
-    propsModalDeletePurchase,
     propsSearchBarButton,
     searchList,
     setSearchList,

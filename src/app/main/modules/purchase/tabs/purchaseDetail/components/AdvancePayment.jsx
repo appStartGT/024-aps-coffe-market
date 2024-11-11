@@ -28,8 +28,8 @@ const AdvancePayment = ({
         return false;
       }
       const parsedAmount = parseFloat(amount);
-      if (isNaN(parsedAmount) || parsedAmount <= 0) {
-        setError('Por favor, ingrese un número válido mayor que cero');
+      if (isNaN(parsedAmount) || parsedAmount < 0) {
+        setError('Por favor, ingrese un número válido mayor o igual a cero');
         return false;
       }
       const totalAmount =
@@ -59,7 +59,7 @@ const AdvancePayment = ({
   );
 
   useEffect(() => {
-    if (advancePaymentAmount) {
+    if (advancePaymentAmount !== '') {
       validateAmount(advancePaymentAmount);
     }
   }, [

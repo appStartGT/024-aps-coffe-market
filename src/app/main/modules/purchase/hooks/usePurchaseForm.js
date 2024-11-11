@@ -2,15 +2,16 @@ import React from 'react';
 import { useFormikFields, useMountEffect } from '@hooks';
 import { LocationOn, Phone, RecentActors } from '@mui/icons-material';
 import { InputAdornment } from '@mui/material';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   purchaseCreateAction,
   purchaseUpdateAction,
+  purchaseDeleteAction,
 } from '../../../../store/modules/purchase';
 import { fieldValidations } from '@utils';
-import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import Email from '@mui/icons-material/Email';
+import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 
 const usePurchaseForm = ({ navigate }) => {
   /* HOOKS */
@@ -49,7 +50,6 @@ const usePurchaseForm = ({ navigate }) => {
         name: 'email',
         gridItem: true,
         gridProps: { md: 3 },
-        // validations: fieldValidations.emailRequired,
         InputProps: {
           endAdornment: (
             <InputAdornment position="end">
@@ -63,7 +63,6 @@ const usePurchaseForm = ({ navigate }) => {
         label: 'Teléfono',
         name: 'phone',
         gridItem: true,
-        // validations: fieldValidations.telephoneRequired,
         gridProps: { md: 3 },
         inputProps: { maxLength: 8 },
         InputProps: {
@@ -113,9 +112,6 @@ const usePurchaseForm = ({ navigate }) => {
         multiline: true,
         rows: 4,
         inputProps: { maxLength: 255 },
-        // validations: fieldValidations.requiredCustom(
-        //   'La dirección es requerida.'
-        // ),
         InputProps: {
           endAdornment: (
             <InputAdornment position="end">
@@ -158,9 +154,38 @@ const usePurchaseForm = ({ navigate }) => {
     }
   };
 
+  const handleDelete = () => {
+    if (id_purchase && id_purchase !== '0') {
+      dispatch(
+        setApsGlobalModalPropsAction({
+          open: true,
+          maxWidth: 'xs',
+          title: 'Eliminar Cliente',
+          description:
+            '¿Está seguro que desea eliminar este registro? Esta acción eliminará toda la información asociada.',
+          content: null,
+          handleOk: () => {
+            dispatch(purchaseDeleteAction({ id_purchase }))
+              .unwrap()
+              .then(() => {
+                navigate('/main/purchase');
+              });
+            dispatch(setApsGlobalModalPropsAction({}));
+          },
+          handleCancel: true,
+          titleOk: 'Eliminar',
+          okProps: {
+            color: 'error',
+          },
+        })
+      );
+    }
+  };
+
   return {
     formikPurchase,
     handleOnclick,
+    handleDelete,
     purchaseSelected,
     loading,
   };

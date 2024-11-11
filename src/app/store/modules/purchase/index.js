@@ -186,18 +186,38 @@ export const purchaseUpdateAction = createAsyncThunk(
 export const purchaseDeleteAction = createAsyncThunk(
   'purchase/delete',
   async ({ id_purchase }, { rejectWithValue }) => {
-    return await deleteRecordById({
-      collectionName: firebaseCollections.PURCHASE,
-      filterBy: [
-        {
-          field: firebaseCollectionsKey.purchase,
-          condition: '==',
-          value: id_purchase,
-        },
-      ],
-    })
-      .then((res) => res)
-      .catch((res) => rejectWithValue(res));
+    try {
+      const deletePromises = [
+        // Delete purchase record
+        deleteRecordById({
+          collectionName: firebaseCollections.PURCHASE,
+          filterBy: [
+            {
+              field: firebaseCollectionsKey.purchase,
+              condition: '==',
+              value: id_purchase,
+            },
+          ],
+        }),
+        // Delete associated purchase details
+        deleteRecordById({
+          collectionName: firebaseCollections.PURCHASE_DETAIL,
+          filterBy: [
+            {
+              field: firebaseCollectionsKey.purchase,
+              condition: '==',
+              value: id_purchase,
+              reference: true,
+            },
+          ],
+        }),
+      ];
+
+      const [purchase] = await Promise.all(deletePromises);
+      return purchase;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
   }
 );
 

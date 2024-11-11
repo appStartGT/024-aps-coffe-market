@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { Delete, Edit, ShoppingCart } from '@mui/icons-material';
+import { Delete, Edit } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { Typography } from '@mui/material';
 import {
@@ -18,7 +17,6 @@ import { catExpenseTypeCatalogAction } from '../../../../store/modules/catalogs'
 const useExpensesList = () => {
   /* hooks */
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   /* selectors */
   const expensesList = useSelector((state) => state.expense.expenseList);
