@@ -10,6 +10,7 @@ const purchaseDetailModel = (purchaseDetail) => {
     price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,
     quantityFormated: `${formatNumber(purchaseDetail?.quantity)} lb`,
+    quantityQQFormated: `${formatNumber(purchaseDetail?.quantity / 100)} qq`,
     total: purchaseDetail?.total,
     totalFormat: `Q${formatNumber(
       purchaseDetail?.quantity * purchaseDetail?.price

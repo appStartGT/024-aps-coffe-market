@@ -32,6 +32,7 @@ const usePurchaseList = () => {
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [purchaseToDelete, setPurchaseToDelete] = useState({});
   const [, setText] = useState('');
+  const [isQuintales, setIsQuintales] = useState(false);
 
   /* use Effects */
 
@@ -45,10 +46,9 @@ const usePurchaseList = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // if (allPurchaseDetails && allPurchaseDetails.length > 0) {
     dispatch(clearAllPurchaseDetails());
-    // }
   }, [dispatch]);
+
   const handleOpenPurchaseDetailModal = (id_purchase) => {
     dispatch(
       setApsGlobalModalPropsAction({
@@ -61,6 +61,10 @@ const usePurchaseList = () => {
     );
   };
 
+  const toggleUnit = () => {
+    setIsQuintales((prevState) => !prevState);
+  };
+
   const columns = [
     {
       field: 'fullName',
@@ -70,30 +74,50 @@ const usePurchaseList = () => {
       minWidth: 100,
       flex: 1,
     },
-
     {
       field: 'totalLbPricedFormatted',
-      headerName: 'Total Lb',
+      headerName: `Total ${isQuintales ? '(qq)' : '(lb)'}`,
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalQQPricedFormatted
+            : params.row.totalLbPricedFormatted}
+        </div>
+      ),
     },
     {
       field: 'totalLbPricelessFormatted',
-      headerName: 'Total Lb Sin Precio',
+      headerName: `Total Sin Precio ${isQuintales ? '(qq)' : '(lb)'}`,
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1.5,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalQQPricelessFormatted
+            : params.row.totalLbPricelessFormatted}
+        </div>
+      ),
     },
     {
       field: 'totalLbRemateFormatted',
-      headerName: 'Total Lb Remate',
+      headerName: `Total Remate ${isQuintales ? '(qq)' : '(lb)'}`,
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
       flex: 1,
+      renderCell: (params) => (
+        <div onClick={toggleUnit} style={{ cursor: 'pointer' }}>
+          {isQuintales
+            ? params.row.totalQQRemateFormatted
+            : params.row.totalLbRemateFormatted}
+        </div>
+      ),
     },
     {
       field: 'averagePriceFormatted',
@@ -119,20 +143,6 @@ const usePurchaseList = () => {
       minWidth: 120,
       flex: 1,
     },
-    // {
-    //   field: 'createdAtFormat',
-    //   headerName: 'Fecha',
-    //   headerAlign: 'center',
-    //   flex: 1,
-    // },
-    // {
-    //   field: 'phone',
-    //   headerName: 'Teléfono',
-    //   headerAlign: 'center',
-    //   align: 'center',
-    //   flex: 1,
-    //   minWidth: 150,
-    // },
     {
       field: 'actions',
       headerName: 'Acciones',
@@ -269,6 +279,8 @@ const usePurchaseList = () => {
     totalItems,
     labels,
     fields,
+    isQuintales,
+    toggleUnit,
   };
 };
 

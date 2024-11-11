@@ -11,7 +11,6 @@ import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/ma
 
 const usePurchaseDetailForm = (id_purchase) => {
   const dispatch = useDispatch();
-
   const loading = useSelector((state) => state.purchaseDetail.processing);
   const purchaseDetailSelected = useSelector(
     (state) => state.purchaseDetail.purchaseDetailSelected

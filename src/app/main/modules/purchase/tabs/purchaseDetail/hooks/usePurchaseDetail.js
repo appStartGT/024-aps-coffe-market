@@ -13,26 +13,32 @@ import PurchaseDetailForm from '../components/PurchaseDetailForm';
 import { IconButton, Chip, Badge } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
+import { getBudgetAction } from '../../../../../../store/modules/budget';
 
 const usePurchaseDetail = () => {
+  const { id_purchase } = useParams();
   const dispatch = useDispatch();
   const [searchList, setSearchList] = useState(null);
   const processing = useSelector((state) => state.purchaseDetail.processing);
   const purchaseList = useSelector(
     (state) => state.purchaseDetail.purchaseDetailList
   );
-  const { id_purchase } = useParams();
+  const [isQuintales, setIsQuintales] = useState(false);
 
   useEffect(() => {
-    // if (Array.isArray(purchaseList) && !purchaseList.length) {
     dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
-    // }
+    dispatch(getBudgetAction());
   }, [dispatch]);
 
   const onClose = () => {
     dispatch(clearPurchaseDetailSelected());
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
+
+  const toggleUnit = () => {
+    setIsQuintales((prevState) => !prevState);
+  };
+
   const propsSearchBarButton = {
     label: 'Buscar por Libras / Precio / Total',
     type: 'text',
@@ -63,18 +69,28 @@ const usePurchaseDetail = () => {
   const columns = [
     {
       field: 'quantityFormated',
-      headerName: 'Libras',
+      headerName: `${isQuintales ? 'Quintales (qq)' : 'Libras (lb)'}`,
       flex: 1,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+          }}
+          onClick={toggleUnit}
+        >
           {(params.row.isPaid || params.row.isRemate) && (
             <Badge
               color={params.row.isRemate ? 'warning' : 'success'}
               variant="dot"
             />
           )}
-          {params.row.quantityFormated}
+          {isQuintales
+            ? params.row.quantityQQFormated
+            : params.row.quantityFormated}
         </div>
       ),
     },

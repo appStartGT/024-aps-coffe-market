@@ -16,8 +16,10 @@ import { useParams } from 'react-router-dom';
 import RemateDetailsForm from '../components/RemateDetailsForm';
 import { BlobProvider } from '@react-pdf/renderer';
 import PdfComprobante from '../components/PdfComprobante';
+import { getBudgetAction } from '../../../../../../store/modules/budget';
 
 const usePurchaseDetail = () => {
+  const { id_purchase } = useParams();
   const dispatch = useDispatch();
   const [searchList, setSearchList] = useState(null);
   const processing = useSelector((state) => state.purchaseDetail.processing);
@@ -26,11 +28,12 @@ const usePurchaseDetail = () => {
     (state) => state.purchaseDetail.purchaseDetailListPriceless
   );
 
-  const { id_purchase } = useParams();
+  const [isQuintales, setIsQuintales] = useState(false);
 
   const [selectionModel, setSelectionModel] = useState([]);
   useEffect(() => {
     dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
+    dispatch(getBudgetAction());
   }, [dispatch]);
 
   const totalSelectedQuantity = useMemo(() => {
@@ -71,12 +74,32 @@ const usePurchaseDetail = () => {
       },
     },
   };
+
+  const toggleUnit = () => {
+    setIsQuintales((prevState) => !prevState);
+  };
+
   const columns = [
     {
       field: 'quantityFormated',
-      headerName: 'Libras',
+      headerName: `${isQuintales ? 'Quintales (qq)' : 'Libras (lb)'}`,
       flex: 1,
       disableColumnMenu: true,
+      renderCell: (params) => (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+          }}
+          onClick={toggleUnit}
+        >
+          {isQuintales
+            ? params.row.quantityQQFormated
+            : params.row.quantityFormated}
+        </div>
+      ),
     },
     {
       field: 'priceFormat',
