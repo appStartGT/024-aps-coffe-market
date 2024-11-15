@@ -6,7 +6,7 @@ import {
   clearSaleDetailSelected,
 } from '../../../../../../../../store/modules/saleDetail';
 import { fieldValidations, paymentMethodType } from '@utils';
-import { paidMethodCatalogAction } from '../../../../../../../../store/modules/catalogs';
+import { paymentMethodCatalogAction } from '../../../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../../../store/modules/main';
 import * as Yup from 'yup';
 
@@ -16,7 +16,7 @@ const useSaleDetailForm = (id_sale) => {
   const saleDetailSelected = useSelector(
     (state) => state.saleDetail.saleDetailSelected
   );
-  const paidMethod = useSelector((state) => state.catalogs.paidMethod);
+  const cat_payment_method = useSelector((state) => state.catalogs.cat_payment_method);
 
   const formikSaleDetail = useFormikFields({
     fields: [
@@ -55,7 +55,7 @@ const useSaleDetailForm = (id_sale) => {
         gridProps: { md: 12 },
         inputProps: { maxLength: 10 },
         field: 'select',
-        options: paidMethod,
+        options: cat_payment_method,
         value: paymentMethodType.CASH,
       },
       {
@@ -75,7 +75,7 @@ const useSaleDetailForm = (id_sale) => {
       if (saleDetailSelected) {
         formikSaleDetail.form.setValues(saleDetailSelected);
       }
-      dispatch(paidMethodCatalogAction());
+      dispatch(paymentMethodCatalogAction());
     },
     deps: [saleDetailSelected],
   });

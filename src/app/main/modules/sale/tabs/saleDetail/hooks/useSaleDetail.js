@@ -8,7 +8,6 @@ import {
   clearSaleDetailSelected,
 } from '../../../../../../store/modules/saleDetail';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
-import { formatNumber } from '@utils';
 
 const useSaleDetail = () => {
   const dispatch = useDispatch();
@@ -29,10 +28,6 @@ const useSaleDetail = () => {
 
   const toggleUnit = () => {
     setIsQuintales((prevState) => !prevState);
-  };
-
-  const convertToQuintales = (value) => {
-    return formatNumber(parseFloat(value.replace(/,/g, '')) / 100);
   };
 
   const propsSearchBarButton = {

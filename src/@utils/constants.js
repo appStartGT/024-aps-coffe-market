@@ -115,6 +115,7 @@ export const firebaseCollections = {
   CAT_PAYMENT_METHOD: 'cat_payment_method',
   CAT_EXPENSE_TYPE: 'cat_expense_type',
   CAT_TRUCKLOAD_LICENSE_PLATE: 'cat_truckload_license_plate',
+  CAT_RUBRO: 'cat_rubro',
   PERSON: 'person',
   BUDGET: 'budget',
   BUDGET_ITEM: 'budget_item',
@@ -146,6 +147,7 @@ export const firebaseCollectionsKey = {
   cat_truckload_license_plate: 'id_cat_truckload_license_plate',
   average_price: 'id_average_price',
   sale_detail: 'id_sale_detail',
+  cat_rubro: 'id_cat_rubro',
 };
 
 export const alertType = {

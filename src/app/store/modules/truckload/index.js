@@ -13,6 +13,7 @@ import {
   uploadFile,
 } from '@utils/firebaseMethods';
 import { updateSaleListTruckloadsAction } from '../sale';
+
 export const truckloadListAction = createAsyncThunk(
   'truckload/list',
   async ({ id_sale }, { rejectWithValue, getState, dispatch }) => {
@@ -155,9 +156,11 @@ export const truckloadSlice = createSlice({
     setTruckloadDetail: (state, action) => {
       state.truckloadSelected = action.payload;
     },
+    updateTruckloadList: (state, { payload }) => {
+      state.truckloadList = truckloadDto.truckloadList(payload);
+    },
   },
   extraReducers: (builder) => {
-    /* LIST */
     builder.addCase(truckloadListAction.pending, (state) => {
       state.processing = true;
     });
@@ -171,44 +174,28 @@ export const truckloadSlice = createSlice({
       state.processing = false;
     });
 
-    /* CREATE */
     builder.addCase(truckloadCreateAction.pending, (state) => {
       state.processing = true;
     });
     builder.addCase(truckloadCreateAction.rejected, (state, { payload }) => {
-      console.error(payload);
       state.error = payload;
       state.processing = false;
     });
-    builder.addCase(truckloadCreateAction.fulfilled, (state, { payload }) => {
-      const truckload = truckloadDto.truckloadGetOne(payload);
-      state.truckloadSelected = truckload;
-      state.truckloadList = [...state.truckloadList, truckload];
+    builder.addCase(truckloadCreateAction.fulfilled, (state) => {
       state.processing = false;
     });
 
-    /* UPDATE */
     builder.addCase(truckloadUpdateAction.pending, (state) => {
       state.processing = true;
     });
     builder.addCase(truckloadUpdateAction.rejected, (state, action) => {
-      console.error(action);
       state.error = action.payload;
       state.processing = false;
     });
-    builder.addCase(truckloadUpdateAction.fulfilled, (state, { payload }) => {
-      const updatedTruckload = truckloadDto.truckloadGetOne(payload);
-      state.truckloadSelected = updatedTruckload;
-      state.truckloadList = state.truckloadList.map((truckload) =>
-        truckload[firebaseCollectionsKey.beneficio_truckload] ===
-        updatedTruckload[firebaseCollectionsKey.beneficio_truckload]
-          ? updatedTruckload
-          : truckload
-      );
+    builder.addCase(truckloadUpdateAction.fulfilled, (state) => {
       state.processing = false;
     });
 
-    /* DELETE */
     builder.addCase(truckloadDeleteAction.pending, (state) => {
       state.processing = true;
     });
@@ -227,7 +214,10 @@ export const truckloadSlice = createSlice({
   },
 });
 
-export const { clearTruckloadSelected, setTruckloadDetail } =
-  truckloadSlice.actions;
+export const {
+  clearTruckloadSelected,
+  setTruckloadDetail,
+  updateTruckloadList,
+} = truckloadSlice.actions;
 
 export default truckloadSlice.reducer;

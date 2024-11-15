@@ -15,6 +15,7 @@ import {
 import { firestore, FieldValue } from '@config/firebaseConfig';
 import {
   updateSaleListDetailsAction,
+  updateSaleListPurchaseDetailsAction,
   updateSaleListTruckloadsAction,
 } from '../sale';
 
@@ -148,19 +149,31 @@ export const createRemateBeneficioAction = createAsyncThunk(
       const batch = firestore.batch();
 
       // 1. Create a new average price from accumulated prop
-      let accumulatedAveragePriceRef;
+      let accumulatedPurchaseDetailRef;
+      let accumulatedPurchaseDetailData = {};
+      let allPurchases = selectedPrices.flatMap((price) => price.purchases);
+      let deletePurchaseDetail = allPurchases.map((purchaseId) => ({
+        id_purchase_detail: purchaseId,
+        deleted: true,
+      }));
       if (accumulated) {
-        accumulatedAveragePriceRef = firestore
-          .collection(firebaseCollections.AVERAGE_PRICE)
+        accumulatedPurchaseDetailRef = firestore
+          .collection(firebaseCollections.PURCHASE_DETAIL)
           .doc();
-        batch.set(accumulatedAveragePriceRef, {
-          id_average_price: accumulatedAveragePriceRef.id,
+        accumulatedPurchaseDetailData = {
+          //TODO: create a purchase detail DTO
+          id: accumulatedPurchaseDetailRef.id,
+          id_purchase_detail: accumulatedPurchaseDetailRef.id,
+          id_sale: data.id_sale,
           quantity: accumulated.quantity,
           price: accumulated.price,
           deleted: false,
           createdAt: FieldValue.serverTimestamp(),
           isSold: false,
-        });
+          isPriceless: false,
+          isAccumulated: true,
+        };
+        batch.set(accumulatedPurchaseDetailRef, accumulatedPurchaseDetailData);
       }
 
       // 2. Create a new average price from the prop data
@@ -189,6 +202,21 @@ export const createRemateBeneficioAction = createAsyncThunk(
             });
           })
         )
+      );
+
+      // updadate the average price in purchase details
+      await Promise.all(
+        selectedPrices.flatMap((price) => {
+          if (price.id_average_price !== null) {
+            const averagePriceRef = firestore
+              .collection(firebaseCollections.AVERAGE_PRICE)
+              .doc(price.id_average_price);
+            return batch.update(averagePriceRef, {
+              isSold: true,
+              updatedAt: FieldValue.serverTimestamp(),
+            });
+          }
+        })
       );
 
       // 4. Update each truckload in truckloadsSelected
@@ -236,21 +264,25 @@ export const createRemateBeneficioAction = createAsyncThunk(
         ],
       });
       // Update the truckloadsSelected with the new average price
+      const truckloadsSelectedUpdated = truckloadsSelected.map((truckload) => ({
+        ...truckload,
+        id_average_price: dataAveragePriceRef.id,
+        isSold: true,
+      }));
+      //update truckloads in sale view
+      dispatch(updateSaleListTruckloadsAction(truckloadsSelectedUpdated));
+      //update purchase details in main view
       dispatch(
-        updateSaleListTruckloadsAction(
-          truckloadsSelected.map((truckload) => ({
-            ...truckload,
-            id_average_price: dataAveragePriceRef.id,
-            isSold: true,
-          }))
-        )
+        updateSaleListPurchaseDetailsAction([
+          accumulatedPurchaseDetailData,
+          ...deletePurchaseDetail,
+        ])
       );
-
       //Update the sale with the new average price
       dispatch(updateSaleListDetailsAction([saleDetail.data[0]]));
 
       return {
-        accumulatedAveragePriceId: accumulatedAveragePriceRef?.id,
+        accumulatedAveragePriceId: accumulatedPurchaseDetailRef?.id,
         dataAveragePriceId: dataAveragePriceRef.id,
         saleDetail: saleDetail.data[0],
       };

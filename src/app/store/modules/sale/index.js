@@ -12,6 +12,7 @@ import {
   firestore,
 } from '@utils/firebaseMethods';
 import { beneficioCreateAction, beneficioUpdateAction } from '../beneficio';
+import { updateTruckloadList } from '../truckload';
 
 export const saleListAction = createAsyncThunk(
   'sale/list',
@@ -119,6 +120,7 @@ export const saleListAction = createAsyncThunk(
         purchaseDetailsResult,
       };
     } catch (error) {
+      console.error(error);
       return rejectWithValue(error);
     }
   }
@@ -302,13 +304,44 @@ export const updateSaleListDetailsAction = createAsyncThunk(
   }
 );
 
-export const updateSaleListTruckloadsAction = createAsyncThunk(
-  'sale/updateListTruckloads',
+export const updateSaleListPurchaseDetailsAction = createAsyncThunk(
+  'sale/updateListPurchaseDetails',
   async (newDetails, { getState, rejectWithValue }) => {
     try {
       const state = getState();
-      const currentDetails = state.sale.rowTruckloads;
+      const currentDetails = state.sale.rowPurchaseDetails;
 
+      // Merge new details with existing ones, overwriting if there's a conflict
+      let updatedDetails = [...currentDetails];
+      newDetails.forEach((newDetail) => {
+        const index = updatedDetails.findIndex(
+          (detail) => detail.id_purchase_detail === newDetail.id_purchase_detail
+        );
+        if (index !== -1) {
+          updatedDetails[index] = { ...updatedDetails[index], ...newDetail };
+        } else {
+          updatedDetails.push(newDetail);
+        }
+      });
+
+      // Remove items with deleted: truea
+      updatedDetails = updatedDetails.filter(
+        (detail) => detail.deleted !== true
+      );
+
+      return updatedDetails;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const updateSaleListTruckloadsAction = createAsyncThunk(
+  'sale/updateListTruckloads',
+  async (newDetails, { getState, rejectWithValue, dispatch }) => {
+    try {
+      const state = getState();
+      const currentDetails = state.sale.rowTruckloads;
       // Merge new details with existing ones, overwriting if there's a conflict
       let updatedDetails = [...currentDetails];
       newDetails.forEach((newDetail) => {
@@ -317,11 +350,16 @@ export const updateSaleListTruckloadsAction = createAsyncThunk(
             detail.id_beneficio_truckload === newDetail.id_beneficio_truckload
         );
         if (index !== -1) {
-          updatedDetails[index] = { ...updatedDetails[index], ...newDetail };
+          updatedDetails[index] = {
+            ...updatedDetails[index],
+            ...newDetail,
+          };
         } else {
           updatedDetails.push(newDetail);
         }
       });
+      //update truckload list in  main view
+      dispatch(updateTruckloadList(updatedDetails));
 
       // Remove items with deleted: true
       updatedDetails = updatedDetails.filter(
@@ -499,6 +537,23 @@ export const saleSlice = createSlice({
         );
         state.saleList = saleList;
         state.purchaseDetailsResult = purchaseDetailsResult;
+      }
+    );
+    /* UPDATE SALE LIST PURCHASE DETAILS */
+    builder.addCase(
+      updateSaleListPurchaseDetailsAction.fulfilled,
+      (state, { payload }) => {
+        if (state.rowPurchaseDetails.length > 0) {
+          state.rowPurchaseDetails = [...payload];
+          const { saleList, purchaseDetailsResult } = saleDto.saleList(
+            state.rowSales,
+            state.rowSaleDetails,
+            state.rowTruckloads,
+            state.rowPurchaseDetails
+          );
+          state.saleList = saleList;
+          state.purchaseDetailsResult = purchaseDetailsResult;
+        }
       }
     );
   },

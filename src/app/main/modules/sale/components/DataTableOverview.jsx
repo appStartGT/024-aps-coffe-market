@@ -9,6 +9,9 @@ const DataTableOverview = ({ saleList }) => {
   const purchaseDetailsResult = useSelector(
     (state) => state.sale.purchaseDetailsResult
   );
+  const rowPurchaseDetails = useSelector(
+    (state) => state.sale.rowPurchaseDetails
+  );
   const [statistics, setStatistics] = useState({
     totalQuantity: '0.00',
     totalLbPriceless: '0.00',
@@ -73,7 +76,7 @@ const DataTableOverview = ({ saleList }) => {
         ),
       });
     }
-  }, [saleList, purchaseDetailsResult]);
+  }, [saleList, purchaseDetailsResult, rowPurchaseDetails]);
 
   const toggleUnit = () => {
     setIsQuintales(!isQuintales);

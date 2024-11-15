@@ -23,14 +23,14 @@ const useTruckload = () => {
   const [isQuintales, setIsQuintales] = useState(false);
   const processing = useSelector((state) => state.truckload.processing);
   const truckloadList = useSelector((state) => state.truckload.truckloadList);
-  const rowTruckloads = useSelector((state) => state.sale.rowTruckloads);
+  // const rowTruckloads = useSelector((state) => state.sale.rowTruckloads);
   const { id_sale } = useParams();
-
+  console.log({ truckloadList });
   useEffect(() => {
     dispatch(truckloadListAction({ id_sale }));
     dispatch(catTruckloadLicensePlateCatalogAction());
     dispatch(getUnaveragesPurchaseDetailsAction());
-  }, [dispatch, rowTruckloads, id_sale]);
+  }, [dispatch, /* rowTruckloads, */ id_sale]);
 
   const onClose = () => {
     dispatch(clearTruckloadSelected());
@@ -116,7 +116,7 @@ const useTruckload = () => {
         ),
     },
     {
-      field: 'createdAt',
+      field: 'createdAtFormated',
       headerName: 'Fecha y hora',
       flex: 1,
       disableColumnMenu: true,

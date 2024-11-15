@@ -6,7 +6,11 @@ const truckloadModel = (truckload) => {
     id: truckload.id_beneficio_truckload,
     id_beneficio_truckload: truckload.id_beneficio_truckload,
     id_sale: truckload?.id_sale,
-    createdAt: formatFirebaseTimestamp(truckload.createdAt, 'DD/MM/YYYY:HH:mm'),
+    createdAt: truckload.createdAt,
+    createdAtFormated: formatFirebaseTimestamp(
+      truckload.createdAt,
+      'DD/MM/YYYY HH:mm'
+    ),
     createdBy: truckload.createdBy || '',
     isActive: truckload.isActive || false,
     updatedAt: formatFirebaseTimestamp(truckload.updatedAt),
@@ -28,7 +32,9 @@ const truckloadGetModel = (truckload) => {
     totalSentFormated: `${formatNumber(truckload.totalSent)} lb`,
     totalReceivedFormated: `${formatNumber(truckload.totalReceived)} lb`,
     totalSentQQFormated: `${formatNumber(truckload.totalSent / 100)} qq`,
-    totalReceivedQQFormated: `${formatNumber(truckload.totalReceived / 100)} qq`, 
+    totalReceivedQQFormated: `${formatNumber(
+      truckload.totalReceived / 100
+    )} qq`,
     colillaUrl: truckload.colilla?.url,
   };
 };

@@ -7,7 +7,7 @@ import {
   clearTruckloadSelected,
 } from '../../../../../../store/modules/truckload';
 import { fieldValidations } from '@utils';
-import { paidMethodCatalogAction } from '../../../../../../store/modules/catalogs';
+import { paymentMethodCatalogAction } from '../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import * as Yup from 'yup';
 import ApsFileUpload from '@components/ApsFileUpload';
@@ -18,8 +18,8 @@ const useTruckloadForm = (id_sale) => {
   const truckloadSelected = useSelector(
     (state) => state.truckload.truckloadSelected
   );
-  const catTruckloadLicensePlate = useSelector(
-    (state) => state.catalogs.catTruckloadLicensePlate
+  const cat_truckload_licenseplate = useSelector(
+    (state) => state.catalogs.cat_truckload_licenseplate
   );
 
   const [selectedFile, setSelectedFile] = useState(null);
@@ -31,7 +31,7 @@ const useTruckloadForm = (id_sale) => {
         label: 'Placa',
         name: 'id_cat_truckload_license_plate',
         field: 'select',
-        options: catTruckloadLicensePlate,
+        options: cat_truckload_licenseplate,
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
@@ -82,10 +82,11 @@ const useTruckloadForm = (id_sale) => {
         formikTruckload.form.setValues(truckloadSelected);
         setSelectedFile(truckloadSelected.colilla?.metadata);
       }
-      dispatch(paidMethodCatalogAction());
+      dispatch(paymentMethodCatalogAction());
     },
     deps: [truckloadSelected],
   });
+
   useUpdateEffect(() => {
     if (formikTruckload.form.values.isPriceless) {
       formikTruckload.form.setFieldValue('price', 0);

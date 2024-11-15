@@ -16,7 +16,7 @@ const saleDetailModel = (saleDetail) => {
     isPriceless: saleDetail?.isPriceless,
     createdAt: formatFirebaseTimestamp(
       saleDetail.createdAt,
-      'DD/MM/YYYY:HH:mm'
+      'DD/MM/YYYY HH:mm'
     ),
     createdBy: saleDetail.createdBy || '',
     isActive: saleDetail.isActive || false,

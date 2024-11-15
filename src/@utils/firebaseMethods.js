@@ -224,6 +224,8 @@ async function getAllDocuments({
               ? resolvedData[key].id
               : resolvedData[key],
           includeReferences: false,
+        }).catch((error) => {
+          console.error(error, key, refCollectionName);
         });
 
         resolvedData[key] = refDocData.id;

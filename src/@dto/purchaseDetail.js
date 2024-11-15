@@ -19,7 +19,7 @@ const purchaseDetailModel = (purchaseDetail) => {
     id_cat_payment_method: purchaseDetail?.id_cat_payment_method,
     createdAt: formatFirebaseTimestamp(
       purchaseDetail.createdAt,
-      'DD/MM/YYYY:HH:mm'
+      'DD/MM/YYYY HH:mm'
     ),
     createdBy: purchaseDetail.createdBy || '',
     isActive: purchaseDetail.isActive || false,

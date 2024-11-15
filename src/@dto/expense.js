@@ -13,7 +13,10 @@ const expenseModel = (expense) => {
     cat_expense_type: expense.cat_expense_type || undefined,
     cat_expense_type_name: expense.cat_expense_type?.name || '',
     createdAt: expense.createdAt,
-    createdAtFormat: formatFirebaseTimestamp(expense.createdAt),
+    createdAtFormat: formatFirebaseTimestamp(
+      expense.createdAt,
+      'DD/MM/YYYY HH:mm'
+    ),
     createdBy: expense.createdBy || '',
     updatedAt: formatFirebaseTimestamp(expense.updatedAt),
   };

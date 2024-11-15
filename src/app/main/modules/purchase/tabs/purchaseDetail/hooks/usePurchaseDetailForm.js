@@ -6,9 +6,10 @@ import {
   clearPurchaseDetailSelected,
 } from '../../../../../../store/modules/purchaseDetail';
 import { fieldValidations, paymentMethodType } from '@utils';
-import { paidMethodCatalogAction } from '../../../../../../store/modules/catalogs';
+import { paymentMethodCatalogAction } from '../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import * as Yup from 'yup';
+import { useEffect } from 'react';
 
 const usePurchaseDetailForm = (id_purchase) => {
   const dispatch = useDispatch();
@@ -16,7 +17,9 @@ const usePurchaseDetailForm = (id_purchase) => {
   const purchaseDetailSelected = useSelector(
     (state) => state.purchaseDetail.purchaseDetailSelected
   );
-  const paidMethod = useSelector((state) => state.catalogs.paidMethod);
+  const cat_payment_method = useSelector(
+    (state) => state.catalogs.cat_payment_method
+  );
 
   const formikPurchaseDetail = useFormikFields({
     fields: [
@@ -55,7 +58,7 @@ const usePurchaseDetailForm = (id_purchase) => {
         gridProps: { md: 12 },
         inputProps: { maxLength: 10 },
         field: 'select',
-        options: paidMethod,
+        options: cat_payment_method,
         value: paymentMethodType.CASH,
       },
       {
@@ -75,10 +78,14 @@ const usePurchaseDetailForm = (id_purchase) => {
       if (purchaseDetailSelected) {
         formikPurchaseDetail.form.setValues(purchaseDetailSelected);
       }
-      dispatch(paidMethodCatalogAction());
     },
     deps: [purchaseDetailSelected],
   });
+  //get catalog paid method
+  useEffect(() => {
+    dispatch(paymentMethodCatalogAction());
+  }, []);
+
   useUpdateEffect(() => {
     if (formikPurchaseDetail.form.values.isPriceless) {
       formikPurchaseDetail.form.setFieldValue('price', 0);

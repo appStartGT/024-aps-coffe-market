@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   List,
   ListItemButton,
@@ -35,6 +35,7 @@ import {
   updateBudgetItemAction,
 } from '../../../../store/modules/budget';
 import { useAuth } from '@hooks';
+import { catRubroCatalogAction } from '../../../../store/modules/catalogs';
 
 // New Budget Dialog Component
 const NewBudgetDialog = ({ open, onClose, onConfirm, previousBalance }) => (
@@ -70,8 +71,8 @@ const ItemDialog = ({
   onSave,
   item,
   setItem,
-  rubros,
   isEditing,
+  cat_rubro,
 }) => (
   <Dialog open={open} onClose={onClose}>
     <DialogTitle>
@@ -86,7 +87,7 @@ const ItemDialog = ({
         value={item.rubro}
         onChange={(e) => setItem({ ...item, rubro: e.target.value })}
       >
-        {rubros.map((rubro) => (
+        {cat_rubro.map((rubro) => (
           <MenuItem key={rubro.id} value={rubro.name}>
             {rubro.name}
           </MenuItem>
@@ -207,10 +208,7 @@ const BudgetContent = () => {
   const budget = useSelector((state) => state.budget.budget);
   const budget_items = useSelector((state) => state.budget.budget_items);
   const expense_items = useSelector((state) => state.budget.expense_items);
-  // // Replace mock data with Redux data
-  // useEffect(() => {
-  //   dispatch(getBudgetAction());
-  // }, [dispatch]);
+  const cat_rubro = useSelector((state) => state.catalogs.cat_rubro);
 
   // Mock data - replace with your actual data
   const rubros = [
@@ -223,6 +221,10 @@ const BudgetContent = () => {
     rubro: '',
     amount: '',
   });
+
+  useEffect(() => {
+    dispatch(catRubroCatalogAction());
+  }, [dispatch]);
 
   const handleNewItem = () => {
     setEditingItem(null);
@@ -380,6 +382,7 @@ const BudgetContent = () => {
         setItem={setNewItem}
         rubros={rubros}
         isEditing={!!editingItem}
+        cat_rubro={cat_rubro}
       />
     </Box>
   );

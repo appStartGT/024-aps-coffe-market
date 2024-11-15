@@ -16,7 +16,9 @@ const useExpenseForm = () => {
   /* SELECTORS */
   const processing = useSelector((state) => state.expense.processing);
   const expenseSelected = useSelector((state) => state.expense.expense);
-  const catExpenseType = useSelector((state) => state.catalogs.catExpenseType);
+  const cat_expense_type = useSelector(
+    (state) => state.catalogs.cat_expense_type
+  );
   const budget = useSelector((state) => state.budget.budget);
   const id_expense = expenseSelected?.id_expense || '0';
 
@@ -30,7 +32,7 @@ const useExpenseForm = () => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { as: 'select' },
-        options: catExpenseType,
+        options: cat_expense_type,
         validations: fieldValidations.required,
       },
       {
