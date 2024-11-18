@@ -12,3 +12,4 @@ export * as averagePriceDto from './averagePrice';
 export * as beneficioDto from './beneficio';
 export * as saleDetailDto from './saleDetail';
 export * as truckloadDto from './truckload';
+export * as loanDto from './loan';

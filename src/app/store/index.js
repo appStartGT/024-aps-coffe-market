@@ -17,6 +17,7 @@ import averagePrice from './modules/averagePrice';
 import saleDetail from './modules/saleDetail';
 import sale from './modules/sale';
 import truckload from './modules/truckload';
+import loan from './modules/loan';
 
 export const store = configureStore({
   reducer: {
@@ -38,6 +39,7 @@ export const store = configureStore({
     saleDetail,
     sale,
     truckload,
+    loan,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

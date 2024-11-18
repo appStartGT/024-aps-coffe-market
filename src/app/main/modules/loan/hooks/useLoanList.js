@@ -2,68 +2,63 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Delete, Edit } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
-import { Typography } from '@mui/material';
+import { Chip, Typography } from '@mui/material';
 import {
-  deleteExpenseAction,
-  getExpenseListAction,
-  setExpenseAction,
-} from '../../../../store/modules/expense';
+  deleteLoanAction,
+  getLoanListAction,
+  setLoanAction,
+} from '../../../../store/modules/loan';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
-import ExpenseDetailForm from '../components/ExpenseDetailForm';
-import { catExpenseTypeCatalogAction } from '../../../../store/modules/catalogs';
+import LoanDetailForm from '../components/LoanDetailForm';
+import { catLoanTypeCatalogAction } from '../../../../store/modules/catalogs';
+import { useParams } from 'react-router-dom';
 
-const useExpensesList = () => {
+const useLoanList = () => {
   /* hooks */
   const dispatch = useDispatch();
-
+  const { id_purchase } = useParams();
   /* selectors */
-  const expensesList = useSelector((state) => state.expense.expenseList);
-  const totalItems = useSelector((state) => state.expense.totalItems);
-  const processing = useSelector((state) => state.expense.processing);
+  const loanList = useSelector((state) => state.loan.loanList);
+  const totalItems = useSelector((state) => state.loan.totalItems);
+  const processing = useSelector((state) => state.loan.processing);
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
   /* States */
   const [searchList, setSearchList] = useState(null);
   const [openModalDelete, setOpenModalDelete] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState({});
+  const [loanToDelete, setLoanToDelete] = useState({});
   const [, setText] = useState('');
 
   /* use Effects */
 
   useEffect(() => {
-    id_budget && dispatch(getExpenseListAction({ id_budget }));
+    id_budget && dispatch(getLoanListAction({ id_budget }));
   }, [dispatch, id_budget]);
 
   useEffect(() => {
-    dispatch(catExpenseTypeCatalogAction());
+    dispatch(catLoanTypeCatalogAction());
   }, [dispatch]);
 
-  const handleOpenExpenseDetailModal = (id_expense) => {
+  const handleOpenLoanDetailModal = (id_loan) => {
     dispatch(
       setApsGlobalModalPropsAction({
         open: true,
         maxWidth: 'xs',
-        title: id_expense ? 'Detalle de Egreso' : 'Agregar Egreso',
-        description: id_expense
-          ? 'Edite los detalles del egreso'
-          : 'Ingrese los detalles del nuevo egreso',
-        content: <ExpenseDetailForm nonupdate={!id_expense} />,
+        title: id_loan ? 'Detalle de Préstamo' : 'Agregar Préstamo',
+        description: id_loan
+          ? 'Edite los detalles del préstamo'
+          : 'Ingrese los detalles del nuevo préstamo',
+        content: (
+          <LoanDetailForm nonupdate={!id_loan} id_purchase={id_purchase} />
+        ),
       })
     );
   };
 
   const columns = [
     {
-      field: 'cat_expense_type_name',
-      headerName: 'Tipo de Gasto',
-      headerAlign: 'center',
-      align: 'center',
-      minWidth: 120,
-      flex: 1,
-    },
-    {
       field: 'amountFormatted',
-      headerName: 'Total',
+      headerName: 'Monto',
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,
@@ -76,6 +71,22 @@ const useExpensesList = () => {
       align: 'center',
       minWidth: 150,
       flex: 2,
+    },
+    {
+      field: 'isPaid',
+      headerName: 'Estado',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 100,
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Chip
+            color={params.row.isPaid ? 'success' : 'error'}
+            label={params.row.isPaid ? 'Pagado' : 'Pendiente'}
+          />
+        );
+      },
     },
     {
       field: 'createdAtFormat',
@@ -104,30 +115,30 @@ const useExpensesList = () => {
               justifyContent: 'center',
             }}
           >
-            {params.row.id_expense && (
+            {params.row.id_loan && (
               <ApsIconButton
                 tooltip={{ title: 'Editar registro' }}
                 onClick={() => {
-                  dispatch(setExpenseAction(params.row));
-                  handleOpenExpenseDetailModal(params.row.id_expense);
+                  dispatch(setLoanAction(params.row));
+                  handleOpenLoanDetailModal(params.row.id_loan);
                 }}
                 children={<Edit color="" />}
                 can={{
-                  key: `can-edit-expense-${params.row.id_expense}`,
+                  key: `can-edit-loan-${params.row.id_loan}`,
                   I: Actions.EDIT,
-                  a: Subjects.EXPENSES,
+                  a: Subjects.LOANS,
                 }}
               />
             )}
-            {params.row.id_expense && (
+            {params.row.id_loan && (
               <ApsIconButton
-                tooltip={{ title: 'Eliminar egreso' }}
+                tooltip={{ title: 'Eliminar préstamo' }}
                 onClick={() => handleOpenDelete(params.row)}
                 children={<Delete color="error" />}
                 can={{
-                  key: `can-delete-expense-${params.row.id_expense}`,
+                  key: `can-delete-loan-${params.row.id_loan}`,
                   I: Actions.DELETE,
-                  a: Subjects.EXPENSES,
+                  a: Subjects.LOANS,
                 }}
               />
             )}
@@ -138,45 +149,45 @@ const useExpensesList = () => {
   ];
 
   const propsSearchBarButton = {
-    label: 'Buscar por Tipo de Egreso / Descripción',
+    label: 'Buscar por Descripción',
     type: 'text',
-    searchList: expensesList,
-    searchKey: 'cat_expense_type_name,description',
+    searchList: loanList,
+    searchKey: 'description',
     searchResults: (results) => setSearchList(results),
     onChange: (value) => setText(value),
     rightButton: {
       icon: 'add_circle',
-      onClick: () => handleOpenExpenseDetailModal(),
+      onClick: () => handleOpenLoanDetailModal(),
       color: 'primary',
       can: {
-        key: 'can-create-expense-record',
+        key: 'can-create-loan-record',
         I: Actions.CREATE,
-        a: Subjects.EXPENSES,
+        a: Subjects.LOANS,
       },
     },
   };
 
   const handleCloseDelete = () => {
-    setExpenseToDelete({});
+    setLoanToDelete({});
     setOpenModalDelete(false);
   };
 
   const handleOpenDelete = (data) => {
     setOpenModalDelete(true);
-    setExpenseToDelete(data);
+    setLoanToDelete(data);
   };
 
   const handleDelete = () => {
-    dispatch(deleteExpenseAction({ id_expense: expenseToDelete.id_expense }));
+    dispatch(deleteLoanAction({ id_loan: loanToDelete.id_loan }));
     setOpenModalDelete(false);
   };
 
-  const propsModalDeleteExpense = {
+  const propsModalDeleteLoan = {
     open: openModalDelete,
     onClose: () => handleCloseDelete(),
-    title: 'Eliminar egreso',
+    title: 'Eliminar préstamo',
     content: (
-      <Typography>{`Está seguro que desea eliminar el egreso "${expenseToDelete.description}" permanentemente?`}</Typography>
+      <Typography>{`Está seguro que desea eliminar el préstamo "${loanToDelete.description}" permanentemente?`}</Typography>
     ),
     handleOk: () => handleDelete(),
     titleOk: 'Eliminar',
@@ -189,18 +200,18 @@ const useExpensesList = () => {
   };
 
   const labels = {
-    expenseType: 'Tipo de Gasto',
+    loanType: 'Tipo de Préstamo',
     createdAtFormat: 'Fecha',
-    total: 'Total',
+    amount: 'Monto',
   };
-  const fields = ['expenseType', 'createdAtFormat', 'total'];
+  const fields = ['loanType', 'createdAtFormat', 'amount'];
 
   return {
     columns,
-    expensesList,
+    loanList,
     totalItems,
     processing,
-    propsModalDeleteExpense,
+    propsModalDeleteLoan,
     propsSearchBarButton,
     searchList,
     setSearchList,
@@ -209,4 +220,4 @@ const useExpensesList = () => {
   };
 };
 
-export default useExpensesList;
+export default useLoanList;

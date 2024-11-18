@@ -17,6 +17,7 @@ import {
 } from '../../../../store/modules/purchase';
 import PurchaseDetailPage from '../tabs/purchaseDetail/pages/PurchaseDetailPage';
 import PurchaseDetailPricelessPage from '../tabs/purchaseDetailPriceless/pages/PurchaseDetailPricelessPage';
+import LoanListPage from '../../loan/pages/LoanListPage';
 
 const stylesPaper = {
   padding: '16px',
@@ -121,11 +122,17 @@ const usePurchaseDetail = () => {
           title: 'Compras',
           content: <PurchaseDetailPage />,
         });
-      ability.can(Actions.PURCHASES_TAB_PAGOS, Subjects.PURCHASES) &&
-        tabs.push({
-          title: 'Compras (Sin precio)',
-          content: <PurchaseDetailPricelessPage />, //purchases without price (cafe sin precio)
-        });
+      // ability.can(Actions.PURCHASES_TAB_PAGOS, Subjects.PURCHASES) &&
+      tabs.push({
+        title: 'Compras (Sin precio)',
+        content: <PurchaseDetailPricelessPage />, //purchases without price (cafe sin precio)
+      });
+
+      // ability.can(Actions.PUsRCHASES_TAB_LOANS, Subjects.PURCHASES) &&
+      tabs.push({
+        title: 'Préstamos',
+        content: <LoanListPage />,
+      });
     }
     return { tabs: tabs };
   };

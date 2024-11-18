@@ -19,31 +19,52 @@ const firebaseConfig = {
   appId: import.meta.env.REACT_APP_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
+// Initialize Firebase and firestore
 if (!Firebase.apps.length) {
   Firebase.initializeApp(firebaseConfig);
 }
 
 export const firestore = Firebase.firestore();
+
+// // Use the new recommended caching configuration
+// firestore.settings({
+//   cacheSizeBytes: Firebase.firestore.CACHE_SIZE_UNLIMITED,
+//   experimentalAutoDetectLongPolling: true,
+//   merge: true,
+// });
+
+// // Initialize cache for frequently accessed collections
+// const initializeCache = () => {
+//   const collections = ['budget', 'budget_items'];
+
+//   collections.forEach((collectionName) => {
+//     const query = firestore
+//       .collection(collectionName)
+//       .where('deleted', '==', false)
+//       .where('isActive', '==', true);
+
+//     // Set up a listener to populate cache
+//     const unsubscribe = query.onSnapshot(
+//       { includeMetadataChanges: true },
+//       (snapshot) => {
+//         console.log(`Cache initialized for ${collectionName}`);
+//         // You can unsubscribe after first server response if you want
+//         if (!snapshot.metadata.fromCache) {
+//           unsubscribe();
+//         }
+//       },
+//       (error) => {
+//         console.error(`Error initializing cache for ${collectionName}:`, error);
+//       }
+//     );
+//   });
+// };
+
+// // Call this when your app starts
+// initializeCache();
+
 export const storage = Firebase.storage();
 export const FieldValue = Firebase.firestore.FieldValue;
 export const increment = _increment;
-
-// // Use FirestoreSettings.cache instead of enablePersistence
-// firestore.settings({
-//   cacheSizeBytes: Firebase.firestore.CACHE_SIZE_UNLIMITED,
-//   merge: true,
-//   // Remove experimentalForceLongPolling to avoid conflict
-// });
-
-// // Handle potential errors
-// firestore
-//   .enableNetwork()
-//   .then(() => {
-//     console.log('Network enabled');
-//   })
-//   .catch((err) => {
-//     console.error('Error enabling network:', err);
-//   });
 
 export default Firebase;

@@ -3,12 +3,14 @@ import { IconButton, Tooltip } from '@mui/material';
 import { AccountBalanceWallet as AccountBalanceWalletIcon } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
+import { getBudgetAction } from '../../../../store/modules/budget';
 import BudgetContent from './BudgetContent';
 
 const DailyBudget = () => {
   const dispatch = useDispatch();
 
   const handleOpenModal = () => {
+    dispatch(getBudgetAction()); // get updated budget each time the modal is opened
     dispatch(
       setApsGlobalModalPropsAction({
         open: true,

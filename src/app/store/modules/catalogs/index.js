@@ -93,6 +93,21 @@ export const catRubroCatalogAction = createAsyncThunk(
   }
 );
 
+export const catLoanTypeCatalogAction = createAsyncThunk(
+  'catalogs/cat-loan-type',
+  async (_, { getState, rejectWithValue }) => {
+    const state = getState();
+    if (state.catalogs.cat_loan_type.length > 0) {
+      return { data: state.catalogs.cat_loan_type, isLocal: true };
+    }
+    return await getAllDocuments({
+      collectionName: firebaseCollections.CAT_LOAN_TYPE,
+    })
+      .then((res) => res)
+      .catch((res) => rejectWithValue(res));
+  }
+);
+
 const initialState = {
   processing: false,
   roles: [],
@@ -102,6 +117,7 @@ const initialState = {
   cat_expense_type: [],
   cat_truckload_licenseplate: [],
   cat_rubro: [],
+  cat_loan_type: [],
 };
 
 export const catalogsSlice = createSlice({
@@ -109,52 +125,45 @@ export const catalogsSlice = createSlice({
   initialState,
   reducers: {
     clearLastSelected: (state) => {
-      // This reducer is kept as it might be used elsewhere
       state.lastCategory = null;
       state.lastMeasureType = null;
       state.lastProvider = null;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(rolesCatalogAction.pending, (state) => {
-      state.processing = true;
-    });
-    builder.addCase(rolesCatalogAction.rejected, (state, { payload }) => {
-      state.error = payload.data;
-      state.processing = false;
-    });
-    builder.addCase(rolesCatalogAction.fulfilled, (state, { payload }) => {
-      if (payload?.data) {
-        state.roles = catalogsDto.list({
-          data: payload.data,
-          valueKey: firebaseCollectionsKey.role,
-        });
-      }
-      state.processing = false;
-    });
-
-    builder.addCase(userCatalogAction.fulfilled, (state, { payload }) => {
-      if (payload) {
-        state.users = catalogsDto.listUser({
-          data: payload,
-          valueKey: firebaseCollectionsKey.user,
-        });
-      }
-    });
-
-    builder.addCase(paymentMethodCatalogAction.pending, (state) => {
-      state.processing = true;
-    });
-    builder.addCase(
-      paymentMethodCatalogAction.rejected,
-      (state, { payload }) => {
+    builder
+      .addCase(rolesCatalogAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(rolesCatalogAction.rejected, (state, { payload }) => {
         state.error = payload.data;
         state.processing = false;
-      }
-    );
-    builder.addCase(
-      paymentMethodCatalogAction.fulfilled,
-      (state, { payload }) => {
+      })
+      .addCase(rolesCatalogAction.fulfilled, (state, { payload }) => {
+        if (payload?.data) {
+          state.roles = catalogsDto.list({
+            data: payload.data,
+            valueKey: firebaseCollectionsKey.role,
+          });
+        }
+        state.processing = false;
+      })
+      .addCase(userCatalogAction.fulfilled, (state, { payload }) => {
+        if (payload) {
+          state.users = catalogsDto.listUser({
+            data: payload,
+            valueKey: firebaseCollectionsKey.user,
+          });
+        }
+      })
+      .addCase(paymentMethodCatalogAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(paymentMethodCatalogAction.rejected, (state, { payload }) => {
+        state.error = payload.data;
+        state.processing = false;
+      })
+      .addCase(paymentMethodCatalogAction.fulfilled, (state, { payload }) => {
         if (payload?.data && !payload.isLocal) {
           state.cat_payment_method = catalogsDto.list({
             data: payload.data,
@@ -162,23 +171,15 @@ export const catalogsSlice = createSlice({
           });
         }
         state.processing = false;
-      }
-    );
-
-    builder.addCase(catExpenseTypeCatalogAction.pending, (state) => {
-      state.processing = true;
-    });
-    builder.addCase(
-      catExpenseTypeCatalogAction.rejected,
-      (state, { payload }) => {
+      })
+      .addCase(catExpenseTypeCatalogAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(catExpenseTypeCatalogAction.rejected, (state, { payload }) => {
         state.error = payload.data;
         state.processing = false;
-      }
-    );
-
-    builder.addCase(
-      catExpenseTypeCatalogAction.fulfilled,
-      (state, { payload }) => {
+      })
+      .addCase(catExpenseTypeCatalogAction.fulfilled, (state, { payload }) => {
         if (payload?.data && !payload.isLocal) {
           state.cat_expense_type = catalogsDto.list({
             data: payload.data,
@@ -186,48 +187,61 @@ export const catalogsSlice = createSlice({
           });
         }
         state.processing = false;
-      }
-    );
-
-    builder.addCase(catTruckloadLicensePlateCatalogAction.pending, (state) => {
-      state.processing = true;
-    });
-    builder.addCase(
-      catTruckloadLicensePlateCatalogAction.rejected,
-      (state, { payload }) => {
+      })
+      .addCase(catTruckloadLicensePlateCatalogAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(
+        catTruckloadLicensePlateCatalogAction.rejected,
+        (state, { payload }) => {
+          state.error = payload.data;
+          state.processing = false;
+        }
+      )
+      .addCase(
+        catTruckloadLicensePlateCatalogAction.fulfilled,
+        (state, { payload }) => {
+          if (payload?.data && !payload.isLocal) {
+            state.cat_truckload_licenseplate = catalogsDto.list({
+              data: payload.data,
+              valueKey: firebaseCollectionsKey.cat_truckload_license_plate,
+            });
+          }
+          state.processing = false;
+        }
+      )
+      .addCase(catRubroCatalogAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(catRubroCatalogAction.rejected, (state, { payload }) => {
         state.error = payload.data;
         state.processing = false;
-      }
-    );
-    builder.addCase(
-      catTruckloadLicensePlateCatalogAction.fulfilled,
-      (state, { payload }) => {
+      })
+      .addCase(catRubroCatalogAction.fulfilled, (state, { payload }) => {
         if (payload?.data && !payload.isLocal) {
-          state.cat_truckload_licenseplate = catalogsDto.list({
+          state.cat_rubro = catalogsDto.list({
             data: payload.data,
-            valueKey: firebaseCollectionsKey.cat_truckload_license_plate,
+            valueKey: firebaseCollectionsKey.cat_rubro,
           });
         }
         state.processing = false;
-      }
-    );
-
-    builder.addCase(catRubroCatalogAction.pending, (state) => {
-      state.processing = true;
-    });
-    builder.addCase(catRubroCatalogAction.rejected, (state, { payload }) => {
-      state.error = payload.data;
-      state.processing = false;
-    });
-    builder.addCase(catRubroCatalogAction.fulfilled, (state, { payload }) => {
-      if (payload?.data && !payload.isLocal) {
-        state.cat_rubro = catalogsDto.list({
-          data: payload.data,
-          valueKey: firebaseCollectionsKey.cat_rubro,
-        });
-      }
-      state.processing = false;
-    });
+      })
+      .addCase(catLoanTypeCatalogAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(catLoanTypeCatalogAction.rejected, (state, { payload }) => {
+        state.error = payload.data;
+        state.processing = false;
+      })
+      .addCase(catLoanTypeCatalogAction.fulfilled, (state, { payload }) => {
+        if (payload?.data && !payload.isLocal) {
+          state.cat_loan_type = catalogsDto.list({
+            data: payload.data,
+            valueKey: firebaseCollectionsKey.cat_loan_type,
+          });
+        }
+        state.processing = false;
+      });
   },
 });
 

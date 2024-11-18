@@ -20,7 +20,7 @@ export const purchaseDetailListAction = createAsyncThunk(
   async ({ id_purchase }, { rejectWithValue, getState, dispatch }) => {
     const state = getState();
     const purchaseListDetails = state.purchase.rowPurchaseDetails;
-
+    const id_budget = state.budget.budget.id_budget;
     if (purchaseListDetails && purchaseListDetails.length > 0) {
       const filteredDetails = purchaseListDetails.filter(
         (detail) => detail.id_purchase === id_purchase
@@ -37,6 +37,12 @@ export const purchaseDetailListAction = createAsyncThunk(
           field: 'id_purchase',
           condition: '==',
           value: id_purchase,
+          reference: true,
+        },
+        {
+          field: firebaseCollectionsKey.budget,
+          condition: '==',
+          value: id_budget,
           reference: true,
         },
       ],
@@ -138,7 +144,8 @@ export const purchaseDetailDeleteAction = createAsyncThunk(
 
 export const createRemateAction = createAsyncThunk(
   'purchaseDetail/createRemate',
-  async (data, { rejectWithValue, dispatch }) => {
+  async (data, { rejectWithValue, dispatch, getState }) => {
+    const state = getState();
     const {
       id_purchase,
       rematePrice,
@@ -148,6 +155,7 @@ export const createRemateAction = createAsyncThunk(
       createdBy,
       quantity,
     } = data;
+    const id_budget = state.budget.budget.id_budget;
 
     try {
       return await firestore.runTransaction(async (transaction) => {
@@ -163,6 +171,9 @@ export const createRemateAction = createAsyncThunk(
           id_purchase_detail: newRemateRef.id,
           id_purchase: firestore.doc(
             `${firebaseCollections.PURCHASE}/${id_purchase}`
+          ),
+          id_budget: firestore.doc(
+            `${firebaseCollections.BUDGET}/${id_budget}`
           ),
           price: rematePrice,
           quantity,

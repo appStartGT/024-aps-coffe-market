@@ -16,7 +16,6 @@ import { useParams } from 'react-router-dom';
 import RemateDetailsForm from '../components/RemateDetailsForm';
 import { BlobProvider } from '@react-pdf/renderer';
 import PdfComprobante from '../components/PdfComprobante';
-import { getBudgetAction } from '../../../../../../store/modules/budget';
 
 const usePurchaseDetail = () => {
   const { id_purchase } = useParams();
@@ -33,7 +32,6 @@ const usePurchaseDetail = () => {
   const [selectionModel, setSelectionModel] = useState([]);
   useEffect(() => {
     dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
-    dispatch(getBudgetAction());
   }, [dispatch]);
 
   const totalSelectedQuantity = useMemo(() => {

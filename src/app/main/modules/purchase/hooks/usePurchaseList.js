@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Edit, ShoppingCart } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { purchaseListAction } from '../../../../store/modules/purchase';
-import { getBudgetAction } from '../../../../store/modules/budget';
 import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetail';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
@@ -33,11 +32,6 @@ const usePurchaseList = () => {
   useEffect(() => {
     id_budget && dispatch(purchaseListAction({ id_budget }));
   }, [dispatch, id_budget]);
-
-  /* get budget */
-  useEffect(() => {
-    dispatch(getBudgetAction());
-  }, [dispatch]);
 
   useEffect(() => {
     dispatch(clearAllPurchaseDetails());

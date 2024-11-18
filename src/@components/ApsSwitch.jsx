@@ -18,7 +18,7 @@ const ApsSwitch = ({
 
     return {
       value: formik.values[name],
-      checked: formik.values[name],
+      checked: Boolean(formik.values[name]),
       onChange: formik.handleChange,
     };
   };

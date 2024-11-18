@@ -32,6 +32,8 @@ export const Actions = {
   EMPLOYEES_TAB_DETALLES: 'Tab_detalles',
   EMPLOYEES_TAB_PAGOS: 'Tab_pagos',
 
+  PURCHASES_TAB_LOANS: 'Tab_préstamos',
+
   // CRUD SHARED ACTIONS
   CREATE: 'Crear',
   EDIT: 'Editar',
@@ -68,4 +70,6 @@ export const Subjects = {
   EMPLOYEES: 'Nomina',
   EMPLOYEES_TAB_DETALLES: 'Nomina (Tab_detalles)',
   EMPLOYEES_TAB_PAGOS: 'Nomina (Tab_pagos)',
+
+  PURCHASES: 'Compras',
 };

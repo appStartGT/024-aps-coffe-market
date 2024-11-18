@@ -13,7 +13,6 @@ import PurchaseDetailForm from '../components/PurchaseDetailForm';
 import { IconButton, Chip, Badge } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
-import { getBudgetAction } from '../../../../../../store/modules/budget';
 
 const usePurchaseDetail = () => {
   const { id_purchase } = useParams();
@@ -27,7 +26,6 @@ const usePurchaseDetail = () => {
 
   useEffect(() => {
     dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
-    dispatch(getBudgetAction());
   }, [dispatch]);
 
   const onClose = () => {

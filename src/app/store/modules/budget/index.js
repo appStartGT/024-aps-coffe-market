@@ -93,45 +93,161 @@ export const createBudgetAction = createAsyncThunk(
 
 export const getBudgetAction = createAsyncThunk(
   'budget/getBudget',
-  async (_, { rejectWithValue, getState }) => {
+  async (_, { rejectWithValue, /* getState, */ dispatch }) => {
     try {
-      const state = getState();
-      const budget = state.budget.budget;
-      const budget_items = state.budget.budget_items;
+      // const state = getState();
+      // const budget = state.budget.budget;
+      // const budget_items = state.budget.budget_items;
+      let id_budget = null;
 
-      if (budget && budget_items.length > 0) {
-        return { budget, budget_items };
-      } else {
-        //just the last budget will be used deleted:false by default the method do it
-        let currentBudget = await getAllDocuments({
-          collectionName: firebaseCollections.BUDGET,
-          filterBy: [{ field: 'isClosed', condition: '==', value: false }],
-        });
-        currentBudget = currentBudget.data[0] || null;
+      // if (budget && budget_items.length > 0) {
+      //   id_budget = budget.id_budget;
+      //   return { budget, budget_items };
+      // } else {
+      //just the last budget will be used deleted:false by default the method do it
+      let currentBudget = await getAllDocuments({
+        collectionName: firebaseCollections.BUDGET,
+        filterBy: [{ field: 'isClosed', condition: '==', value: false }],
+      });
+      currentBudget = currentBudget.data[0] || null;
 
-        let id_budget = null;
-        if (currentBudget) {
-          id_budget = currentBudget.id_budget;
-        }
-        if (id_budget) {
-          const newBudget_items = await getAllDocuments({
-            collectionName: firebaseCollections.BUDGET_ITEM,
-            filterBy: [
-              {
-                field: firebaseCollectionsKey.budget,
-                condition: '==',
-                value: id_budget,
-                reference: true,
-              },
-            ],
-            excludeReferences: ['id_budget'],
-          });
-
-          return { budget: currentBudget, budget_items: newBudget_items.data };
-        } else {
-          return { budget: null, budget_items: [] };
-        }
+      if (currentBudget) {
+        id_budget = currentBudget.id_budget;
       }
+      if (id_budget) {
+        const newBudget_items = await getAllDocuments({
+          collectionName: firebaseCollections.BUDGET_ITEM,
+          filterBy: [
+            {
+              field: firebaseCollectionsKey.budget,
+              condition: '==',
+              value: id_budget,
+              reference: true,
+            },
+          ],
+          excludeReferences: ['id_budget'],
+        });
+
+        id_budget = currentBudget.id_budget;
+        // Fetch the expenses for the current budget
+        dispatch(budgetExpensesAction(id_budget));
+
+        return { budget: currentBudget, budget_items: newBudget_items.data };
+      } else {
+        return { budget: null, budget_items: [] };
+      }
+      // }
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const budgetExpensesAction = createAsyncThunk(
+  'budget/expenses',
+  async (id_budget, { rejectWithValue }) => {
+    try {
+      const [purchaseDetails, expenses, loans] = await Promise.all([
+        getAllDocuments({
+          collectionName: firebaseCollections.PURCHASE_DETAIL,
+          filterBy: [
+            {
+              field: 'id_budget',
+              condition: '==',
+              value: id_budget,
+              reference: true,
+            },
+            { field: 'isPriceless', condition: '==', value: false },
+          ],
+          excludeReferences: [
+            'id_budget',
+            'id_average_price',
+            'id_sale',
+            'id_purchase_detail_remate',
+          ],
+        }),
+        getAllDocuments({
+          collectionName: firebaseCollections.EXPENSE,
+          filterBy: [
+            {
+              field: 'id_budget',
+              condition: '==',
+              value: id_budget,
+              reference: true,
+            },
+          ],
+          excludeReferences: ['id_budget'],
+        }),
+        getAllDocuments({
+          collectionName: firebaseCollections.LOAN,
+          filterBy: [
+            {
+              field: 'id_budget',
+              condition: '==',
+              value: id_budget,
+              reference: true,
+            },
+            {
+              field: 'isPaid',
+              condition: '==',
+              value: false,
+            },
+          ],
+          excludeReferences: ['id_budget'],
+        }),
+      ]);
+
+      const groupedPurchaseDetails = purchaseDetails.data.reduce(
+        (acc, item) => {
+          if (item.id_cat_payment_method) {
+            const key = item.cat_payment_method.name;
+            if (!acc[key]) {
+              acc[key] = {
+                items: [],
+                total: 0,
+              };
+            }
+            acc[key].items.push(item);
+            acc[key].total += Number(item.price) * Number(item.quantity) || 0;
+          }
+          return acc;
+        },
+        {}
+      );
+
+      const groupedExpenses = expenses.data.reduce((acc, item) => {
+        if (item.id_cat_expense_type) {
+          const key = item.cat_expense_type.name;
+          if (!acc[key]) {
+            acc[key] = {
+              items: [],
+              total: 0,
+            };
+          }
+          acc[key].items.push(item);
+          acc[key].total += Number(item.amount) || 0;
+        }
+        return acc;
+      }, {});
+
+      const groupedLoans = loans.data.reduce((acc, item) => {
+        const key = 'Loans';
+        if (!acc[key]) {
+          acc[key] = {
+            items: [],
+            total: 0,
+          };
+        }
+        acc[key].items.push(item);
+        acc[key].total += Number(item.amount) || 0;
+        return acc;
+      }, {});
+
+      return {
+        purchaseDetails: groupedPurchaseDetails,
+        expenses: groupedExpenses,
+        loans: groupedLoans,
+      };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -191,6 +307,17 @@ const initialState = {
   processing: false,
   error: null,
   old_budget: null,
+  expenses: {
+    purchaseDetails: [],
+    expenses: [],
+    loans: [],
+    totals: {
+      purchaseTotal: 0,
+      expenseTotal: 0,
+      loanTotal: 0,
+      grandTotal: 0,
+    },
+  },
 };
 
 export const budgetSlice = createSlice({
@@ -201,6 +328,17 @@ export const budgetSlice = createSlice({
       state.budget = null;
       state.budget_items = [];
       state.old_budget = null;
+      state.expenses = {
+        purchaseDetails: [],
+        expenses: [],
+        loans: [],
+        totals: {
+          purchaseTotal: 0,
+          expenseTotal: 0,
+          loanTotal: 0,
+          grandTotal: 0,
+        },
+      };
     },
     setOldBudget: (state, action) => {
       state.old_budget = action.payload;
@@ -250,6 +388,40 @@ export const budgetSlice = createSlice({
         state.budget_items = state.budget_items.filter(
           (item) => item.id_budget_item !== action.payload
         );
+      })
+      .addCase(budgetExpensesAction.pending, (state) => {
+        state.processing = true;
+      })
+      .addCase(budgetExpensesAction.fulfilled, (state, action) => {
+        state.processing = false;
+        state.expenses.purchaseDetails = action.payload.purchaseDetails;
+        state.expenses.expenses = action.payload.expenses;
+        state.expenses.loans = action.payload.loans;
+
+        // Calculate totals
+        const purchaseTotal = Object.values(
+          action.payload.purchaseDetails
+        ).reduce((sum, category) => sum + category.total, 0);
+        const expenseTotal = Object.values(action.payload.expenses).reduce(
+          (sum, category) => sum + category.total,
+          0
+        );
+        const loanTotal = Object.values(action.payload.loans).reduce(
+          (sum, category) => sum + category.total,
+          0
+        );
+        const grandTotal = purchaseTotal + expenseTotal + loanTotal;
+
+        state.expenses.totals = {
+          purchaseTotal,
+          expenseTotal,
+          loanTotal,
+          grandTotal,
+        };
+      })
+      .addCase(budgetExpensesAction.rejected, (state, action) => {
+        state.processing = false;
+        state.error = action.payload;
       });
   },
 });

@@ -116,6 +116,7 @@ export const firebaseCollections = {
   CAT_EXPENSE_TYPE: 'cat_expense_type',
   CAT_TRUCKLOAD_LICENSE_PLATE: 'cat_truckload_license_plate',
   CAT_RUBRO: 'cat_rubro',
+  CAT_LOAN_TYPE: 'cat_loan_type',
   PERSON: 'person',
   BUDGET: 'budget',
   BUDGET_ITEM: 'budget_item',
@@ -123,6 +124,7 @@ export const firebaseCollections = {
   BENEFICIO: 'beneficio',
   BENEFICIO_TRUCKLOAD: 'beneficio_truckload',
   AVERAGE_PRICE: 'average_price',
+  LOAN: 'loan',
 };
 
 export const firebaseCollectionsKey = {
@@ -148,6 +150,8 @@ export const firebaseCollectionsKey = {
   average_price: 'id_average_price',
   sale_detail: 'id_sale_detail',
   cat_rubro: 'id_cat_rubro',
+  cat_loan_type: 'id_cat_loan_type',
+  loan: 'id_loan',
 };
 
 export const alertType = {

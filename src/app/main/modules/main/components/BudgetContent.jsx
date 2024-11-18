@@ -12,11 +12,11 @@ import {
   Stack,
   ListItemSecondaryAction,
   Dialog,
-  TextField,
   DialogTitle,
   DialogContent,
   DialogActions,
   Alert,
+  TextField,
   MenuItem,
 } from '@mui/material';
 import {
@@ -49,7 +49,7 @@ const NewBudgetDialog = ({ open, onClose, onConfirm, previousBalance }) => (
         </Alert>
         {previousBalance > 0 && (
           <Alert severity="info">
-            El balance actual de Q {previousBalance.toLocaleString()} será
+            El saldo actual de Q {previousBalance.toLocaleString()} será
             agregado como saldo inicial en el nuevo presupuesto.
           </Alert>
         )}
@@ -65,73 +65,186 @@ const NewBudgetDialog = ({ open, onClose, onConfirm, previousBalance }) => (
 );
 
 // Add/Edit Item Dialog Component
-const ItemDialog = ({
-  open,
-  onClose,
-  onSave,
-  item,
-  setItem,
-  isEditing,
-  cat_rubro,
-}) => (
+const ItemDialog = ({ open, onClose, onSave, item, isEditing, cat_rubro }) => {
+  const [formValues, setFormValues] = useState({
+    id_cat_rubro: '',
+    amount: '',
+  });
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (item) {
+      setFormValues({
+        id_cat_rubro: item.id_cat_rubro,
+        amount: item.amount,
+      });
+    } else {
+      setFormValues({
+        id_cat_rubro: '',
+        amount: '',
+      });
+    }
+    setErrors({});
+  }, [item]);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: '' }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formValues.id_cat_rubro) {
+      newErrors.id_cat_rubro = 'Por favor seleccione una categoría';
+    }
+    if (
+      !formValues.amount ||
+      isNaN(formValues.amount) ||
+      Number(formValues.amount) <= 0
+    ) {
+      newErrors.amount = 'Por favor ingrese un monto válido';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (validateForm()) {
+      onSave({
+        ...formValues,
+        amount: Number(formValues.amount),
+      });
+      onClose();
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>
+        {isEditing ? 'Editar Ítem' : 'Agregar Nuevo Ítem al Presupuesto'}
+      </DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <TextField
+            select
+            label="Categoría"
+            name="id_cat_rubro"
+            value={formValues.id_cat_rubro}
+            onChange={handleChange}
+            fullWidth
+            error={!!errors.id_cat_rubro}
+            helperText={errors.id_cat_rubro}
+          >
+            {cat_rubro.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            label="Monto"
+            name="amount"
+            type="number"
+            value={formValues.amount}
+            onChange={handleChange}
+            fullWidth
+            error={!!errors.amount}
+            helperText={errors.amount}
+          />
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={handleSubmit} variant="contained" color="primary">
+          {isEditing ? 'Actualizar' : 'Guardar'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+};
+
+// Delete Confirmation Dialog Component
+const DeleteConfirmationDialog = ({ open, onClose, onConfirm, itemName }) => (
   <Dialog open={open} onClose={onClose}>
-    <DialogTitle>
-      {isEditing ? 'Editar Item' : 'Agregar Nuevo Item al Presupuesto'}
-    </DialogTitle>
+    <DialogTitle>Confirmar Eliminación</DialogTitle>
     <DialogContent>
-      <TextField
-        select
-        fullWidth
-        margin="dense"
-        label="Rubro"
-        value={item.rubro}
-        onChange={(e) => setItem({ ...item, rubro: e.target.value })}
-      >
-        {cat_rubro.map((rubro) => (
-          <MenuItem key={rubro.id} value={rubro.name}>
-            {rubro.name}
-          </MenuItem>
-        ))}
-      </TextField>
-      <TextField
-        fullWidth
-        margin="dense"
-        label="Monto"
-        type="number"
-        value={item.amount}
-        onChange={(e) => setItem({ ...item, amount: Number(e.target.value) })}
-      />
+      <Typography>
+        ¿Está seguro que desea eliminar este ítem del presupuesto: {itemName}?
+      </Typography>
     </DialogContent>
     <DialogActions>
       <Button onClick={onClose}>Cancelar</Button>
-      <Button onClick={onSave} variant="contained">
-        {isEditing ? 'Actualizar' : 'Guardar'}
+      <Button onClick={onConfirm} color="error" variant="contained">
+        Eliminar
       </Button>
     </DialogActions>
   </Dialog>
 );
 
 // Budget List Item Component
-const BudgetListItem = ({ item, onEdit, onDelete }) => (
-  <ListItemButton sx={{ pl: 4 }}>
-    <ListItemText
-      primary={item.rubro}
-      secondary={`Q ${item.amount.toLocaleString()}`}
-    />
-    <ListItemSecondaryAction>
-      <IconButton
-        edge="end"
-        aria-label="edit"
-        onClick={() => onEdit(item)}
-        sx={{ mr: 1 }}
-      >
-        <EditIcon color="primary" />
-      </IconButton>
-      <IconButton edge="end" aria-label="delete" onClick={() => onDelete(item)}>
-        <DeleteIcon color="error" />
-      </IconButton>
-    </ListItemSecondaryAction>
-  </ListItemButton>
+const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro }) => {
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const rubroLabel =
+    cat_rubro.find((rubro) => rubro.value === item.id_cat_rubro)?.label ||
+    'Desconocido';
+
+  const handleDeleteClick = () => {
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(item);
+    setOpenDeleteDialog(false);
+  };
+
+  return (
+    <>
+      <ListItemButton sx={{ pl: 4 }}>
+        <ListItemText
+          primary={rubroLabel}
+          secondary={`Q ${item.amount.toLocaleString()}`}
+        />
+        <ListItemSecondaryAction>
+          <IconButton
+            edge="end"
+            aria-label="edit"
+            onClick={() => onEdit(item)}
+            sx={{ mr: 1 }}
+          >
+            <EditIcon color="primary" />
+          </IconButton>
+          <IconButton
+            edge="end"
+            aria-label="delete"
+            onClick={handleDeleteClick}
+          >
+            <DeleteIcon color="error" />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItemButton>
+      <DeleteConfirmationDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={handleConfirmDelete}
+        itemName={rubroLabel}
+      />
+    </>
+  );
+};
+
+// Expense List Component
+const ExpenseList = ({ expenses, renderPrimaryText = true }) => (
+  <List component="div" disablePadding>
+    {Object.entries(expenses).map(([key, value]) => (
+      <ListItemButton key={key} sx={{ pl: 4 }}>
+        <ListItemText
+          primary={renderPrimaryText ? key : ''}
+          secondary={`Q ${value.total.toLocaleString()}`}
+        />
+      </ListItemButton>
+    ))}
+  </List>
 );
 
 // Collapsible Section Component
@@ -147,6 +260,7 @@ const CollapsibleSection = ({
   onAdd,
   backgroundColor,
   id_budget,
+  cat_rubro,
 }) => (
   <Paper
     elevation={2}
@@ -176,7 +290,7 @@ const CollapsibleSection = ({
             onClick={onAdd}
             sx={{ mb: 1 }}
           >
-            Agregar Rubro
+            Agregar Categoría
           </Button>
         </Box>
       )}
@@ -187,6 +301,7 @@ const CollapsibleSection = ({
             item={item}
             onEdit={onEdit}
             onDelete={onDelete}
+            cat_rubro={cat_rubro}
           />
         ))}
       </List>
@@ -194,11 +309,53 @@ const CollapsibleSection = ({
   </Paper>
 );
 
+// Egresos Component
+const Egresos = ({
+  expenseTotal,
+  expense_purchaseDetails,
+  expense_expenses,
+  expense_loans,
+}) => {
+  const [openExpense, setOpenExpense] = useState(false);
+
+  return (
+    <Paper
+      elevation={2}
+      sx={{
+        mb: 2,
+        backgroundColor: 'rgba(211, 47, 47, 0.08)',
+        transition: 'background-color 0.3s',
+      }}
+    >
+      <ListItemButton onClick={() => setOpenExpense(!openExpense)}>
+        <ListItemText
+          primary={<Typography variant="h6">Egresos</Typography>}
+          secondary={`Q ${expenseTotal?.toLocaleString()}`}
+        />
+        {openExpense ? <ExpandLess /> : <ExpandMore />}
+      </ListItemButton>
+      <Collapse in={openExpense} timeout="auto" unmountOnExit>
+        <Typography sx={{ fontWeight: 'bold', pl: 2, pt: 1, fontSize: '12px' }}>
+          Compras
+        </Typography>
+        <ExpenseList expenses={expense_purchaseDetails} />
+        <Typography sx={{ fontWeight: 'bold', pl: 2, pt: 1, fontSize: '12px' }}>
+          Gastos Operativos
+        </Typography>
+        <ExpenseList expenses={expense_expenses} />
+        <Typography sx={{ fontWeight: 'bold', pl: 2, pt: 1, fontSize: '12px' }}>
+          Préstamos
+        </Typography>
+        <ExpenseList expenses={expense_loans} renderPrimaryText={false} />
+      </Collapse>
+    </Paper>
+  );
+};
+
 // Main Budget Content Component
 const BudgetContent = () => {
   const dispatch = useDispatch();
   const [openBudget, setOpenBudget] = useState(false);
-  const [openExpense, setOpenExpense] = useState(false);
   const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [openNewBudgetDialog, setOpenNewBudgetDialog] = useState(false);
@@ -207,20 +364,14 @@ const BudgetContent = () => {
   // Get budget data from Redux store
   const budget = useSelector((state) => state.budget.budget);
   const budget_items = useSelector((state) => state.budget.budget_items);
-  const expense_items = useSelector((state) => state.budget.expense_items);
+  const expense_purchaseDetails = useSelector(
+    (state) => state.budget.expenses.purchaseDetails
+  );
+  const expense_expenses = useSelector(
+    (state) => state.budget.expenses.expenses
+  );
+  const expense_loans = useSelector((state) => state.budget.expenses.loans);
   const cat_rubro = useSelector((state) => state.catalogs.cat_rubro);
-
-  // Mock data - replace with your actual data
-  const rubros = [
-    { id: 1, name: 'Materia Prima' },
-    { id: 2, name: 'Mano de Obra' },
-    { id: 3, name: 'Gastos Operativos' },
-  ];
-
-  const [newItem, setNewItem] = useState({
-    rubro: '',
-    amount: '',
-  });
 
   useEffect(() => {
     dispatch(catRubroCatalogAction());
@@ -228,13 +379,11 @@ const BudgetContent = () => {
 
   const handleNewItem = () => {
     setEditingItem(null);
-    setNewItem({ rubro: '', amount: '' });
     setOpenNewItemDialog(true);
   };
 
   const handleEditItem = (item) => {
     setEditingItem(item);
-    setNewItem({ rubro: item.rubro, amount: item.amount });
     setOpenNewItemDialog(true);
   };
 
@@ -245,49 +394,74 @@ const BudgetContent = () => {
         isBudget,
       })
     ).catch((error) => {
-      console.error('Error deleting budget item:', error);
+      console.error('Error al eliminar ítem del presupuesto:', error);
     });
   };
 
-  const handleSaveNewItem = () => {
+  const handleSaveNewItem = (formData) => {
     const newItemWithId = {
       id_budget: budget?.id_budget,
-      ...newItem,
+      ...formData,
     };
 
     if (editingItem) {
       dispatch(
         updateBudgetItemAction({
           ...newItemWithId,
-          id_budget_item: editingItem.id,
+          id_budget_item: editingItem.id_budget_item,
         })
       )
         .then(() => {
           setOpenNewItemDialog(false);
-          setNewItem({ rubro: '', amount: '' });
           setEditingItem(null);
         })
         .catch((error) => {
-          console.error('Error updating budget item:', error);
+          console.error('Error al actualizar ítem del presupuesto:', error);
         });
     } else {
       dispatch(addBudgetItemAction(newItemWithId))
         .then(() => {
           setOpenNewItemDialog(false);
-          setNewItem({ rubro: '', amount: '' });
         })
         .catch((error) => {
-          console.error('Error adding budget item:', error);
+          console.error('Error al agregar ítem al presupuesto:', error);
         });
     }
   };
 
   const calculateTotal = (items) => {
-    return items?.reduce((sum, item) => sum + item.amount, 0) || 0;
+    if (!Array.isArray(items)) {
+      return 0;
+    }
+    return items.reduce((sum, item) => sum + Number(item.amount), 0);
   };
 
   const budgetTotal = calculateTotal(budget_items || []);
-  const expenseTotal = calculateTotal(expense_items || []);
+  const expenseTotal =
+    calculateTotal(
+      Object.values(expense_purchaseDetails || {}).flatMap((group) =>
+        group.items.map((item) => ({
+          ...item,
+          amount: Number(item.price || 0) * Number(item.quantity || 0),
+        }))
+      )
+    ) +
+    calculateTotal(
+      Object.values(expense_expenses || {}).flatMap((group) =>
+        group.items.map((item) => ({
+          ...item,
+          amount: Number(item.amount || 0),
+        }))
+      )
+    ) +
+    calculateTotal(
+      Object.values(expense_loans || {}).flatMap((group) =>
+        group.items.map((item) => ({
+          ...item,
+          amount: Number(item.amount || 0),
+        }))
+      )
+    );
   const balance = budgetTotal - expenseTotal;
 
   const handleNewBudget = () => {
@@ -307,7 +481,7 @@ const BudgetContent = () => {
         setOpenNewBudgetDialog(false);
       })
       .catch((error) => {
-        console.error('Error creating new budget:', error);
+        console.error('Error al crear nuevo presupuesto:', error);
       });
   };
 
@@ -336,19 +510,14 @@ const BudgetContent = () => {
         onAdd={handleNewItem}
         backgroundColor="rgba(25, 118, 210, 0.08)"
         id_budget={budget?.id_budget}
+        cat_rubro={cat_rubro}
       />
 
-      <CollapsibleSection
-        title="Egresos"
-        total={expenseTotal}
-        isOpen={openExpense}
-        onToggle={() => setOpenExpense(!openExpense)}
-        items={expense_items || []}
-        onEdit={handleEditItem}
-        onDelete={(item) => handleDeleteItem(item, false)}
-        showAddButton={false}
-        backgroundColor="rgba(211, 47, 47, 0.08)"
-        id_budget={budget?.id_budget}
+      <Egresos
+        expenseTotal={expenseTotal}
+        expense_purchaseDetails={expense_purchaseDetails}
+        expense_expenses={expense_expenses}
+        expense_loans={expense_loans}
       />
 
       <Paper
@@ -363,7 +532,7 @@ const BudgetContent = () => {
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Balance: Q {balance.toLocaleString()}
+          Saldo: Q {balance.toLocaleString()}
         </Typography>
       </Paper>
 
@@ -378,9 +547,7 @@ const BudgetContent = () => {
         open={openNewItemDialog}
         onClose={() => setOpenNewItemDialog(false)}
         onSave={handleSaveNewItem}
-        item={newItem}
-        setItem={setNewItem}
-        rubros={rubros}
+        item={editingItem}
         isEditing={!!editingItem}
         cat_rubro={cat_rubro}
       />
