@@ -19,6 +19,7 @@ export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
   async ({ id_purchase }, { rejectWithValue, getState, dispatch }) => {
     const state = getState();
+    const purchase = state.purchase.purchaseSelected;
     const purchaseListDetails = state.purchase.rowPurchaseDetails;
     const id_budget = state.budget.budget.id_budget;
     if (purchaseListDetails && purchaseListDetails.length > 0) {
@@ -26,7 +27,11 @@ export const purchaseDetailListAction = createAsyncThunk(
         (detail) => detail.id_purchase === id_purchase
       );
       if (filteredDetails.length > 0) {
-        return { data: filteredDetails, totalItems: filteredDetails.length };
+        return {
+          data: filteredDetails,
+          totalItems: filteredDetails.length,
+          purchaseSelected: purchase,
+        };
       }
     }
 
@@ -50,7 +55,7 @@ export const purchaseDetailListAction = createAsyncThunk(
     })
       .then((res) => {
         dispatch(updatePurchaseListDetailsAction(res.data));
-        return res;
+        return { ...res, purchaseSelected: purchase };
       })
       .catch((res) => rejectWithValue(res));
   }
@@ -60,6 +65,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
   'purchaseDetail/create',
   async (data, { rejectWithValue, dispatch, getState }) => {
     const state = getState();
+    const purchaseSelected = state.purchase.purchaseSelected;
     const id_budget = state.budget.budget.id_budget;
     let body = cleanModel({ ...data, isSold: false, id_budget });
     body.isPriceless = Boolean(data.isPriceless);
@@ -74,7 +80,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
       .then((res) => {
         dispatch(setLoadingMainViewAction(false));
         dispatch(updatePurchaseListDetailsAction([res]));
-        return { ...res };
+        return { ...res, purchaseSelected };
       })
       .catch((res) => {
         return rejectWithValue(res);
@@ -154,6 +160,7 @@ export const createRemateAction = createAsyncThunk(
       list,
       createdBy,
       quantity,
+      id_cat_payment_method,
     } = data;
     const id_budget = state.budget.budget.id_budget;
 
@@ -174,6 +181,9 @@ export const createRemateAction = createAsyncThunk(
           ),
           id_budget: firestore.doc(
             `${firebaseCollections.BUDGET}/${id_budget}`
+          ),
+          id_cat_payment_method: firestore.doc(
+            `${firebaseCollections.CAT_PAYMENT_METHOD}/${id_cat_payment_method}`
           ),
           price: rematePrice,
           quantity,
@@ -270,7 +280,8 @@ export const purchaseDetailSlice = createSlice({
       purchaseDetailListAction.fulfilled,
       (state, { payload }) => {
         const allPurchaseDetails = purchaseDetailDto.purchaseDetailList(
-          payload.data
+          payload.data,
+          payload.purchaseSelected
         );
         state.purchaseDetailList = allPurchaseDetails.filter(
           (detail) => detail.isPriceless === false
@@ -299,8 +310,10 @@ export const purchaseDetailSlice = createSlice({
       purchaseDetailCreateAction.fulfilled,
       (state, { payload }) => {
         if (!payload.nonupdate) {
-          const purchaseDetail =
-            purchaseDetailDto.purchaseDetailGetOne(payload);
+          const purchaseDetail = purchaseDetailDto.purchaseDetailGetOne(
+            payload,
+            payload.purchaseSelected
+          );
           state.purchaseDetailSelected = purchaseDetail;
           if (purchaseDetail.isPriceless) {
             state.purchaseDetailListPriceless = [

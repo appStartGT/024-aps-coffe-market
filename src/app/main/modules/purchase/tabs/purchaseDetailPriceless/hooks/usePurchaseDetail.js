@@ -26,7 +26,6 @@ const usePurchaseDetail = () => {
   const purchaseListPriceless = useSelector(
     (state) => state.purchaseDetail.purchaseDetailListPriceless
   );
-
   const [isQuintales, setIsQuintales] = useState(false);
 
   const [selectionModel, setSelectionModel] = useState([]);
@@ -165,8 +164,9 @@ const usePurchaseDetail = () => {
             <BlobProvider
               document={
                 <PdfComprobante
-                  title={`Compra ${params.row?.id}`}
-                  content={params.row}
+                  // title={`Compra ${params.row?.id}`}
+                  purchaseCode={params.row?.id}
+                  content={{ ...params.row }}
                 />
               }
             >

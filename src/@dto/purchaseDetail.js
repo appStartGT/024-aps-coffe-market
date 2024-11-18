@@ -1,7 +1,7 @@
 import { formatNumber, cleanModel } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
-const purchaseDetailModel = (purchaseDetail) => {
+const purchaseDetailModel = (purchaseDetail, purchaseSelected) => {
   const obj = {
     id: purchaseDetail.id_purchase_detail,
     id_purchase_detail: purchaseDetail.id_purchase_detail,
@@ -43,16 +43,17 @@ const purchaseDetailModel = (purchaseDetail) => {
     isRemate: purchaseDetail?.isRemate || false,
     id_purchase_detail_remate: purchaseDetail?.id_purchase_detail_remate || '',
     isSold: purchaseDetail?.isSold || false,
+    customerName: purchaseSelected?.fullName || '',
   };
   return obj;
 };
 
-export const purchaseDetailList = (data) => {
-  return data.map((item) => purchaseDetailModel(item));
+export const purchaseDetailList = (data, purchaseSelected) => {
+  return data.map((item) => purchaseDetailModel({ ...item }, purchaseSelected));
 };
 
-export const purchaseDetailGetOne = (purchaseDetail) =>
-  purchaseDetailModel(purchaseDetail);
+export const purchaseDetailGetOne = (purchaseDetail, purchaseSelected) =>
+  purchaseDetailModel(purchaseDetail, purchaseSelected);
 
 export const purchaseDetailPut = (purchaseDetail) => {
   const model = purchaseDetailModel(purchaseDetail);

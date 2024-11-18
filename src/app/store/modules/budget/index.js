@@ -56,6 +56,7 @@ export const createBudgetAction = createAsyncThunk(
           transaction.set(newItemRef, {
             ...budgetItem,
             id_budget_item: newItemRef.id,
+            isInitial: true,
           });
         }
       });
@@ -164,6 +165,7 @@ export const budgetExpensesAction = createAsyncThunk(
             'id_average_price',
             'id_sale',
             'id_purchase_detail_remate',
+            'id_purchase',
           ],
         }),
         getAllDocuments({
@@ -355,6 +357,17 @@ export const budgetSlice = createSlice({
         state.budget = budget;
         state.budget_items = budget_items;
         state.old_budget = action.payload.old_budget;
+        state.expenses = {
+          purchaseDetails: [],
+          expenses: [],
+          loans: [],
+          totals: {
+            purchaseTotal: 0,
+            expenseTotal: 0,
+            loanTotal: 0,
+            grandTotal: 0,
+          },
+        };
       })
       .addCase(createBudgetAction.rejected, (state, action) => {
         state.processing = false;

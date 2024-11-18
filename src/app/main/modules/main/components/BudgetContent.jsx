@@ -115,6 +115,10 @@ const ItemDialog = ({ open, onClose, onSave, item, isEditing, cat_rubro }) => {
         ...formValues,
         amount: Number(formValues.amount),
       });
+      setFormValues({
+        id_cat_rubro: '',
+        amount: '',
+      });
       onClose();
     }
   };
@@ -185,9 +189,10 @@ const DeleteConfirmationDialog = ({ open, onClose, onConfirm, itemName }) => (
 // Budget List Item Component
 const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const rubroLabel =
-    cat_rubro.find((rubro) => rubro.value === item.id_cat_rubro)?.label ||
-    'Desconocido';
+  const rubroLabel = item.isInitial
+    ? 'Saldo inicial'
+    : cat_rubro.find((rubro) => rubro.value === item.id_cat_rubro)?.label ||
+      'Desconocido';
 
   const handleDeleteClick = () => {
     setOpenDeleteDialog(true);
@@ -206,29 +211,35 @@ const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro }) => {
           secondary={`Q ${item.amount.toLocaleString()}`}
         />
         <ListItemSecondaryAction>
-          <IconButton
-            edge="end"
-            aria-label="edit"
-            onClick={() => onEdit(item)}
-            sx={{ mr: 1 }}
-          >
-            <EditIcon color="primary" />
-          </IconButton>
-          <IconButton
-            edge="end"
-            aria-label="delete"
-            onClick={handleDeleteClick}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
+          {!item.isInitial && (
+            <>
+              <IconButton
+                edge="end"
+                aria-label="edit"
+                onClick={() => onEdit(item)}
+                sx={{ mr: 1 }}
+              >
+                <EditIcon color="primary" />
+              </IconButton>
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={handleDeleteClick}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
+            </>
+          )}
         </ListItemSecondaryAction>
       </ListItemButton>
-      <DeleteConfirmationDialog
-        open={openDeleteDialog}
-        onClose={() => setOpenDeleteDialog(false)}
-        onConfirm={handleConfirmDelete}
-        itemName={rubroLabel}
-      />
+      {!item.isInitial && (
+        <DeleteConfirmationDialog
+          open={openDeleteDialog}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+          itemName={rubroLabel}
+        />
+      )}
     </>
   );
 };
@@ -383,19 +394,21 @@ const BudgetContent = () => {
   };
 
   const handleEditItem = (item) => {
-    setEditingItem(item);
-    setOpenNewItemDialog(true);
+    if (!item.isInitial) {
+      setEditingItem(item);
+      setOpenNewItemDialog(true);
+    }
   };
 
   const handleDeleteItem = (itemToDelete, isBudget) => {
-    dispatch(
-      deleteBudgetItemAction({
-        id_budget_item: itemToDelete.id_budget_item,
-        isBudget,
-      })
-    ).catch((error) => {
-      console.error('Error al eliminar ítem del presupuesto:', error);
-    });
+    if (!itemToDelete.isInitial) {
+      dispatch(
+        deleteBudgetItemAction({
+          id_budget_item: itemToDelete.id_budget_item,
+          isBudget,
+        })
+      );
+    }
   };
 
   const handleSaveNewItem = (formData) => {
@@ -404,7 +417,7 @@ const BudgetContent = () => {
       ...formData,
     };
 
-    if (editingItem) {
+    if (editingItem && !editingItem.isInitial) {
       dispatch(
         updateBudgetItemAction({
           ...newItemWithId,
@@ -418,7 +431,7 @@ const BudgetContent = () => {
         .catch((error) => {
           console.error('Error al actualizar ítem del presupuesto:', error);
         });
-    } else {
+    } else if (!editingItem) {
       dispatch(addBudgetItemAction(newItemWithId))
         .then(() => {
           setOpenNewItemDialog(false);

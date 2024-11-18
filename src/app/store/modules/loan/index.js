@@ -33,7 +33,7 @@ export const createLoanAction = createAsyncThunk(
 
 export const getLoanListAction = createAsyncThunk(
   'loan/getLoanList',
-  async ({ id_budget }, { rejectWithValue }) => {
+  async ({ id_budget, id_purchase }, { rejectWithValue }) => {
     try {
       const currentLoan = await getAllDocuments({
         collectionName: firebaseCollections.LOAN,
@@ -44,6 +44,16 @@ export const getLoanListAction = createAsyncThunk(
             value: id_budget,
             reference: true,
           },
+          {
+            field: firebaseCollectionsKey.purchase,
+            condition: '==',
+            value: id_purchase,
+            reference: true,
+          },
+        ],
+        excludeReferences: [
+          firebaseCollectionsKey.purchase,
+          firebaseCollectionsKey.budget,
         ],
       });
       return currentLoan.data || [];

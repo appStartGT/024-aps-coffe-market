@@ -32,8 +32,8 @@ const useLoanList = () => {
   /* use Effects */
 
   useEffect(() => {
-    id_budget && dispatch(getLoanListAction({ id_budget }));
-  }, [dispatch, id_budget]);
+    id_budget && dispatch(getLoanListAction({ id_budget, id_purchase }));
+  }, [dispatch, id_budget, id_purchase]);
 
   useEffect(() => {
     dispatch(catLoanTypeCatalogAction());
