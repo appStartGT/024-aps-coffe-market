@@ -43,17 +43,14 @@ const DataTableOverview = ({ purchaseList }) => {
         0
       );
       const averagePrice =
-        totalQuantity !== 0 ? totalAmount / totalQuantity : 0;
-
+        totalQuantity !== 0 ? totalAmount / totalLbPriced : 0;
       const totalAdvancePayments = purchaseList.reduce(
         (sum, purchase) =>
           sum +
-          (true
-            ? purchase.advancePayments?.reduce(
-                (paymentSum, payment) => paymentSum + payment.amount,
-                0
-              ) || 0
-            : 0),
+          (purchase.advancePayments?.reduce(
+            (paymentSum, payment) => paymentSum + payment.amount,
+            0
+          ) || 0),
         0
       );
       const totalDebt = Math.max(
