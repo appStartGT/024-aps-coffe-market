@@ -34,6 +34,7 @@ export const purchaseListAction = createAsyncThunk(
 
       const purchases = await getAllDocuments({
         collectionName: firebaseCollections.PURCHASE,
+        excludeReferences: [firebaseCollectionsKey.budget],
       });
 
       rowPurchases = purchases.data;
