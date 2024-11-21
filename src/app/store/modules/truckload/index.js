@@ -139,6 +139,15 @@ export const truckloadDeleteAction = createAsyncThunk(
   }
 );
 
+export const updateTruckloadList = createAsyncThunk(
+  'truckload/updateList',
+  async (data, { getState }) => {
+    const state = getState();
+    const id_sale = state.sale.saleSelected.id_sale;
+    return data.filter((truckload) => truckload.id_sale === id_sale);
+  }
+);
+
 const initialState = {
   truckloadSelected: null,
   processing: false,
@@ -155,9 +164,6 @@ export const truckloadSlice = createSlice({
     },
     setTruckloadDetail: (state, action) => {
       state.truckloadSelected = action.payload;
-    },
-    updateTruckloadList: (state, { payload }) => {
-      state.truckloadList = truckloadDto.truckloadList(payload);
     },
   },
   extraReducers: (builder) => {
@@ -211,13 +217,16 @@ export const truckloadSlice = createSlice({
       );
       state.processing = false;
     });
+    builder.addCase(updateTruckloadList.fulfilled, (state, { payload }) => {
+      state.truckloadList = truckloadDto.truckloadList(payload);
+    });
   },
 });
 
 export const {
   clearTruckloadSelected,
   setTruckloadDetail,
-  updateTruckloadList,
+  // updateTruckloadList,
 } = truckloadSlice.actions;
 
 export default truckloadSlice.reducer;

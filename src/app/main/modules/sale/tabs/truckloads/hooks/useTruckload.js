@@ -25,7 +25,6 @@ const useTruckload = () => {
   const truckloadList = useSelector((state) => state.truckload.truckloadList);
   // const rowTruckloads = useSelector((state) => state.sale.rowTruckloads);
   const { id_sale } = useParams();
-  console.log({ truckloadList });
   useEffect(() => {
     dispatch(truckloadListAction({ id_sale }));
     dispatch(catTruckloadLicensePlateCatalogAction());

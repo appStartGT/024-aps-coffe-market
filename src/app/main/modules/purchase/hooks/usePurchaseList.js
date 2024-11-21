@@ -30,7 +30,7 @@ const usePurchaseList = () => {
   /* use Effects */
 
   useEffect(() => {
-    id_budget && dispatch(purchaseListAction({ id_budget }));
+    /*  id_budget &&  */ dispatch(purchaseListAction({ id_budget }));
   }, [dispatch, id_budget]);
 
   useEffect(() => {

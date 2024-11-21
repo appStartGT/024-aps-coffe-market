@@ -22,27 +22,27 @@ export const saleListAction = createAsyncThunk(
       let { rowSales, rowSaleDetails, rowTruckloads, rowPurchaseDetails } =
         state.sale;
 
-      if (
-        rowSales.length > 0 &&
-        rowTruckloads.length > 0 &&
-        rowPurchaseDetails.length > 0
-      ) {
-        const { saleList, purchaseDetailsResult } = saleDto.saleList(
-          rowSales,
-          rowSaleDetails,
-          rowTruckloads,
-          rowPurchaseDetails
-        );
-        return {
-          isUpdateNeeded: false,
-          rowSales,
-          rowSaleDetails,
-          rowTruckloads,
-          rowPurchaseDetails,
-          saleList,
-          purchaseDetailsResult,
-        };
-      }
+      // if (
+      //   rowSales.length > 0 &&
+      //   rowTruckloads.length > 0 &&
+      //   rowPurchaseDetails.length > 0
+      // ) {
+      //   const { saleList, purchaseDetailsResult } = saleDto.saleList(
+      //     rowSales,
+      //     rowSaleDetails,
+      //     rowTruckloads,
+      //     rowPurchaseDetails
+      //   );
+      //   return {
+      //     isUpdateNeeded: false,
+      //     rowSales,
+      //     rowSaleDetails,
+      //     rowTruckloads,
+      //     rowPurchaseDetails,
+      //     saleList,
+      //     purchaseDetailsResult,
+      //   };
+      // }
 
       const sales = await getAllDocuments({
         collectionName: firebaseCollections.SALE,
