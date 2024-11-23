@@ -12,6 +12,8 @@ const DataTableOverview = ({ saleList }) => {
   const rowPurchaseDetails = useSelector(
     (state) => state.sale.rowPurchaseDetails
   );
+  const id_budget = useSelector((state) => state.budget.budget?.id_budget);
+  console.log({ id_budget });
   const [statistics, setStatistics] = useState({
     totalQuantity: '0.00',
     totalLbPriceless: '0.00',
@@ -23,6 +25,8 @@ const DataTableOverview = ({ saleList }) => {
     availableForShipment: '0.00',
   });
   const [isQuintales, setIsQuintales] = useState(false);
+
+  console.log({ purchaseDetailsResult, rowPurchaseDetails });
 
   useEffect(() => {
     if (saleList && saleList.length > 0) {
@@ -53,9 +57,33 @@ const DataTableOverview = ({ saleList }) => {
       const totalLbAvailablePriceless =
         purchaseDetailsResult?.totalLbAvailablePriceless || 0;
 
+      const totalLbPricedForShipment = Number(
+        rowPurchaseDetails
+          ?.filter(
+            (detail) =>
+              !detail.isPriceless &&
+              !detail.isRemate &&
+              detail.id_budget === id_budget
+          )
+          .reduce((sum, detail) => sum + Number(detail.quantity) || 0, 0)
+          .toFixed(2)
+      );
+
+      const totalLbPricelessForShipment = Number(
+        rowPurchaseDetails
+          ?.filter(
+            (detail) =>
+              detail.isPriceless &&
+              !detail.isRemate &&
+              detail.id_budget === id_budget
+          )
+          .reduce((sum, detail) => sum + Number(detail.quantity) || 0, 0)
+          .toFixed(2)
+      );
+
       const availableForShipment =
-        Number(totalLbAvailable) +
-        Number(totalLbAvailablePriceless) -
+        Number(totalLbPricedForShipment) +
+        Number(totalLbPricelessForShipment) -
         Number(totalTruckloadsSent);
 
       setStatistics({

@@ -10,74 +10,103 @@ const purchaseModel = (purchase, purchase_details) => {
     ...detail,
   }));
 
-  const totalAdvancePayments = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (detail.advancePayments?.reduce(
-        (detailSum, payment) => detailSum + (Number(payment.amount) || 0),
+  const totalAdvancePayments = Number(
+    relevantDetails
+      .reduce(
+        (sum, detail) =>
+          sum +
+          (detail.advancePayments?.reduce(
+            (detailSum, payment) => detailSum + (Number(payment.amount) || 0),
+            0
+          ) || 0),
         0
-      ) || 0),
-    0
+      )
+      .toFixed(2)
   );
 
-  const totalPricedAmount = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (!detail.isPriceless
-        ? Number(detail.quantity) * Number(detail.price) || 0
-        : 0),
-    0
-  );
-
-  const totalLbPriced = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (!detail.isPriceless && !detail.isRemate
-        ? Number(detail.quantity) || 0
-        : 0),
-    0
-  );
-
-  const totalLbPriceless = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (detail.isPriceless && !detail.isRemate
-        ? Number(detail.quantity) || 0
-        : 0),
-    0
-  );
-
-  const totalLbRemate = relevantDetails.reduce(
-    (sum, detail) =>
-      sum +
-      (detail.isRemate && !detail.isPriceless
-        ? Number(detail.quantity) || 0
-        : 0),
-    0
-  );
-
-  const totalLbQuantity = totalLbPriced + totalLbPriceless + totalLbRemate;
-
-  const averagePrice =
-    totalLbPriced > 0 ? totalPricedAmount / (totalLbPriced + totalLbRemate) : 0;
-
-  const totalDebt = relevantDetails.reduce((sum, detail) => {
-    if (
-      !detail.isPriceless &&
-      !detail.isRemate &&
-      detail.advancePayments &&
-      detail.advancePayments.length > 0
-    ) {
-      const detailTotal =
-        (Number(detail.quantity) || 0) * (Number(detail.price) || 0);
-      const detailAdvances = detail.advancePayments.reduce(
-        (total, payment) => total + (Number(payment.amount) || 0),
+  const totalPricedAmount = Number(
+    relevantDetails
+      .reduce(
+        (sum, detail) =>
+          sum +
+          (!detail.isPriceless
+            ? Number(detail.quantity) * Number(detail.price) || 0
+            : 0),
         0
-      );
-      return sum + (detailTotal - detailAdvances);
-    }
-    return sum;
-  }, 0);
+      )
+      .toFixed(2)
+  );
+
+  const totalLbPriced = Number(
+    relevantDetails
+      .reduce(
+        (sum, detail) =>
+          sum +
+          (!detail.isPriceless && !detail.isRemate
+            ? Number(detail.quantity) || 0
+            : 0),
+        0
+      )
+      .toFixed(2)
+  );
+
+  const totalLbPriceless = Number(
+    relevantDetails
+      .reduce(
+        (sum, detail) =>
+          sum +
+          (detail.isPriceless && !detail.isRemate
+            ? Number(detail.quantity) || 0
+            : 0),
+        0
+      )
+      .toFixed(2)
+  );
+
+  const totalLbRemate = Number(
+    relevantDetails
+      .reduce(
+        (sum, detail) =>
+          sum +
+          (detail.isRemate && !detail.isPriceless
+            ? Number(detail.quantity) || 0
+            : 0),
+        0
+      )
+      .toFixed(2)
+  );
+
+  const totalLbQuantity = Number(
+    (totalLbPriced + totalLbPriceless) /* + totalLbRemate */
+      .toFixed(2)
+  );
+  console.log({ relevantDetails });
+
+  const averagePrice = Number(
+    (totalPricedAmount / (totalLbPriced + totalLbRemate)).toFixed(2)
+  );
+
+  const totalDebt = Number(
+    relevantDetails
+      .reduce((sum, detail) => {
+        if (
+          !detail.isPriceless &&
+          !detail.isRemate &&
+          detail.advancePayments &&
+          detail.advancePayments.length > 0
+        ) {
+          const detailTotal =
+            (Number(detail.quantity) || 0) * (Number(detail.price) || 0);
+          const detailAdvances = detail.advancePayments.reduce(
+            (total, payment) => total + (Number(payment.amount) || 0),
+            0
+          );
+          return sum + (detailTotal - detailAdvances);
+        }
+        return sum;
+      }, 0)
+      .toFixed(2)
+  );
 
   const obj = {
     id: purchase.id_purchase,
@@ -101,26 +130,35 @@ const purchaseModel = (purchase, purchase_details) => {
     averagePriceFormatted: `Q ${formatNumber(averagePrice)}`,
     totalAdvancePaymentsFormatted: `Q ${formatNumber(totalAdvancePayments)}`,
     totalLbRemateFormatted: `${formatNumber(totalLbRemate)} lb`,
-    totalQQRemateFormatted: `${formatNumber(totalLbRemate / 100)} qq`,
+    totalQQRemateFormatted: `${formatNumber(
+      Number((totalLbRemate / 100).toFixed(2))
+    )} qq`,
     totalLbPricedFormatted: `${formatNumber(totalLbPriced)} lb`,
-    totalQQPricedFormatted: `${formatNumber(totalLbPriced / 100)} qq`,
+    totalQQPricedFormatted: `${formatNumber(
+      Number((totalLbPriced / 100).toFixed(2))
+    )} qq`,
     totalLbPricelessFormatted: `${formatNumber(totalLbPriceless)} lb`,
-    totalQQPricelessFormatted: `${formatNumber(totalLbPriceless / 100)} qq`,
+    totalQQPricelessFormatted: `${formatNumber(
+      Number((totalLbPriceless / 100).toFixed(2))
+    )} qq`,
     totalDebtFormatted: `Q ${formatNumber(totalDebt)}`,
-    totalPricedAmountFormatted: formatNumber(totalPricedAmount),
+    totalPricedAmountFormatted: `Q ${formatNumber(totalPricedAmount)}`,
     totalLbQuantityFormatted: `${formatNumber(totalLbQuantity)} lb`,
-    totalQQQuantityFormatted: `${formatNumber(totalLbQuantity / 100)} qq`,
+    totalQQQuantityFormatted: `${formatNumber(
+      Number((totalLbQuantity / 100).toFixed(2))
+    )} qq`,
     averagePrice: averagePrice,
     totalAdvancePayments: totalAdvancePayments,
     totalLbRemate: totalLbRemate,
-    totalQQRemate: totalLbRemate / 100,
+    totalQQRemate: Number((totalLbRemate / 100).toFixed(2)),
     totalLbPriced: totalLbPriced,
-    totalQQPriced: totalLbPriced / 100,
+    totalQQPriced: Number((totalLbPriced / 100).toFixed(2)),
     totalLbPriceless: totalLbPriceless,
-    totalQQPriceless: totalLbPriceless / 100,
+    totalQQPriceless: Number((totalLbPriceless / 100).toFixed(2)),
     totalLbQuantity: totalLbQuantity,
-    totalQQQuantity: totalLbQuantity / 100,
+    totalQQQuantity: Number((totalLbQuantity / 100).toFixed(2)),
     totalPricedAmount: totalPricedAmount,
+
     totalDebt: totalDebt,
   };
   return obj;

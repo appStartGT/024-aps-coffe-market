@@ -20,57 +20,80 @@ const DataTableOverview = ({ purchaseList }) => {
 
   useEffect(() => {
     if (purchaseList && purchaseList.length > 0) {
-      const totalQuantity = purchaseList.reduce(
-        (sum, purchase) => sum + Number(purchase.totalLbQuantity),
-        0
+      const totalQuantity = Number(
+        purchaseList
+          .reduce((sum, purchase) => sum + Number(purchase.totalLbQuantity), 0)
+          .toFixed(2)
       );
 
-      const totalLbPriced = purchaseList.reduce(
-        (sum, purchase) => sum + Number(+purchase.totalLbPriced),
-        0
+      const totalLbPriced = Number(
+        purchaseList
+          .reduce((sum, purchase) => sum + Number(purchase.totalLbPriced), 0)
+          .toFixed(2)
       );
 
-      const totalLbPriceless = purchaseList.reduce(
-        (sum, purchase) => sum + purchase.totalLbPriceless,
-        0
+      const totalLbPriceless = Number(
+        purchaseList
+          .reduce((sum, purchase) => sum + Number(purchase.totalLbPriceless), 0)
+          .toFixed(2)
       );
-      const totalLbRemate = purchaseList.reduce(
-        (sum, purchase) => sum + purchase.totalLbRemate,
-        0
+
+      const totalLbRemate = Number(
+        purchaseList
+          .reduce((sum, purchase) => sum + Number(purchase.totalLbRemate), 0)
+          .toFixed(2)
       );
-      const totalAmount = purchaseList.reduce(
-        (sum, purchase) => sum + purchase.totalPricedAmount,
-        0
-      );
-      const averagePrice =
-        totalQuantity !== 0 ? totalAmount / totalLbPriced : 0;
-      const totalAdvancePayments = purchaseList.reduce(
-        (sum, purchase) =>
-          sum +
-          (purchase.advancePayments?.reduce(
-            (paymentSum, payment) => paymentSum + payment.amount,
+
+      const totalAmount = Number(
+        purchaseList
+          .reduce(
+            (sum, purchase) => sum + Number(purchase.totalPricedAmount),
             0
-          ) || 0),
-        0
+          )
+          .toFixed(2)
       );
-      const totalDebt = Math.max(
-        0,
-        purchaseList.reduce((sum, purchase) => {
-          if (
-            !purchase.isPriceless &&
-            !purchase.isRemate &&
-            purchase.advancePayments &&
-            purchase.advancePayments.length > 0
-          ) {
-            const purchaseTotal = purchase.quantity * purchase.price;
-            const purchaseAdvances = purchase.advancePayments.reduce(
-              (total, payment) => total + payment.amount,
-              0
-            );
-            return sum + (purchaseTotal - purchaseAdvances);
-          }
-          return sum;
-        }, 0)
+
+      const averagePrice = Number(
+        totalQuantity !== 0
+          ? (totalAmount / (totalLbPriced + totalLbRemate)).toFixed(2)
+          : 0
+      );
+
+      const totalAdvancePayments = Number(
+        purchaseList
+          .reduce(
+            (sum, purchase) =>
+              sum +
+              (purchase.advancePayments?.reduce(
+                (paymentSum, payment) => paymentSum + Number(payment.amount),
+                0
+              ) || 0),
+            0
+          )
+          .toFixed(2)
+      );
+
+      const totalDebt = Number(
+        Math.max(
+          0,
+          purchaseList.reduce((sum, purchase) => {
+            if (
+              !purchase.isPriceless &&
+              !purchase.isRemate &&
+              purchase.advancePayments &&
+              purchase.advancePayments.length > 0
+            ) {
+              const purchaseTotal =
+                Number(purchase.quantity) * Number(purchase.price);
+              const purchaseAdvances = purchase.advancePayments.reduce(
+                (total, payment) => total + Number(payment.amount),
+                0
+              );
+              return sum + (purchaseTotal - purchaseAdvances);
+            }
+            return sum;
+          }, 0)
+        ).toFixed(2)
       );
 
       setStatistics({
@@ -102,7 +125,7 @@ const DataTableOverview = ({ purchaseList }) => {
   };
 
   const convertToQuintales = (value) => {
-    return formatNumber(parseFloat(value.replace(/,/g, '')) / 100);
+    return formatNumber((parseFloat(value.replace(/,/g, '')) / 100).toFixed(2));
   };
 
   return (
@@ -152,12 +175,6 @@ const DataTableOverview = ({ purchaseList }) => {
           color={theme.palette.warning.contrastText}
           onClick={toggleUnit}
         />
-        {/* <DataItem
-          value={`Q${statistics.totalDebt}`}
-          label="Total Deuda"
-          backgroundColor={theme.palette.balance.background}
-          color={theme.palette.balance.text}
-        /> */}
         <DataItem
           value={`Q${statistics.averagePrice}`}
           label="Precio Promedio"

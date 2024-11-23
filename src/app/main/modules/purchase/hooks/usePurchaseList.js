@@ -78,6 +78,22 @@ const usePurchaseList = () => {
       ),
     },
     {
+      field: 'averagePriceFormatted',
+      headerName: 'Precio Promedio',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    {
+      field: 'totalPricedAmountFormatted',
+      headerName: 'Total',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    {
       field: 'totalLbPricelessFormatted',
       headerName: `Total Sin Precio ${isQuintales ? '(qq)' : '(lb)'}`,
       headerAlign: 'center',
@@ -107,14 +123,7 @@ const usePurchaseList = () => {
         </div>
       ),
     },
-    {
-      field: 'averagePriceFormatted',
-      headerName: 'Precio Promedio',
-      headerAlign: 'center',
-      align: 'center',
-      minWidth: 120,
-      flex: 1,
-    },
+
     {
       field: 'totalAdvancePaymentsFormatted',
       headerName: 'Anticipos',
@@ -123,14 +132,14 @@ const usePurchaseList = () => {
       minWidth: 120,
       flex: 1,
     },
-    {
-      field: 'totalDebtFormatted',
-      headerName: 'Total Deuda',
-      headerAlign: 'center',
-      align: 'center',
-      minWidth: 120,
-      flex: 1,
-    },
+    // {
+    //   field: 'totalDebtFormatted',
+    //   headerName: 'Total Deuda',
+    //   headerAlign: 'center',
+    //   align: 'center',
+    //   minWidth: 120,
+    //   flex: 1,
+    // },
     {
       field: 'actions',
       headerName: 'Acciones',

@@ -6,6 +6,7 @@ const purchaseDetailModel = (purchaseDetail, purchaseSelected) => {
     id: purchaseDetail.id_purchase_detail,
     id_purchase_detail: purchaseDetail.id_purchase_detail,
     id_purchase: purchaseDetail?.id_purchase,
+    id_budget: purchaseDetail?.id_budget,
     priceFormat: `Q${formatNumber(purchaseDetail?.price)}`,
     price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,

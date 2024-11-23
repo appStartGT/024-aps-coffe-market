@@ -182,6 +182,7 @@ export const createRemateAction = createAsyncThunk(
           id_budget: firestore.doc(
             `${firebaseCollections.BUDGET}/${id_budget}`
           ),
+          remateBudgetIds: list.map((item) => item.id_budget),
           id_cat_payment_method: firestore.doc(
             `${firebaseCollections.CAT_PAYMENT_METHOD}/${id_cat_payment_method}`
           ),

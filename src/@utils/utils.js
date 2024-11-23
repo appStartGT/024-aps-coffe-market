@@ -259,7 +259,7 @@ export const formatNumber = (number) => {
     return '0.00';
   }
   return number.toLocaleString('en-US', {
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 2,//TODO: opcion para ver promedios con mas decimales
     maximumFractionDigits: 2,
   });
 };

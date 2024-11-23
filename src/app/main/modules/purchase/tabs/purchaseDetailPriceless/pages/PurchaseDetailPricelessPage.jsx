@@ -38,7 +38,7 @@ const PurchaseDetailPricelessPage = () => {
             }}
           >
             <Typography variant="body1">
-              Total de libras seleccionadas:{' '}
+              Total de libras seleccionadas:
               {formatNumber(totalSelectedQuantity)}
               &nbsp;({formatNumber(totalSelectedQuintales)} quintales)
             </Typography>

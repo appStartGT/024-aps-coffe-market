@@ -82,10 +82,10 @@ export const purchaseListAction = createAsyncThunk(
 
 export const purchaseCreateAction = createAsyncThunk(
   'purchase/create',
-  async (data, { rejectWithValue, dispatch, getState }) => {
+  async (data, { rejectWithValue, dispatch /* getState */ }) => {
     dispatch(setLoadingMainViewAction(true));
-    const state = getState();
-    const id_budget = state.budget.budget.id_budget;
+    // const state = getState();
+    // const id_budget = state.budget.budget.id_budget;
     let body = cleanModel({ ...data });
 
     // Create customer first
@@ -106,7 +106,7 @@ export const purchaseCreateAction = createAsyncThunk(
 
     const purchaseData = {
       id_customer,
-      id_budget,
+      // id_budget,
     };
 
     return await insertDocument({
