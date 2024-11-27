@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Box, useTheme } from '@mui/material';
+import { Box, useTheme, IconButton } from '@mui/material';
 import DataItem from './DataItem';
 import { formatNumber } from '@utils';
+import { useSelector } from 'react-redux';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 
 const DataTableOverview = ({ purchaseList }) => {
   const theme = useTheme();
+  const expensesGrandTotal = useSelector(
+    (state) => state.budget.expenses?.totals?.grandTotal
+  );
+
   const [statistics, setStatistics] = useState({
     totalPurchases: 0,
     totalQuantity: '0.00',
@@ -17,6 +23,8 @@ const DataTableOverview = ({ purchaseList }) => {
     totalLbRemate: '0.00',
   });
   const [isQuintales, setIsQuintales] = useState(false);
+  const [showAveragePriceWithExpenses, setShowAveragePriceWithExpenses] =
+    useState(false);
 
   useEffect(() => {
     if (purchaseList && purchaseList.length > 0) {
@@ -56,6 +64,15 @@ const DataTableOverview = ({ purchaseList }) => {
       const averagePrice = Number(
         totalQuantity !== 0
           ? (totalAmount / (totalLbPriced + totalLbRemate)).toFixed(2)
+          : 0
+      );
+
+      const averagePriceWithExpenses = Number(
+        totalQuantity !== 0
+          ? (
+              (expensesGrandTotal || 0) /
+              (totalLbPriced + totalLbRemate)
+            ).toFixed(2)
           : 0
       );
 
@@ -100,6 +117,7 @@ const DataTableOverview = ({ purchaseList }) => {
         totalQuantity: formatNumber(totalQuantity),
         totalLbPriceless: formatNumber(totalLbPriceless),
         averagePrice: formatNumber(averagePrice),
+        averagePriceWithExpenses: formatNumber(averagePriceWithExpenses),
         totalAmount: formatNumber(totalAmount),
         totalAdvancePayments: formatNumber(totalAdvancePayments),
         totalDebt: formatNumber(totalDebt),
@@ -111,6 +129,7 @@ const DataTableOverview = ({ purchaseList }) => {
         totalQuantity: '0.00',
         totalLbPriceless: '0.00',
         averagePrice: '0.00',
+        averagePriceWithExpenses: '0.00',
         totalAmount: '0.00',
         totalAdvancePayments: '0.00',
         totalDebt: '0.00',
@@ -118,10 +137,14 @@ const DataTableOverview = ({ purchaseList }) => {
         totalLbRemate: '0.00',
       });
     }
-  }, [purchaseList]);
+  }, [purchaseList, expensesGrandTotal]);
 
   const toggleUnit = () => {
     setIsQuintales(!isQuintales);
+  };
+
+  const toggleAveragePrice = () => {
+    setShowAveragePriceWithExpenses(!showAveragePriceWithExpenses);
   };
 
   const convertToQuintales = (value) => {
@@ -137,10 +160,18 @@ const DataTableOverview = ({ purchaseList }) => {
               ? convertToQuintales(statistics.totalQuantity)
               : statistics.totalQuantity
           }
-          label={`Total ${isQuintales ? 'Quintales' : 'Libras'} `}
+          label={`Total ${isQuintales ? 'Quintales' : 'Libras'}`}
           backgroundColor={theme.palette.primary.main}
           color={theme.palette.primary.contrastText}
-          onClick={toggleUnit}
+          icon={
+            <IconButton
+              onClick={toggleUnit}
+              size="small"
+              sx={{ color: theme.palette.primary.contrastText }}
+            >
+              <SwapHorizIcon />
+            </IconButton>
+          }
         />
         <DataItem
           value={
@@ -151,7 +182,15 @@ const DataTableOverview = ({ purchaseList }) => {
           label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Pagadas`}
           backgroundColor={theme.palette.totalQuantity.background}
           color={theme.palette.totalQuantity.text}
-          onClick={toggleUnit}
+          icon={
+            <IconButton
+              onClick={toggleUnit}
+              size="small"
+              sx={{ color: theme.palette.totalQuantity.text }}
+            >
+              <SwapHorizIcon />
+            </IconButton>
+          }
         />
         <DataItem
           value={
@@ -162,7 +201,15 @@ const DataTableOverview = ({ purchaseList }) => {
           label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Sin Precio`}
           backgroundColor={theme.palette.balance.background}
           color={theme.palette.balance.text}
-          onClick={toggleUnit}
+          icon={
+            <IconButton
+              onClick={toggleUnit}
+              size="small"
+              sx={{ color: theme.palette.balance.text }}
+            >
+              <SwapHorizIcon />
+            </IconButton>
+          }
         />
         <DataItem
           value={
@@ -173,13 +220,36 @@ const DataTableOverview = ({ purchaseList }) => {
           label={`Total ${isQuintales ? 'Quintales' : 'Libras'} Remate`}
           backgroundColor={theme.palette.warning.main}
           color={theme.palette.warning.contrastText}
-          onClick={toggleUnit}
+          icon={
+            <IconButton
+              onClick={toggleUnit}
+              size="small"
+              sx={{ color: theme.palette.warning.contrastText }}
+            >
+              <SwapHorizIcon />
+            </IconButton>
+          }
         />
         <DataItem
-          value={`Q${statistics.averagePrice}`}
-          label="Precio Promedio"
+          value={`Q${
+            showAveragePriceWithExpenses
+              ? statistics.averagePriceWithExpenses
+              : statistics.averagePrice
+          }`}
+          label={`Precio Promedio ${
+            showAveragePriceWithExpenses ? '(con gastos)' : ''
+          }`}
           backgroundColor={theme.palette.info.main}
           color={theme.palette.info.contrastText}
+          icon={
+            <IconButton
+              onClick={toggleAveragePrice}
+              size="small"
+              sx={{ color: theme.palette.info.contrastText }}
+            >
+              <SwapHorizIcon />
+            </IconButton>
+          }
         />
       </Box>
     </Box>

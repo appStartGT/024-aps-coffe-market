@@ -80,7 +80,6 @@ const purchaseModel = (purchase, purchase_details) => {
     (totalLbPriced + totalLbPriceless) /* + totalLbRemate */
       .toFixed(2)
   );
-  console.log({ relevantDetails });
 
   const averagePrice = Number(
     (totalPricedAmount / (totalLbPriced + totalLbRemate)).toFixed(2)

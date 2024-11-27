@@ -13,7 +13,12 @@ const DataTableOverview = ({ saleList }) => {
     (state) => state.sale.rowPurchaseDetails
   );
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
-  console.log({ id_budget });
+  const expensesGrandTotal = useSelector(
+    (state) => state.budget.expenses?.totals?.grandTotal
+  );
+
+  console.log({ expensesGrandTotal });
+  
   const [statistics, setStatistics] = useState({
     totalQuantity: '0.00',
     totalLbPriceless: '0.00',
@@ -53,7 +58,14 @@ const DataTableOverview = ({ saleList }) => {
         0
       );
 
-      const totalLbAvailable = purchaseDetailsResult?.totalLbAvailable || 0;
+      const totalLbAvailable = saleList.reduce((sum, sale) => {
+        return (
+          sum +
+          (Number(sale.totalTruckloadsReceived || 0) -
+            Number(sale.totalLbPriceless || 0))
+        );
+      }, 0);
+
       const totalLbAvailablePriceless =
         purchaseDetailsResult?.totalLbAvailablePriceless || 0;
 

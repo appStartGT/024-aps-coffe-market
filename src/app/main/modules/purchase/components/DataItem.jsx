@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography, Paper, Box, IconButton } from '@mui/material';
 import SwapVertIcon from '@mui/icons-material/SwapVert';
 
-const DataItem = ({ value, label, backgroundColor, color, onClick }) => {
+const DataItem = ({ value, label, backgroundColor, color, onClick, icon }) => {
   return (
     <Paper
       elevation={3}
@@ -18,6 +18,10 @@ const DataItem = ({ value, label, backgroundColor, color, onClick }) => {
         borderRadius: '10px',
         position: 'relative',
         cursor: onClick ? 'pointer' : 'default',
+        transition: 'transform 0.3s ease-in-out',
+        '&:hover': {
+          transform: 'scale(1.05)',
+        },
       }}
       onClick={onClick}
     >
@@ -58,6 +62,11 @@ const DataItem = ({ value, label, backgroundColor, color, onClick }) => {
         >
           <SwapVertIcon fontSize="small" />
         </IconButton>
+      )}
+      {icon && (
+        <Box sx={{ position: 'absolute', top: 5, left: 5 }}>
+          {icon}
+        </Box>
       )}
     </Paper>
   );
