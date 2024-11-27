@@ -75,11 +75,13 @@ const SearchBar = ({
         flexWrap: 'wrap',
         gap: 1,
         marginBottom: '16px',
+        alignItems: 'center',
+        height: '100%',
         ...props.sx,
       }}
     >
       {dropdown && (
-        <Box sx={{ flex: '1 1 100%', maxWidth: '25%' }}>
+        <Box sx={{ flex: '0 0 auto', width: '200px' }}>
           <TextField
             select
             label={dropdown.label}
@@ -90,7 +92,7 @@ const SearchBar = ({
             {...dropdown.dropdownProps}
             sx={{ width: '100%', ...dropdown.styles }}
           >
-            {dropdown.options.map((option) => (
+            {dropdown.options?.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
@@ -99,7 +101,7 @@ const SearchBar = ({
         </Box>
       )}
       {field && (
-        <Box sx={{ flex: '1 1 100%', maxWidth: '25%' }}>
+        <Box sx={{ flex: '0 0 auto', width: '200px' }}>
           <TextField
             id="outlined-field"
             label={field.label}
@@ -121,20 +123,23 @@ const SearchBar = ({
       <Box
         sx={{
           flex: '1',
+          height: '56px', // Match the height of the dropdown
         }}
         {...wrapperProps}
       >
         <FormControl
           variant="outlined"
           color="primary"
-          sx={{ width: '100%', ...outlinedInputStyles }}
+          sx={{ width: '100%', height: '100%', ...outlinedInputStyles }}
         >
           <InputLabel sx={{ fontSize: '12px' }}>{label}</InputLabel>
           <OutlinedInput
             sx={{
               borderRadius: '8px',
+              height: '100%',
               '& .MuiOutlinedInput-input': {
-                padding: '10px',
+                padding: '16.5px 14px',
+                height: '100%',
               },
             }}
             type={type}

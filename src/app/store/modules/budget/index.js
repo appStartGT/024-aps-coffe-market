@@ -7,6 +7,7 @@ import {
   deleteRecordById,
 } from '@utils/firebaseMethods';
 import { firebaseCollections, firebaseCollectionsKey } from '@utils/constants';
+import { formatFirebaseTimestamp } from '@utils/dates';
 
 export const createBudgetAction = createAsyncThunk(
   'budget/createBudget',
@@ -41,7 +42,7 @@ export const createBudgetAction = createAsyncThunk(
         // Update all budgets to deleted:true
         const budgets = await budgetRef.get();
         budgets.docs.forEach((doc) => {
-          transaction.update(doc.ref, { deleted: true, isClosed: true });
+          transaction.update(doc.ref, { /* deleted: true, */ isClosed: true });
         });
 
         // Create a new budget
@@ -106,11 +107,11 @@ export const getBudgetAction = createAsyncThunk(
       //   return { budget, budget_items };
       // } else {
       //just the last budget will be used deleted:false by default the method do it
-      let currentBudget = await getAllDocuments({
+      const budgets = await getAllDocuments({
         collectionName: firebaseCollections.BUDGET,
-        filterBy: [{ field: 'isClosed', condition: '==', value: false }],
+        // filterBy: [{ field: 'isClosed', condition: '==', value: false }],
       });
-      currentBudget = currentBudget.data[0] || null;
+      const currentBudget = budgets.data.find((item) => !item.isClosed);
 
       if (currentBudget) {
         id_budget = currentBudget.id_budget;
@@ -133,9 +134,18 @@ export const getBudgetAction = createAsyncThunk(
         // Fetch the expenses for the current budget
         dispatch(budgetExpensesAction(id_budget));
 
-        return { budget: currentBudget, budget_items: newBudget_items.data };
+        return {
+          budget: currentBudget,
+          budget_items: newBudget_items.data,
+          budgets: budgets.data,
+        };
       } else {
-        return { budget: null, budget_items: [] };
+        return {
+          budget: null,
+          budget_items: [],
+          id_budget: null,
+          budgets: budgets.data,
+        };
       }
       // }
     } catch (error) {
@@ -305,6 +315,7 @@ export const deleteBudgetItemAction = createAsyncThunk(
 
 const initialState = {
   budget: null,
+  budgets: [],
   budget_items: [],
   processing: false,
   error: null,
@@ -328,6 +339,7 @@ export const budgetSlice = createSlice({
   reducers: {
     clearBudget: (state) => {
       state.budget = null;
+      state.budgets = [];
       state.budget_items = [];
       state.old_budget = null;
       state.expenses = {
@@ -356,10 +368,11 @@ export const budgetSlice = createSlice({
       })
       .addCase(createBudgetAction.fulfilled, (state, action) => {
         state.processing = false;
-        const { budget, budget_items } = action.payload;
+        const { budget, budget_items, budgets, old_budget } = action.payload;
         state.budget = budget;
         state.budget_items = budget_items;
-        state.old_budget = action.payload.old_budget;
+        state.budgets = budgets;
+        state.old_budget = old_budget;
         state.expenses = {
           purchaseDetails: [],
           expenses: [],
@@ -381,8 +394,33 @@ export const budgetSlice = createSlice({
       })
       .addCase(getBudgetAction.fulfilled, (state, action) => {
         state.processing = false;
-        const { budget, budget_items } = action.payload;
+        const { budget, budget_items, budgets } = action.payload;
         state.budget = budget;
+        state.budgets = budgets
+          .map((item) => {
+            const timestamp = formatFirebaseTimestamp(item.createdAt);
+            if (item.id_budget === budget?.id_budget) {
+              return {
+                value: item.id_budget,
+                label: 'Actual',
+                createdAt: timestamp,
+                rawDate: new Date(timestamp),
+              };
+            }
+            return {
+              value: item.id_budget,
+              label: `Presupuesto ${timestamp}`,
+              createdAt: timestamp,
+              rawDate: new Date(timestamp),
+            };
+          })
+          .sort((a, b) => {//TODO: SORT THEM DESC
+            // Put 'Actual' first
+            if (a.label === 'Actual') return -1;
+            if (b.label === 'Actual') return 1;
+            // Sort other items in descending order by date
+            return a.rawDate - b.rawDate;
+          });
         state.budget_items = budget_items;
       })
       .addCase(getBudgetAction.rejected, (state, action) => {

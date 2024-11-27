@@ -22,16 +22,23 @@ const usePurchaseList = () => {
     (state) => state.purchase.purchaseListDetails
   );
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
+  const budgets = useSelector((state) => state.budget.budgets);
   /* States */
   const [searchList, setSearchList] = useState(null);
   const [, setText] = useState('');
   const [isQuintales, setIsQuintales] = useState(false);
-
+  const [selectedBudget, setSelectedBudget] = useState('');
   /* use Effects */
+  useEffect(() => {
+    /*  id_budget &&  */
+    dispatch(purchaseListAction({ id_budget }));
+    id_budget && setSelectedBudget(id_budget);
+  }, [dispatch, id_budget]);
 
   useEffect(() => {
-    /*  id_budget &&  */ dispatch(purchaseListAction({ id_budget }));
-  }, [dispatch, id_budget]);
+    selectedBudget &&
+      dispatch(purchaseListAction({ id_budget: selectedBudget, force: true }));
+  }, [dispatch, selectedBudget]);
 
   useEffect(() => {
     dispatch(clearAllPurchaseDetails());
@@ -206,6 +213,15 @@ const usePurchaseList = () => {
         key: 'can-create-purchase-record',
         I: Actions.CREATE,
         a: Subjects.PURCHASES,
+      },
+    },
+    dropdown: {
+      label: 'Presupuesto',
+      type: 'select',
+      options: budgets,
+      value: selectedBudget,
+      onChange: ({ target: { value } }) => {
+        setSelectedBudget(value);
       },
     },
   };

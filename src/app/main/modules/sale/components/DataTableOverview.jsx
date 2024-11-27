@@ -13,12 +13,10 @@ const DataTableOverview = ({ saleList }) => {
     (state) => state.sale.rowPurchaseDetails
   );
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
-  const expensesGrandTotal = useSelector(
-    (state) => state.budget.expenses?.totals?.grandTotal
-  );
+  // const expensesGrandTotal = useSelector(
+  //   (state) => state.budget.expenses?.totals?.grandTotal
+  // );
 
-  console.log({ expensesGrandTotal });
-  
   const [statistics, setStatistics] = useState({
     totalQuantity: '0.00',
     totalLbPriceless: '0.00',

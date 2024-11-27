@@ -635,16 +635,20 @@ const BudgetContent = () => {
         </ListItemButton>
         <Collapse in={openBalance} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            {cat_rubro.map((rubro) => (
-              <ListItemButton key={rubro.value} sx={{ pl: 4 }}>
-                <ListItemText
-                  primary={rubro.label}
-                  secondary={`Q ${(
-                    rubroBalances[rubro.value] || 0
-                  ).toLocaleString()}`}
-                />
-              </ListItemButton>
-            ))}
+            {cat_rubro.map((rubro) => {
+              const rubroBalance = rubroBalances[rubro.value] || 0;
+              if (rubroBalance !== 0) {
+                return (
+                  <ListItemButton key={rubro.value} sx={{ pl: 4 }}>
+                    <ListItemText
+                      primary={rubro.label}
+                      secondary={`Q ${rubroBalance.toLocaleString()}`}
+                    />
+                  </ListItemButton>
+                );
+              }
+              return null;
+            })}
           </List>
         </Collapse>
       </Paper>

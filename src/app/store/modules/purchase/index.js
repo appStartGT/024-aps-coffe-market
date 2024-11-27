@@ -16,7 +16,7 @@ import { setOldBudget } from '../budget';
 
 export const purchaseListAction = createAsyncThunk(
   'purchase/list',
-  async ({ id_budget }, { rejectWithValue, getState, dispatch }) => {
+  async ({ id_budget, force }, { rejectWithValue, getState, dispatch }) => {
     try {
       const state = getState();
       const old_budget = state.budget.old_budget;
@@ -25,6 +25,7 @@ export const purchaseListAction = createAsyncThunk(
         old_budget && old_budget?.id_budget !== id_budget
       );
       if (
+        !force &&
         !isNewBudget &&
         rowPurchases.length > 0 &&
         rowPurchaseDetails.length > 0
