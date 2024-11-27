@@ -15,6 +15,9 @@ const useLoanForm = (id_purchase) => {
   const processing = useSelector((state) => state.loan.processing);
   const loanSelected = useSelector((state) => state.loan.loan);
   const budget = useSelector((state) => state.budget.budget);
+  const cat_payment_method = useSelector(
+    (state) => state.catalogs.cat_payment_method
+  );
   const id_loan = loanSelected?.id_loan || '0';
 
   const formikLoan = useFormikFields({
@@ -29,6 +32,17 @@ const useLoanForm = (id_purchase) => {
         validations: fieldValidations.numberRequired,
       },
       {
+        id: '3',
+        label: 'Forma de Financiamiento',
+        name: 'id_cat_payment_method',
+        field: 'select',
+        gridItem: true,
+        gridProps: { md: 12 },
+        inputProps: { as: 'select' },
+        options: cat_payment_method,
+        validations: fieldValidations.required,
+      },
+      {
         id: '2',
         label: 'Descripción',
         name: 'description',
@@ -40,7 +54,7 @@ const useLoanForm = (id_purchase) => {
       },
 
       {
-        id: '3',
+        id: '4',
         label: 'Marcar como pagado',
         name: 'isPaid',
         field: 'switch',

@@ -11,7 +11,10 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import ExpenseDetailForm from '../components/ExpenseDetailForm';
-import { catExpenseTypeCatalogAction } from '../../../../store/modules/catalogs';
+import {
+  catExpenseTypeCatalogAction,
+  paymentMethodCatalogAction,
+} from '../../../../store/modules/catalogs';
 
 const useExpensesList = () => {
   /* hooks */
@@ -38,6 +41,10 @@ const useExpensesList = () => {
     dispatch(catExpenseTypeCatalogAction());
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(paymentMethodCatalogAction());
+  }, [dispatch]);
+
   const handleOpenExpenseDetailModal = (id_expense) => {
     dispatch(
       setApsGlobalModalPropsAction({
@@ -56,6 +63,14 @@ const useExpensesList = () => {
     {
       field: 'cat_expense_type_name',
       headerName: 'Tipo de Gasto',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 120,
+      flex: 1,
+    },
+    {
+      field: 'cat_payment_method_name',
+      headerName: 'Forma de Pago',
       headerAlign: 'center',
       align: 'center',
       minWidth: 120,

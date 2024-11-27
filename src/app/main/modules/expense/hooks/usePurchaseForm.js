@@ -19,6 +19,9 @@ const useExpenseForm = () => {
   const cat_expense_type = useSelector(
     (state) => state.catalogs.cat_expense_type
   );
+  const cat_payment_method = useSelector(
+    (state) => state.catalogs.cat_payment_method
+  );
   const budget = useSelector((state) => state.budget.budget);
   const id_expense = expenseSelected?.id_expense || '0';
 
@@ -42,6 +45,17 @@ const useExpenseForm = () => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { type: 'number' },
+        validations: fieldValidations.required,
+      },
+      {
+        id: '4',
+        label: 'Forma de Pago',
+        name: 'id_cat_payment_method',
+        field: 'select',
+        gridItem: true,
+        gridProps: { md: 12 },
+        inputProps: { as: 'select' },
+        options: cat_payment_method,
         validations: fieldValidations.required,
       },
       {

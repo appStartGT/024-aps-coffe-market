@@ -12,6 +12,9 @@ const expenseModel = (expense) => {
     id_cat_expense_type: expense.id_cat_expense_type || undefined,
     cat_expense_type: expense.cat_expense_type || undefined,
     cat_expense_type_name: expense.cat_expense_type?.name || '',
+    id_cat_payment_method: expense.id_cat_payment_method || undefined,
+    cat_payment_method: expense.cat_payment_method || undefined,
+    cat_payment_method_name: expense.cat_payment_method?.name || '',
     createdAt: expense.createdAt,
     createdAtFormat: formatFirebaseTimestamp(
       expense.createdAt,

@@ -11,7 +11,10 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import LoanDetailForm from '../components/LoanDetailForm';
-import { catLoanTypeCatalogAction } from '../../../../store/modules/catalogs';
+import {
+  catLoanTypeCatalogAction,
+  paymentMethodCatalogAction,
+} from '../../../../store/modules/catalogs';
 import { useParams } from 'react-router-dom';
 
 const useLoanList = () => {
@@ -37,6 +40,10 @@ const useLoanList = () => {
 
   useEffect(() => {
     dispatch(catLoanTypeCatalogAction());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(paymentMethodCatalogAction());
   }, [dispatch]);
 
   const handleOpenLoanDetailModal = (id_loan) => {

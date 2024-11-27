@@ -385,6 +385,12 @@ const BudgetContent = () => {
   const expense_loans = useSelector((state) => state.budget.expenses.loans);
   const cat_rubro = useSelector((state) => state.catalogs.cat_rubro);
 
+  const allExpenses = {
+    ...expense_purchaseDetails,
+    ...expense_expenses,
+    ...expense_loans,
+  };
+
   useEffect(() => {
     dispatch(catRubroCatalogAction());
   }, [dispatch]);
@@ -449,7 +455,6 @@ const BudgetContent = () => {
     }
     return items.reduce((sum, item) => sum + Number(item.amount), 0);
   };
-
   const budgetTotal = calculateTotal(budget_items || []);
   const expenseTotal =
     calculateTotal(
@@ -476,10 +481,14 @@ const BudgetContent = () => {
         }))
       )
     );
+
+  const transferenciasTotal =
+    expense_purchaseDetails?.Transferencia?.total || 0;
+
   const balance = budgetTotal - expenseTotal;
 
   const handleNewBudget = () => {
-    const currentBalance = budgetTotal - expenseTotal;
+    const currentBalance = budgetTotal - expenseTotal - transferenciasTotal;
     setPreviousBalance(currentBalance);
     setOpenNewBudgetDialog(true);
   };
@@ -520,10 +529,53 @@ const BudgetContent = () => {
       });
     });
 
+    // Subtract Transferencias from Bancos
+    if (allExpenses?.Transferencia) {
+      const bancosRubro = cat_rubro.find(
+        (rubro) => rubro.label === 'Bancos'
+      )?.value;
+      if (bancosRubro && rubroBalances[bancosRubro]) {
+        rubroBalances[bancosRubro] -= transferenciasTotal;
+      }
+    }
+
+    // Subtract the rest of the expenses from Efectivo
+    const efectivoRubro = cat_rubro.find(
+      (rubro) => rubro.label === 'Efectivo'
+    )?.value;
+    if (efectivoRubro && rubroBalances[efectivoRubro]) {
+      const totalOtherExpenses =
+        Object.values(allExpenses).reduce(
+          (sum, group) => sum + (group.total || 0),
+          0
+        ) - transferenciasTotal; // Exclude Transferencias as they're already subtracted from Bancos
+      rubroBalances[efectivoRubro] -= totalOtherExpenses;
+    }
+
     return rubroBalances;
   };
 
   const rubroBalances = calculateRubroBalance();
+
+  // Check if the sum of Efectivo and Bancos matches the total balance
+  const efectivoRubro = cat_rubro.find(
+    (rubro) => rubro.label === 'Efectivo'
+  )?.value;
+  const bancosRubro = cat_rubro.find(
+    (rubro) => rubro.label === 'Bancos'
+  )?.value;
+  const efectivoBalance = rubroBalances[efectivoRubro] || 0;
+  const bancosBalance = rubroBalances[bancosRubro] || 0;
+  const totalEfectivoBancos = efectivoBalance + bancosBalance;
+
+  if (Math.abs(totalEfectivoBancos - balance) > 0.01) {
+    console.warn(
+      'La suma de Efectivo y Bancos no coincide con el saldo total.'
+    );
+    console.log('Saldo total:', balance);
+    console.log('Suma de Efectivo y Bancos:', totalEfectivoBancos);
+    console.log('Diferencia:', balance - totalEfectivoBancos);
+  }
 
   return (
     <Box sx={{ width: '100%', maxWidth: 360, margin: '0 auto' }}>
