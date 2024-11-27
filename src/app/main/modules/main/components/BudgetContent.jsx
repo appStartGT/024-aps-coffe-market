@@ -371,6 +371,7 @@ const BudgetContent = () => {
   const [editingItem, setEditingItem] = useState(null);
   const [openNewBudgetDialog, setOpenNewBudgetDialog] = useState(false);
   const [previousBalance, setPreviousBalance] = useState(0);
+  const [openBalance, setOpenBalance] = useState(false);
   const auth = useAuth();
   // Get budget data from Redux store
   const budget = useSelector((state) => state.budget.budget);
@@ -498,6 +499,32 @@ const BudgetContent = () => {
       });
   };
 
+  const calculateRubroBalance = () => {
+    const rubroBalances = {};
+
+    // Calculate budget amounts for each rubro
+    budget_items?.forEach((item) => {
+      if (!rubroBalances[item.id_cat_rubro]) {
+        rubroBalances[item.id_cat_rubro] = 0;
+      }
+      rubroBalances[item.id_cat_rubro] += Number(item.amount);
+    });
+
+    // Subtract expenses for each rubro
+    Object.values(expense_expenses || {}).forEach((group) => {
+      group.items.forEach((item) => {
+        if (!rubroBalances[item.id_cat_rubro]) {
+          rubroBalances[item.id_cat_rubro] = 0;
+        }
+        rubroBalances[item.id_cat_rubro] -= Number(item.amount || 0);
+      });
+    });
+
+    return rubroBalances;
+  };
+
+  const rubroBalances = calculateRubroBalance();
+
   return (
     <Box sx={{ width: '100%', maxWidth: 360, margin: '0 auto' }}>
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
@@ -544,9 +571,30 @@ const BudgetContent = () => {
           transition: 'background-color 0.3s',
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Saldo: Q {balance.toLocaleString()}
-        </Typography>
+        <ListItemButton onClick={() => setOpenBalance(!openBalance)}>
+          <ListItemText
+            primary={
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Saldo: Q {balance.toLocaleString()}
+              </Typography>
+            }
+          />
+          {openBalance ? <ExpandLess /> : <ExpandMore />}
+        </ListItemButton>
+        <Collapse in={openBalance} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {cat_rubro.map((rubro) => (
+              <ListItemButton key={rubro.value} sx={{ pl: 4 }}>
+                <ListItemText
+                  primary={rubro.label}
+                  secondary={`Q ${(
+                    rubroBalances[rubro.value] || 0
+                  ).toLocaleString()}`}
+                />
+              </ListItemButton>
+            ))}
+          </List>
+        </Collapse>
       </Paper>
 
       <NewBudgetDialog
