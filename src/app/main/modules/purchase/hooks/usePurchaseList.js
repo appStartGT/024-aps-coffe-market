@@ -8,7 +8,6 @@ import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetai
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../tabs/purchaseDetail/components/PurchaseDetailForm';
-import { getBudgetAction } from '../../../../store/modules/budget';
 
 const usePurchaseList = () => {
   /* hooks */
@@ -23,25 +22,20 @@ const usePurchaseList = () => {
     (state) => state.purchase.purchaseListDetails
   );
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
-  const budgets = useSelector((state) => state.budget.budgets);
   /* States */
   const [searchList, setSearchList] = useState(null);
   const [, setText] = useState('');
   const [isQuintales, setIsQuintales] = useState(false);
-  const [selectedBudget, setSelectedBudget] = useState('');
   /* use Effects */
   useEffect(() => {
     /*  id_budget &&  */
     dispatch(purchaseListAction({ id_budget }));
-    id_budget && setSelectedBudget(id_budget);
-  }, [dispatch, id_budget]);
+  }, [dispatch]);
 
   useEffect(() => {
-    selectedBudget &&
-      dispatch(purchaseListAction({ id_budget: selectedBudget, force: true }));
-
-    selectedBudget && dispatch(getBudgetAction({ id_budget: selectedBudget }));
-  }, [dispatch, selectedBudget]);
+    id_budget &&
+      dispatch(purchaseListAction({ id_budget: id_budget, force: true }));
+  }, [dispatch, id_budget]);
 
   useEffect(() => {
     dispatch(clearAllPurchaseDetails());
@@ -218,15 +212,15 @@ const usePurchaseList = () => {
         a: Subjects.PURCHASES,
       },
     },
-    dropdown: {
-      label: 'Presupuesto',
-      type: 'select',
-      options: budgets,
-      value: selectedBudget,
-      onChange: ({ target: { value } }) => {
-        setSelectedBudget(value);
-      },
-    },
+    // dropdown: {
+    //   label: 'Presupuesto',
+    //   type: 'select',
+    //   options: budgets,
+    //   value: selectedBudget,
+    //   onChange: ({ target: { value } }) => {
+    //     setSelectedBudget(value);
+    //   },
+    // },
   };
 
   const labels = {

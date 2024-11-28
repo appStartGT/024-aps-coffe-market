@@ -51,9 +51,7 @@ const useExpensesList = () => {
         open: true,
         maxWidth: 'xs',
         title: id_expense ? 'Detalles' : 'Agregar',
-        description: id_expense
-          ? 'Edita los campos.'
-          : 'Ingrese los detalles.',
+        description: id_expense ? 'Edita los campos.' : 'Ingrese los detalles.',
         content: <ExpenseDetailForm nonupdate={!id_expense} />,
       })
     );

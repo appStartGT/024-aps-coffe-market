@@ -12,15 +12,12 @@ import {
 import { styled } from '@mui/material/styles';
 import {
   AccountCircle as AccountCircleIcon,
-  //Settings as SettingsIcon,
   Logout as LogoutIcon,
-  // ChevronLeft as ChevronLeftIcon,
   Menu as MenuIcon,
 } from '@mui/icons-material';
-
 import { useAuth } from '@hooks';
-// import MainThemeDrawer from './MainThemeDrawer';
 import DailyBudget from './DailyBudget';
+import BudgetSelect from './budget/BudgetSelect';
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   backgroundColor: theme.palette.secondary['50'],
@@ -32,7 +29,6 @@ const AppBar = styled(MuiAppBar)(({ theme }) => ({
 
 const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
   const auth = useAuth();
-  // const [openDrawerTheme, setOpenDrawerTheme] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
@@ -70,7 +66,7 @@ const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
         <Box
           sx={() => ({
             width: '100%',
-            maxWidth: '232px',
+            // maxWidth: '232px',
             display: { xs: 'block', md: 'none' }, // Show only on mobile and tablet
           })}
         >
@@ -88,11 +84,8 @@ const MainAppBar = ({ sx, setOpenDrawer, isScrollingUp }) => {
             <MenuIcon />
           </IconButton>
         </Box>
+        <BudgetSelect />
         <Box>
-          {/* <MainThemeDrawer
-            open={openDrawerTheme}
-            setOpen={setOpenDrawerTheme}
-          /> */}
           <DailyBudget />
           <Tooltip title="Account settings">
             <IconButton
