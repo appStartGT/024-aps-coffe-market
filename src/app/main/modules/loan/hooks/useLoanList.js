@@ -4,6 +4,7 @@ import { Delete, Edit } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { Chip, Typography } from '@mui/material';
 import {
+  clearLoanAction,
   deleteLoanAction,
   getLoanListAction,
   setLoanAction,
@@ -43,7 +44,7 @@ const useLoanList = () => {
           force: Boolean(selectedBudget),
         })
       );
-  }, [dispatch, id_budget, id_purchase /* selectedBudget */]);
+  }, [dispatch, id_budget, id_purchase]);
 
   useEffect(() => {
     dispatch(catLoanTypeCatalogAction());
@@ -65,6 +66,12 @@ const useLoanList = () => {
         content: (
           <LoanDetailForm nonupdate={!id_loan} id_purchase={id_purchase} />
         ),
+        onClose: () => {
+          dispatch(clearLoanAction());
+          dispatch(
+            setApsGlobalModalPropsAction({ open: false, content: null })
+          );
+        },
       })
     );
   };

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   createLoanAction,
   updateLoanAction,
-  setLoanAction,
+  clearLoanAction,
 } from '../../../../store/modules/loan';
 import { fieldValidations } from '@utils';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
@@ -77,8 +77,9 @@ const useLoanForm = (id_purchase) => {
   });
 
   const handleClose = () => {
+    console.log('handleClose');
     formikLoan.clearForm();
-    dispatch(setLoanAction(null));
+    dispatch(clearLoanAction(null));
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
 

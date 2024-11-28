@@ -2,6 +2,7 @@ import { cleanModel, formatNumber } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
 const loanModel = (loan) => {
+  console.log(loan);
   if (!loan) return {};
   const obj = {
     id: loan.id,
@@ -15,6 +16,7 @@ const loanModel = (loan) => {
       loan.createdAt,
       'DD/MM/YYYY HH:mm'
     ),
+    id_cat_payment_method: loan.id_cat_payment_method,
     createdBy: loan.createdBy || '',
     updatedAt: formatFirebaseTimestamp(loan.updatedAt),
   };
@@ -41,6 +43,7 @@ export const loanPost = (loan) => {
     isPaid: Boolean(loan.isPaid),
     id_budget: loan.id_budget,
     id_purchase: loan.id_purchase,
+    id_cat_payment_method: loan.id_cat_payment_method,
   };
   return cleanModel(model);
 };
