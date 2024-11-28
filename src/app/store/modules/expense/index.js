@@ -36,7 +36,11 @@ export const createExpenseAction = createAsyncThunk(
 
 export const getExpenseListAction = createAsyncThunk(
   'expense/getExpenseList',
-  async ({ id_budget }, { rejectWithValue }) => {
+  async ({ id_budget, force = false }, { rejectWithValue, getState }) => {
+    const state = getState();
+    if (!force && state.expense.expenseList.length > 0) {
+      return { data: state.expense.expenseList, fromRedux: true };
+    }
     try {
       const currentExpense = await getAllDocuments({
         collectionName: firebaseCollections.EXPENSE,
@@ -49,7 +53,7 @@ export const getExpenseListAction = createAsyncThunk(
           },
         ],
       });
-      return currentExpense.data || [];
+      return { data: currentExpense.data || [], fromRedux: false };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -141,8 +145,10 @@ export const expenseSlice = createSlice({
       })
       .addCase(getExpenseListAction.fulfilled, (state, action) => {
         state.processing = false;
-        state.expenseList = expenseList(action.payload);
-        state.totalItems = action.payload.length;
+        if (!action.payload.fromRedux) {
+          state.expenseList = expenseList(action.payload.data);
+          state.totalItems = action.payload.data.length;
+        }
       })
       .addCase(getExpenseListAction.rejected, (state, action) => {
         state.processing = false;

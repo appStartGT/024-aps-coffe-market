@@ -23,10 +23,11 @@ const usePurchaseDetail = () => {
     (state) => state.purchaseDetail.purchaseDetailList
   );
   const [isQuintales, setIsQuintales] = useState(false);
+  const purchaseListMain = useSelector((state) => state.purchase.purchaseList);
 
   useEffect(() => {
     dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
-  }, [dispatch]);
+  }, [dispatch, purchaseListMain]); //refresh when the list is ready
 
   const onClose = () => {
     dispatch(clearPurchaseDetailSelected());

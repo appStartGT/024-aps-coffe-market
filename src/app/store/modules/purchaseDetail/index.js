@@ -17,12 +17,13 @@ import { updatePurchaseListDetailsAction } from '../purchase';
 
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
-  async ({ id_purchase }, { rejectWithValue, getState, dispatch }) => {
+  async ({ id_purchase, force }, { rejectWithValue, getState, dispatch }) => {
     const state = getState();
     const purchase = state.purchase.purchaseSelected;
     const purchaseListDetails = state.purchase.rowPurchaseDetails;
     const id_budget = state.budget.budget.id_budget;
-    if (purchaseListDetails && purchaseListDetails.length > 0) {
+
+    if (!force && purchaseListDetails && purchaseListDetails.length > 0) {
       const filteredDetails = purchaseListDetails.filter(
         (detail) => detail.id_purchase === id_purchase
       );

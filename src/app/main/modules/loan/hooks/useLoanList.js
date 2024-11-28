@@ -26,6 +26,7 @@ const useLoanList = () => {
   const totalItems = useSelector((state) => state.loan.totalItems);
   const processing = useSelector((state) => state.loan.processing);
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
+  const selectedBudget = useSelector((state) => state.budget.selectedBudget);
   /* States */
   const [searchList, setSearchList] = useState(null);
   const [openModalDelete, setOpenModalDelete] = useState(false);
@@ -33,10 +34,16 @@ const useLoanList = () => {
   const [, setText] = useState('');
 
   /* use Effects */
-
   useEffect(() => {
-    id_budget && dispatch(getLoanListAction({ id_budget, id_purchase }));
-  }, [dispatch, id_budget, id_purchase]);
+    id_budget &&
+      dispatch(
+        getLoanListAction({
+          id_budget: selectedBudget || id_budget,
+          id_purchase,
+          force: Boolean(selectedBudget),
+        })
+      );
+  }, [dispatch, id_budget, id_purchase /* selectedBudget */]);
 
   useEffect(() => {
     dispatch(catLoanTypeCatalogAction());

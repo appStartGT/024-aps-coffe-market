@@ -27,11 +27,12 @@ const usePurchaseDetail = () => {
     (state) => state.purchaseDetail.purchaseDetailListPriceless
   );
   const [isQuintales, setIsQuintales] = useState(false);
+  const purchaseListMain = useSelector((state) => state.purchase.purchaseList);
 
   const [selectionModel, setSelectionModel] = useState([]);
   useEffect(() => {
     dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
-  }, [dispatch]);
+  }, [dispatch, purchaseListMain]); //refresh when the list is ready
 
   const totalSelectedQuantity = useMemo(() => {
     const selectedRows = (searchList || purchaseListPriceless).filter((row) =>

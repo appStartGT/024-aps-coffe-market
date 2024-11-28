@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Box, MenuItem, TextField } from '@mui/material';
+import { Box, MenuItem, TextField, CircularProgress } from '@mui/material';
 import { useSelector, useDispatch } from 'react-redux';
-import { getBudgetAction } from '../../../../../store/modules/budget';
+import {
+  getBudgetAction,
+  setSelectedBudgetAction,
+} from '../../../../../store/modules/budget';
+import { purchaseListAction } from '../../../../../store/modules/purchase';
+import { getExpenseListAction } from '../../../../../store/modules/expense';
 
 const BudgetSelect = () => {
   const budgets = useSelector((state) => state.budget.budgets);
   const currentBudget = useSelector((state) => state.budget.budget);
   const dispatch = useDispatch();
   const [selectedBudget, setSelectedBudget] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (currentBudget) {
@@ -18,11 +24,19 @@ const BudgetSelect = () => {
   const handleBudgetChange = (event) => {
     const id_budget = event.target.value;
     setSelectedBudget(id_budget);
-    dispatch(getBudgetAction({ id_budget }));
+    setIsLoading(true);
+    Promise.all([
+      dispatch(getBudgetAction({ id_budget })).unwrap(),
+      dispatch(purchaseListAction({ id_budget, force: true })).unwrap(), //get from database
+      dispatch(getExpenseListAction({ id_budget, force: true })).unwrap(), //get from database
+    ]).finally(() => setIsLoading(false));
+    dispatch(setSelectedBudgetAction(id_budget));
   };
 
   return (
     <Box display="flex" alignItems="center">
+      {isLoading && <CircularProgress size={24} sx={{ mr: 1 }} />}
+
       <TextField
         select
         value={selectedBudget}

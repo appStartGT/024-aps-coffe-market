@@ -32,10 +32,9 @@ const usePurchaseList = () => {
     dispatch(purchaseListAction({ id_budget }));
   }, [dispatch]);
 
-  useEffect(() => {
-    id_budget &&
-      dispatch(purchaseListAction({ id_budget: id_budget, force: true }));
-  }, [dispatch, id_budget]);
+  // useEffect(() => {
+  //   id_budget && dispatch(purchaseListAction({ id_budget }));
+  // }, [dispatch, id_budget]);
 
   useEffect(() => {
     dispatch(clearAllPurchaseDetails());

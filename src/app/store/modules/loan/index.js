@@ -33,8 +33,18 @@ export const createLoanAction = createAsyncThunk(
 
 export const getLoanListAction = createAsyncThunk(
   'loan/getLoanList',
-  async ({ id_budget, id_purchase }, { rejectWithValue }) => {
+  async ({ id_budget, id_purchase }, { getState, rejectWithValue }) => {
     try {
+      const state = getState();
+      const existingLoans = state.loan.rowLoanList.filter(
+        (loan) =>
+          loan.id_budget === id_budget && loan.id_purchase === id_purchase
+      );
+
+      if (existingLoans.length > 0) {
+        return { newLoans: existingLoans, updatedRowLoanList: existingLoans };
+      }
+
       const currentLoan = await getAllDocuments({
         collectionName: firebaseCollections.LOAN,
         filterBy: [
@@ -56,7 +66,9 @@ export const getLoanListAction = createAsyncThunk(
           firebaseCollectionsKey.budget,
         ],
       });
-      return currentLoan.data || [];
+
+      const newLoans = currentLoan.data || [];
+      return { newLoans, updatedRowLoanList: newLoans };
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -112,6 +124,7 @@ export const deleteLoanAction = createAsyncThunk(
 
 const initialState = {
   loan: null,
+  rowLoanList: [],
   loanList: [],
   totalItems: 0,
   processing: false,
@@ -138,6 +151,7 @@ export const loanSlice = createSlice({
         state.processing = false;
         state.loan = loanGetOne(action.payload);
         state.loanList.push(loanGetOne(action.payload));
+        state.rowLoanList.push(action.payload);
       })
       .addCase(createLoanAction.rejected, (state, action) => {
         state.processing = false;
@@ -148,8 +162,9 @@ export const loanSlice = createSlice({
       })
       .addCase(getLoanListAction.fulfilled, (state, action) => {
         state.processing = false;
-        state.loanList = loanList(action.payload);
-        state.totalItems = action.payload.length;
+        state.loanList = loanList(action.payload.newLoans);
+        state.rowLoanList = action.payload.updatedRowLoanList;
+        state.totalItems = action.payload.newLoans.length;
       })
       .addCase(getLoanListAction.rejected, (state, action) => {
         state.processing = false;
@@ -158,6 +173,7 @@ export const loanSlice = createSlice({
       .addCase(addLoanAction.fulfilled, (state, action) => {
         state.loan = loanGetOne(action.payload);
         state.loanList.push(loanGetOne(action.payload));
+        state.rowLoanList.push(action.payload);
       })
       .addCase(updateLoanAction.pending, (state) => {
         state.processing = true;
@@ -166,6 +182,9 @@ export const loanSlice = createSlice({
         state.processing = false;
         state.loan = loanGetOne(action.payload);
         state.loanList = updateListLoan(state.loanList, action.payload);
+        state.rowLoanList = state.rowLoanList.map((loan) =>
+          loan.id_loan === action.payload.id_loan ? action.payload : loan
+        );
       })
       .addCase(updateLoanAction.rejected, (state, action) => {
         state.processing = false;
@@ -174,6 +193,9 @@ export const loanSlice = createSlice({
       .addCase(deleteLoanAction.fulfilled, (state, action) => {
         state.loan = null;
         state.loanList = state.loanList.filter(
+          (loan) => loan.id_loan !== action.payload
+        );
+        state.rowLoanList = state.rowLoanList.filter(
           (loan) => loan.id_loan !== action.payload
         );
         state.totalItems -= 1;

@@ -303,6 +303,7 @@ export const deleteBudgetItemAction = createAsyncThunk(
 
 const initialState = {
   budget: null,
+  selectedBudget: null,
   rawBudgets: [],
   budgets: [],
   budget_items: [],
@@ -376,6 +377,9 @@ export const budgetSlice = createSlice({
     },
     setExpenseTotalAction: (state, action) => {
       state.expenses.totals.expenseTotal = action.payload;
+    },
+    setSelectedBudgetAction: (state, action) => {
+      state.selectedBudget = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -478,7 +482,11 @@ export const budgetSlice = createSlice({
   },
 });
 
-export const { clearBudget, setOldBudget, setExpenseTotalAction } =
-  budgetSlice.actions;
+export const {
+  clearBudget,
+  setOldBudget,
+  setExpenseTotalAction,
+  setSelectedBudgetAction,
+} = budgetSlice.actions;
 
 export default budgetSlice.reducer;

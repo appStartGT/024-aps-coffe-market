@@ -32,7 +32,6 @@ const useExpensesList = () => {
   const [, setText] = useState('');
 
   /* use Effects */
-
   useEffect(() => {
     id_budget && dispatch(getExpenseListAction({ id_budget }));
   }, [dispatch, id_budget]);
