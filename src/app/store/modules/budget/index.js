@@ -322,30 +322,31 @@ const initialState = {
     },
   },
 };
-
-function formatAndSortBudgets(budgets, currentBudgetId) {
+function formatAndSortBudgets(budgets) {
   return budgets
     .map((item) => {
       const timestamp = formatFirebaseTimestamp(item.createdAt);
-      // if (item.id_budget === currentBudgetId) {
-      //   return {
-      //     value: item.id_budget,
-      //     label: 'Actual',
-      //     createdAt: timestamp,
-      //     rawDate: new Date(timestamp),
-      //   };
-      // }
+      if (!item.isClosed) {
+        return {
+          value: item.id_budget,
+          label: `Actual ${timestamp}`,
+          createdAt: timestamp,
+          rawDate: new Date(timestamp),
+          isActual: true,
+        };
+      }
       return {
         value: item.id_budget,
         label: `Presupuesto ${timestamp}`,
         createdAt: timestamp,
         rawDate: new Date(timestamp),
+        isActual: false,
       };
     })
     .sort((a, b) => {
-      // Put 'Actual' first
-      // if (a.label === 'Actual') return -1;
-      // if (b.label === 'Actual') return 1;
+      // Always put 'Actual' first
+      if (a.isActual) return -1;
+      if (b.isActual) return 1;
       // Sort other items in descending order by date
       return b.rawDate - a.rawDate;
     });
@@ -393,10 +394,7 @@ export const budgetSlice = createSlice({
         state.budget = budget;
         state.rawBudgets = [...rawBudgets, budget];
         state.budget_items = budget_items;
-        state.budgets = formatAndSortBudgets(
-          [...rawBudgets, budget],
-          budget?.id_budget
-        );
+        state.budgets = formatAndSortBudgets([...rawBudgets, budget]);
         state.old_budget = old_budget;
         state.expenses = {
           purchaseDetails: [],
@@ -422,7 +420,7 @@ export const budgetSlice = createSlice({
         const { budget, budget_items, budgets } = action.payload;
         state.budget = budget;
         state.rawBudgets = budgets;
-        state.budgets = formatAndSortBudgets(budgets, budget?.id_budget);
+        state.budgets = formatAndSortBudgets(budgets);
         state.budget_items = budget_items;
       })
       .addCase(getBudgetAction.rejected, (state, action) => {
