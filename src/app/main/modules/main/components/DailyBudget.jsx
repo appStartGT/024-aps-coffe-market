@@ -3,7 +3,7 @@ import { IconButton, Tooltip } from '@mui/material';
 import { AccountBalanceWallet as AccountBalanceWalletIcon } from '@mui/icons-material';
 import { useDispatch } from 'react-redux';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
-import { getBudgetAction } from '../../../../store/modules/budget';
+// import { getBudgetAction } from '../../../../store/modules/budget';
 import BudgetContent from './BudgetContent';
 import { useSelector } from 'react-redux';
 import { formatFirebaseTimestamp } from '@utils/dates';
@@ -13,7 +13,7 @@ const DailyBudget = () => {
   const budget = useSelector((state) => state.budget.budget);
 
   const handleOpenModal = () => {
-    dispatch(getBudgetAction()); // get updated budget each time the modal is opened
+    // dispatch(getBudgetAction()); // get updated budget each time the modal is opened
     dispatch(
       setApsGlobalModalPropsAction({
         open: true,

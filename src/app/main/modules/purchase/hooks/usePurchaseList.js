@@ -8,6 +8,7 @@ import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetai
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../tabs/purchaseDetail/components/PurchaseDetailForm';
+import { getBudgetAction } from '../../../../store/modules/budget';
 
 const usePurchaseList = () => {
   /* hooks */
@@ -38,6 +39,8 @@ const usePurchaseList = () => {
   useEffect(() => {
     selectedBudget &&
       dispatch(purchaseListAction({ id_budget: selectedBudget, force: true }));
+
+    selectedBudget && dispatch(getBudgetAction({ id_budget: selectedBudget }));
   }, [dispatch, selectedBudget]);
 
   useEffect(() => {
