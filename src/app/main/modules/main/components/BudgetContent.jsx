@@ -6,28 +6,11 @@ import {
   Collapse,
   Typography,
   Box,
-  IconButton,
   Paper,
   Button,
   Stack,
-  ListItemSecondaryAction,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  TextField,
-  MenuItem,
 } from '@mui/material';
-import {
-  ExpandLess,
-  ExpandMore,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-} from '@mui/icons-material';
-import { useDispatch, useSelector } from 'react-redux';
-
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import {
   createBudgetAction,
   addBudgetItemAction,
@@ -36,333 +19,11 @@ import {
 } from '../../../../store/modules/budget';
 import { useAuth } from '@hooks';
 import { catRubroCatalogAction } from '../../../../store/modules/catalogs';
-
-// New Budget Dialog Component
-const NewBudgetDialog = ({ open, onClose, onConfirm, previousBalance }) => (
-  <Dialog open={open} onClose={onClose}>
-    <DialogTitle>Crear Nuevo Presupuesto</DialogTitle>
-    <DialogContent>
-      <Stack spacing={2} sx={{ mt: 1 }}>
-        <Alert severity="warning">
-          ¿Está seguro que desea crear un nuevo presupuesto? Esta acción
-          reiniciará todos los valores.
-        </Alert>
-        {previousBalance > 0 && (
-          <Alert severity="info">
-            El saldo actual de Q {previousBalance.toLocaleString()} será
-            agregado como saldo inicial en el nuevo presupuesto.
-          </Alert>
-        )}
-      </Stack>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose}>Cancelar</Button>
-      <Button onClick={onConfirm} variant="contained" color="primary">
-        Crear Nuevo Presupuesto
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
-
-// Add/Edit Item Dialog Component
-const ItemDialog = ({ open, onClose, onSave, item, isEditing, cat_rubro }) => {
-  const [formValues, setFormValues] = useState({
-    id_cat_rubro: '',
-    amount: '',
-  });
-  const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    if (item) {
-      setFormValues({
-        id_cat_rubro: item.id_cat_rubro,
-        amount: item.amount,
-      });
-    } else {
-      setFormValues({
-        id_cat_rubro: '',
-        amount: '',
-      });
-    }
-    setErrors({});
-  }, [item]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: '' }));
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formValues.id_cat_rubro) {
-      newErrors.id_cat_rubro = 'Por favor seleccione una categoría';
-    }
-    if (
-      !formValues.amount ||
-      isNaN(formValues.amount) ||
-      Number(formValues.amount) <= 0
-    ) {
-      newErrors.amount = 'Por favor ingrese un monto válido';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = () => {
-    if (validateForm()) {
-      onSave({
-        ...formValues,
-        amount: Number(formValues.amount),
-      });
-      setFormValues({
-        id_cat_rubro: '',
-        amount: '',
-      });
-      onClose();
-    }
-  };
-
-  return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>
-        {isEditing ? 'Editar Ítem' : 'Agregar Nuevo Ítem al Presupuesto'}
-      </DialogTitle>
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField
-            select
-            label="Categoría"
-            name="id_cat_rubro"
-            value={formValues.id_cat_rubro}
-            onChange={handleChange}
-            fullWidth
-            error={!!errors.id_cat_rubro}
-            helperText={errors.id_cat_rubro}
-          >
-            {cat_rubro.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            label="Monto"
-            name="amount"
-            type="number"
-            value={formValues.amount}
-            onChange={handleChange}
-            fullWidth
-            error={!!errors.amount}
-            helperText={errors.amount}
-          />
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          {isEditing ? 'Actualizar' : 'Guardar'}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
-};
-
-// Delete Confirmation Dialog Component
-const DeleteConfirmationDialog = ({ open, onClose, onConfirm, itemName }) => (
-  <Dialog open={open} onClose={onClose}>
-    <DialogTitle>Confirmar Eliminación</DialogTitle>
-    <DialogContent>
-      <Typography>
-        ¿Está seguro que desea eliminar este ítem del presupuesto: {itemName}?
-      </Typography>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={onClose}>Cancelar</Button>
-      <Button onClick={onConfirm} color="error" variant="contained">
-        Eliminar
-      </Button>
-    </DialogActions>
-  </Dialog>
-);
-
-// Budget List Item Component
-const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro }) => {
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const rubroLabel = item.isInitial
-    ? 'Saldo inicial'
-    : cat_rubro.find((rubro) => rubro.value === item.id_cat_rubro)?.label ||
-      'Desconocido';
-
-  const handleDeleteClick = () => {
-    setOpenDeleteDialog(true);
-  };
-
-  const handleConfirmDelete = () => {
-    onDelete(item);
-    setOpenDeleteDialog(false);
-  };
-
-  return (
-    <>
-      <ListItemButton sx={{ pl: 4 }}>
-        <ListItemText
-          primary={rubroLabel}
-          secondary={`Q ${item.amount.toLocaleString()}`}
-        />
-        <ListItemSecondaryAction>
-          {!item.isInitial && (
-            <>
-              <IconButton
-                edge="end"
-                aria-label="edit"
-                onClick={() => onEdit(item)}
-                sx={{ mr: 1 }}
-              >
-                <EditIcon color="primary" />
-              </IconButton>
-              <IconButton
-                edge="end"
-                aria-label="delete"
-                onClick={handleDeleteClick}
-              >
-                <DeleteIcon color="error" />
-              </IconButton>
-            </>
-          )}
-        </ListItemSecondaryAction>
-      </ListItemButton>
-      {!item.isInitial && (
-        <DeleteConfirmationDialog
-          open={openDeleteDialog}
-          onClose={() => setOpenDeleteDialog(false)}
-          onConfirm={handleConfirmDelete}
-          itemName={rubroLabel}
-        />
-      )}
-    </>
-  );
-};
-
-// Expense List Component
-const ExpenseList = ({ expenses, renderPrimaryText = true }) => (
-  <List component="div" disablePadding>
-    {Object.entries(expenses).map(([key, value]) => (
-      <ListItemButton key={key} sx={{ pl: 4 }}>
-        <ListItemText
-          primary={renderPrimaryText ? key : ''}
-          secondary={`Q ${value.total.toLocaleString()}`}
-        />
-      </ListItemButton>
-    ))}
-  </List>
-);
-
-// Collapsible Section Component
-const CollapsibleSection = ({
-  title,
-  total,
-  isOpen,
-  onToggle,
-  items,
-  onEdit,
-  onDelete,
-  showAddButton,
-  onAdd,
-  backgroundColor,
-  id_budget,
-  cat_rubro,
-}) => (
-  <Paper
-    elevation={2}
-    sx={{
-      mb: 2,
-      backgroundColor,
-      transition: 'background-color 0.3s',
-      '&:hover': {
-        backgroundColor: backgroundColor.replace('0.08', '0.12'),
-      },
-    }}
-  >
-    <ListItemButton onClick={onToggle}>
-      <ListItemText
-        primary={<Typography variant="h6">{title}</Typography>}
-        secondary={`Q ${total?.toLocaleString()}`}
-      />
-      {isOpen ? <ExpandLess /> : <ExpandMore />}
-    </ListItemButton>
-    <Collapse in={isOpen} timeout="auto" unmountOnExit>
-      {showAddButton && id_budget && (
-        <Box sx={{ p: 1, display: 'flex', justifyContent: 'start' }}>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<AddIcon />}
-            onClick={onAdd}
-            sx={{ mb: 1 }}
-          >
-            Agregar Categoría
-          </Button>
-        </Box>
-      )}
-      <List component="div" disablePadding>
-        {items?.map((item) => (
-          <BudgetListItem
-            key={item.id_budget_item}
-            item={item}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            cat_rubro={cat_rubro}
-          />
-        ))}
-      </List>
-    </Collapse>
-  </Paper>
-);
-
-// Egresos Component
-const Egresos = ({
-  expenseTotal,
-  expense_purchaseDetails,
-  expense_expenses,
-  expense_loans,
-}) => {
-  const [openExpense, setOpenExpense] = useState(false);
-
-  return (
-    <Paper
-      elevation={2}
-      sx={{
-        mb: 2,
-        backgroundColor: 'rgba(211, 47, 47, 0.08)',
-        transition: 'background-color 0.3s',
-      }}
-    >
-      <ListItemButton onClick={() => setOpenExpense(!openExpense)}>
-        <ListItemText
-          primary={<Typography variant="h6">Egresos</Typography>}
-          secondary={`Q ${expenseTotal?.toLocaleString()}`}
-        />
-        {openExpense ? <ExpandLess /> : <ExpandMore />}
-      </ListItemButton>
-      <Collapse in={openExpense} timeout="auto" unmountOnExit>
-        <Typography sx={{ fontWeight: 'bold', pl: 2, pt: 1, fontSize: '12px' }}>
-          Compras
-        </Typography>
-        <ExpenseList expenses={expense_purchaseDetails} />
-        <Typography sx={{ fontWeight: 'bold', pl: 2, pt: 1, fontSize: '12px' }}>
-          Gastos Operativos
-        </Typography>
-        <ExpenseList expenses={expense_expenses} />
-        <Typography sx={{ fontWeight: 'bold', pl: 2, pt: 1, fontSize: '12px' }}>
-          Préstamos
-        </Typography>
-        <ExpenseList expenses={expense_loans} renderPrimaryText={false} />
-      </Collapse>
-    </Paper>
-  );
-};
-
+import NewBudgetDialog from './budget/NewBudgetDialog';
+import ItemDialog from './budget/ItemDialog';
+import CollapsibleSection from './budget/CollapsibleSection';
+import Egresos from './budget/Egresos';
+import { useDispatch, useSelector } from 'react-redux';
 // Main Budget Content Component
 const BudgetContent = () => {
   const dispatch = useDispatch();
@@ -370,7 +31,6 @@ const BudgetContent = () => {
   const [openNewItemDialog, setOpenNewItemDialog] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [openNewBudgetDialog, setOpenNewBudgetDialog] = useState(false);
-  const [previousBalance, setPreviousBalance] = useState(0);
   const [openBalance, setOpenBalance] = useState(false);
   const auth = useAuth();
   // Get budget data from Redux store
@@ -488,16 +148,21 @@ const BudgetContent = () => {
   const balance = budgetTotal - expenseTotal;
 
   const handleNewBudget = () => {
-    const currentBalance = budgetTotal - expenseTotal - transferenciasTotal;
-    setPreviousBalance(currentBalance);
     setOpenNewBudgetDialog(true);
   };
 
-  const handleConfirmNewBudget = () => {
+  const handleConfirmNewBudget = (rubroBalances) => {
+    const newBudgetItems = Object.entries(rubroBalances)
+      .filter(([, value]) => value > 0)
+      .map(([key, value]) => ({
+        id_cat_rubro: cat_rubro.find((rubro) => rubro.label === key)?.value,
+        amount: value,
+      }));
+
     dispatch(
       createBudgetAction({
-        initialBalance: previousBalance,
         createdBy: auth.user?.id_user || '',
+        budgetItems: newBudgetItems,
       })
     )
       .then(() => {
@@ -512,43 +177,54 @@ const BudgetContent = () => {
     const rubroBalances = {};
 
     // Calculate budget amounts for each rubro
-    budget_items?.forEach((item) => {
-      if (!rubroBalances[item.id_cat_rubro]) {
-        rubroBalances[item.id_cat_rubro] = 0;
-      }
-      rubroBalances[item.id_cat_rubro] += Number(item.amount);
-    });
+    if (budget_items && Array.isArray(budget_items)) {
+      budget_items.forEach((item) => {
+        if (item && item.id_cat_rubro) {
+          if (!rubroBalances[item.id_cat_rubro]) {
+            rubroBalances[item.id_cat_rubro] = 0;
+          }
+          rubroBalances[item.id_cat_rubro] += Number(item.amount || 0);
+        }
+      });
+    }
 
     // Subtract expenses for each rubro
-    Object.values(expense_expenses || {}).forEach((group) => {
-      group.items.forEach((item) => {
-        if (!rubroBalances[item.id_cat_rubro]) {
-          rubroBalances[item.id_cat_rubro] = 0;
+    if (expense_expenses && typeof expense_expenses === 'object') {
+      Object.values(expense_expenses).forEach((group) => {
+        if (group && Array.isArray(group.items)) {
+          group.items.forEach((item) => {
+            if (item && item.id_cat_rubro) {
+              if (!rubroBalances[item.id_cat_rubro]) {
+                rubroBalances[item.id_cat_rubro] = 0;
+              }
+              rubroBalances[item.id_cat_rubro] -= Number(item.amount || 0);
+            }
+          });
         }
-        rubroBalances[item.id_cat_rubro] -= Number(item.amount || 0);
       });
-    });
+    }
 
     // Subtract Transferencias from Bancos
-    if (allExpenses?.Transferencia) {
-      const bancosRubro = cat_rubro.find(
-        (rubro) => rubro.label === 'Bancos'
-      )?.value;
+    if (allExpenses && allExpenses.Transferencia) {
+      const bancosRubro =
+        cat_rubro &&
+        cat_rubro.find((rubro) => rubro && rubro.label === 'Bancos')?.value;
       if (bancosRubro && rubroBalances[bancosRubro]) {
-        rubroBalances[bancosRubro] -= transferenciasTotal;
+        rubroBalances[bancosRubro] -= Number(transferenciasTotal || 0);
       }
     }
 
     // Subtract the rest of the expenses from Efectivo
-    const efectivoRubro = cat_rubro.find(
-      (rubro) => rubro.label === 'Efectivo'
-    )?.value;
+    const efectivoRubro =
+      cat_rubro &&
+      cat_rubro.find((rubro) => rubro && rubro.label === 'Efectivo')?.value;
     if (efectivoRubro && rubroBalances[efectivoRubro]) {
-      const totalOtherExpenses =
-        Object.values(allExpenses).reduce(
-          (sum, group) => sum + (group.total || 0),
-          0
-        ) - transferenciasTotal; // Exclude Transferencias as they're already subtracted from Bancos
+      const totalOtherExpenses = allExpenses
+        ? Object.values(allExpenses).reduce(
+            (sum, group) => sum + Number(group?.total || 0),
+            0
+          ) - Number(transferenciasTotal || 0)
+        : 0; // Exclude Transferencias as they're already subtracted from Bancos
       rubroBalances[efectivoRubro] -= totalOtherExpenses;
     }
 
@@ -615,7 +291,7 @@ const BudgetContent = () => {
       <Paper
         elevation={2}
         sx={{
-          p: 2,
+          // p: 2,
           backgroundColor:
             balance >= 0
               ? 'rgba(76, 175, 80, 0.08)'
@@ -627,9 +303,10 @@ const BudgetContent = () => {
           <ListItemText
             primary={
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Saldo: Q {balance.toLocaleString()}
+                Saldo
               </Typography>
             }
+            secondary={`Q ${balance?.toLocaleString()}`}
           />
           {openBalance ? <ExpandLess /> : <ExpandMore />}
         </ListItemButton>
@@ -657,7 +334,12 @@ const BudgetContent = () => {
         open={openNewBudgetDialog}
         onClose={() => setOpenNewBudgetDialog(false)}
         onConfirm={handleConfirmNewBudget}
-        previousBalance={previousBalance}
+        rubroBalances={Object.fromEntries(
+          Object.entries(rubroBalances).map(([key, value]) => [
+            cat_rubro.find((rubro) => rubro.value === key)?.label || key,
+            value,
+          ])
+        )}
       />
 
       <ItemDialog

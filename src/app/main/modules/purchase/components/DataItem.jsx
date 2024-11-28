@@ -63,11 +63,7 @@ const DataItem = ({ value, label, backgroundColor, color, onClick, icon }) => {
           <SwapVertIcon fontSize="small" />
         </IconButton>
       )}
-      {icon && (
-        <Box sx={{ position: 'absolute', top: 5, left: 5 }}>
-          {icon}
-        </Box>
-      )}
+      {icon && <Box sx={{ position: 'absolute', top: 5, left: 5 }}>{icon}</Box>}
     </Paper>
   );
 };

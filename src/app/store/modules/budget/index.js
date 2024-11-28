@@ -11,26 +11,17 @@ import { formatFirebaseTimestamp } from '@utils/dates';
 
 export const createBudgetAction = createAsyncThunk(
   'budget/createBudget',
-  async (item, { rejectWithValue, getState }) => {
+  async ({ createdBy, budgetItems }, { rejectWithValue, getState }) => {
     const state = getState();
     const old_budget = state.budget.budget?.id_budget;
     const data = {
-      ...item,
+      createdBy,
       isClosed: false,
       createdAt: new Date(),
       deleted: false,
       isActive: true,
     };
-    let budgetItem = null;
-    if (item.initialBalance) {
-      budgetItem = {
-        rubro: 'Saldo Inicial',
-        amount: item.initialBalance,
-        createdAt: new Date(),
-        deleted: false,
-        isActive: true,
-      };
-    }
+
     try {
       const budgetRef = firestore.collection(firebaseCollections.BUDGET);
       const budgetItemRef = firestore.collection(
@@ -39,10 +30,10 @@ export const createBudgetAction = createAsyncThunk(
       let budgetDoc = null;
 
       await firestore.runTransaction(async (transaction) => {
-        // Update all budgets to deleted:true
+        // Update all budgets to isClosed: true
         const budgets = await budgetRef.get();
         budgets.docs.forEach((doc) => {
-          transaction.update(doc.ref, { /* deleted: true, */ isClosed: true });
+          transaction.update(doc.ref, { isClosed: true });
         });
 
         // Create a new budget
@@ -50,16 +41,18 @@ export const createBudgetAction = createAsyncThunk(
         transaction.set(newBudgetRef, { ...data, id_budget: newBudgetRef.id });
         budgetDoc = newBudgetRef;
 
-        // Create the budget items if exists
-        if (budgetItem) {
+        // Create the budget items
+        budgetItems.forEach((item) => {
           const newItemRef = budgetItemRef.doc();
-          budgetItem.id_budget = newBudgetRef;
           transaction.set(newItemRef, {
-            ...budgetItem,
+            ...item,
+            id_budget: newBudgetRef,
             id_budget_item: newItemRef.id,
-            isInitial: true,
+            createdAt: new Date(),
+            deleted: false,
+            isActive: true,
           });
-        }
+        });
       });
 
       // Fetch the newly created budget
@@ -69,21 +62,18 @@ export const createBudgetAction = createAsyncThunk(
         id_budget: budgetDoc.id,
       };
 
-      // Fetch budget items if they exist
-      let budgetItems = [];
-      if (budgetItem) {
-        const itemsSnapshot = await budgetItemRef
-          .where('id_budget', '==', budgetDoc)
-          .get();
-        budgetItems = itemsSnapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id_budget_item: doc.id,
-        }));
-      }
+      // Fetch budget items
+      const itemsSnapshot = await budgetItemRef
+        .where('id_budget', '==', budgetDoc)
+        .get();
+      const budgetItemsData = itemsSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id_budget_item: doc.id,
+      }));
 
       return {
         budget: budgetData,
-        budget_items: budgetItems,
+        budget_items: budgetItemsData,
         old_budget,
       };
     } catch (error) {

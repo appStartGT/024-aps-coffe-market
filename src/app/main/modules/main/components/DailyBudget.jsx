@@ -5,9 +5,12 @@ import { useDispatch } from 'react-redux';
 import { setApsGlobalModalPropsAction } from '../../../../store/modules/main';
 import { getBudgetAction } from '../../../../store/modules/budget';
 import BudgetContent from './BudgetContent';
+import { useSelector } from 'react-redux';
+import { formatFirebaseTimestamp } from '@utils/dates';
 
 const DailyBudget = () => {
   const dispatch = useDispatch();
+  const budget = useSelector((state) => state.budget.budget);
 
   const handleOpenModal = () => {
     dispatch(getBudgetAction()); // get updated budget each time the modal is opened
@@ -16,7 +19,9 @@ const DailyBudget = () => {
         open: true,
         maxWidth: 'xs',
         title: 'Presupuesto',
-        description: 'Administrar Presupuesto',
+        description: `Administrar Presupuesto ${formatFirebaseTimestamp(
+          budget?.createdAt
+        )}`,
         content: <BudgetContent />,
         closeBtn: true,
       })
