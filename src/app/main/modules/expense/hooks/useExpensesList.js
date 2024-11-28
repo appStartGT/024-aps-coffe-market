@@ -50,10 +50,10 @@ const useExpensesList = () => {
       setApsGlobalModalPropsAction({
         open: true,
         maxWidth: 'xs',
-        title: id_expense ? 'Detalle de Egreso' : 'Agregar Egreso',
+        title: id_expense ? 'Detalles' : 'Agregar',
         description: id_expense
-          ? 'Edite los detalles del egreso'
-          : 'Ingrese los detalles del nuevo egreso',
+          ? 'Edita los campos.'
+          : 'Ingrese los detalles.',
         content: <ExpenseDetailForm nonupdate={!id_expense} />,
       })
     );

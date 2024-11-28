@@ -83,7 +83,7 @@ const MainDrawer = ({ openDrawer, setOpenDrawer }) => {
         id: 2,
         to: 'expense',
         icon: <MonetizationOn sx={styledIcon} />,
-        name: 'Egresos Varios',
+        name: 'Gastos Operativos',
       },
       {
         id: 3,

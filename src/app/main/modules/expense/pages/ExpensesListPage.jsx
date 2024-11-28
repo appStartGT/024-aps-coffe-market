@@ -22,8 +22,8 @@ const ExpensesListPage = () => {
 
   return (
     <GeneralContainer
-      title="Egresos Varios"
-      subtitle="Listado de egresos varios."
+      title="Gastos Operativos"
+      subtitle="Listado de gastos operativos."
       backTitle="Volver"
       actions={[]}
       buttonProps={{}}
