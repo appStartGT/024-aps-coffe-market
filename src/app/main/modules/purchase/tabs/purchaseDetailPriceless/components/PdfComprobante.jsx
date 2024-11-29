@@ -1,11 +1,4 @@
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-  Image,
-} from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
 
 // Estilos para el PDF
 const styles = StyleSheet.create({
@@ -23,10 +16,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 60,
     marginTop: 25,
   },
-  headerLogo: {
-    width: 100,
-    height: 'auto',
-  },
   headerText: {
     fontSize: 10,
     color: '#6B7280',
@@ -41,14 +30,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#094067',
-    marginBottom: 10,
+    marginBottom: 14,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'medium',
     textAlign: 'center',
     color: '#3DA9FC',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   content: {
     display: 'flex',
@@ -88,7 +77,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const PdfComprobante = ({ title, purchaseCode, content }) => {
+const PdfComprobante = ({ _, purchaseCode, content }) => {
   const totalAdvancePayment =
     content.advancePayments?.reduce(
       (sum, payment) => sum + payment.amount,
@@ -99,7 +88,6 @@ const PdfComprobante = ({ title, purchaseCode, content }) => {
     <Document>
       <Page style={styles.page}>
         <View style={styles.header}>
-          {/* <Image style={styles.headerLogo} src="/img/png/moneycoi.png" /> */}
           <View>
             <Text style={styles.purchaseCode}>ID: {purchaseCode}</Text>
             <Text style={styles.headerText}>
@@ -108,14 +96,26 @@ const PdfComprobante = ({ title, purchaseCode, content }) => {
           </View>
         </View>
 
-        <Text style={styles.title}>Comprobante de Compra</Text>
-        <Text style={styles.subtitle}>{title}</Text>
+        <Text style={styles.subtitle}>COMPRA DE CAFÉ</Text>
+        <Text style={styles.title}>DELICIA DEL CAFE</Text>
+        <View style={{ alignItems: 'center', marginBottom: '12px' }}>
+          <Text style={styles.headerText}>
+            Estoy ubicado en el Kilómetro 87.5 Ruta a El Salvador, a 100 metros
+            antes de la entrada a San José Acatempa, Jutiapa.
+          </Text>
+          <Text style={styles.headerText}>
+            SIEMPRE OFRECIÉNDOLE UN MEJOR PRECIO
+          </Text>
+          <Text style={styles.headerText}>
+            Prop. Lic. M.A. Donaldo Cano Pernillo ¡Será un gusto atenderle!
+          </Text>
+          <Text style={styles.headerText}>TELÉFONOS: 3047-9284</Text>
+        </View>
 
         <View style={styles.content}>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Información del Cliente</Text>
             <View style={styles.listItem}>
-              <Text style={styles.listItemLabel}>Nombre:</Text>
+              <Text style={styles.listItemLabel}>Recibido de:</Text>
               <Text style={styles.listItemValue}>
                 {content.customerName || 'No especificado'}
               </Text>
@@ -123,13 +123,11 @@ const PdfComprobante = ({ title, purchaseCode, content }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Detalles de la Compra</Text>
             <View style={styles.listItem}>
-              <Text style={styles.listItemLabel}>Descripción:</Text>
               <Text style={styles.listItemValue}>{content.description}</Text>
             </View>
             <View style={styles.listItem}>
-              <Text style={styles.listItemLabel}>Cantidad:</Text>
+              <Text style={styles.listItemLabel}>Quintales:</Text>
               <Text style={styles.listItemValue}>
                 {`${content.quantity.toLocaleString()} libras (${(
                   content.quantity / 100
