@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   purchaseDetailListAction,
@@ -16,6 +15,7 @@ import { useParams } from 'react-router-dom';
 import RemateDetailsForm from '../components/RemateDetailsForm';
 import { BlobProvider } from '@react-pdf/renderer';
 import PdfComprobante from '../components/PdfComprobante';
+import { useMountEffect } from '@hooks';
 
 const usePurchaseDetail = () => {
   const { id_purchase } = useParams();
@@ -26,13 +26,22 @@ const usePurchaseDetail = () => {
   const purchaseListPriceless = useSelector(
     (state) => state.purchaseDetail.purchaseDetailListPriceless
   );
+  const id_budget = useSelector((state) => state.budget.budget.id_budget);
   const [isQuintales, setIsQuintales] = useState(false);
-  const purchaseListMain = useSelector((state) => state.purchase.purchaseList);
-
   const [selectionModel, setSelectionModel] = useState([]);
-  useEffect(() => {
-    dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseListPriceless has items
-  }, [dispatch, purchaseListMain]); //refresh when the list is ready
+
+  useMountEffect({
+    effect: () => {
+      dispatch(
+        purchaseDetailListAction({
+          id_purchase,
+          id_budget,
+          force: true,
+        })
+      ); // Fetch purchase details if purchaseListPriceless has items
+    },
+    deps: [dispatch, id_budget],
+  });
 
   const totalSelectedQuantity = useMemo(() => {
     const selectedRows = (searchList || purchaseListPriceless).filter((row) =>

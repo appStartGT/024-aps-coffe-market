@@ -21,15 +21,7 @@ export const purchaseListAction = createAsyncThunk(
       const state = getState();
       const old_budget = state.budget.old_budget;
       let { rowPurchases, rowPurchaseDetails } = state.purchase;
-      const isNewBudget = Boolean(
-        old_budget && old_budget?.id_budget !== id_budget
-      );
-      if (
-        !force &&
-        !isNewBudget &&
-        rowPurchases.length > 0 &&
-        rowPurchaseDetails.length > 0
-      ) {
+      if (!force && rowPurchases.length > 0 && rowPurchaseDetails.length > 0) {
         return { isUpdateNeeded: false, rowPurchases, rowPurchaseDetails };
       }
 
@@ -66,7 +58,8 @@ export const purchaseListAction = createAsyncThunk(
         })
       );
       // Clear old budget when a new budget is created
-      if (isNewBudget) dispatch(setOldBudget(null));
+      if (old_budget && old_budget?.id_budget !== id_budget)
+        dispatch(setOldBudget(null));
       // Flatten the array of arrays
       rowPurchaseDetails = rowPurchaseDetails.flat();
 

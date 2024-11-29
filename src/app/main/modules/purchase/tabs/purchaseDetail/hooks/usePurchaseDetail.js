@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   purchaseDetailListAction,
@@ -13,6 +12,7 @@ import PurchaseDetailForm from '../components/PurchaseDetailForm';
 import { IconButton, Badge } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
+import { useMountEffect } from '@hooks';
 
 const usePurchaseDetail = () => {
   const { id_purchase } = useParams();
@@ -22,12 +22,22 @@ const usePurchaseDetail = () => {
   const purchaseList = useSelector(
     (state) => state.purchaseDetail.purchaseDetailList
   );
+  const id_budget = useSelector((state) => state.budget.budget.id_budget);
   const [isQuintales, setIsQuintales] = useState(false);
-  const purchaseListMain = useSelector((state) => state.purchase.purchaseList);
 
-  useEffect(() => {
-    dispatch(purchaseDetailListAction({ id_purchase })); // Fetch purchase details if purchaseList has items
-  }, [dispatch, purchaseListMain]); //refresh when the list is ready
+  useMountEffect({
+    effect: () => {
+      id_budget &&
+        dispatch(
+          purchaseDetailListAction({
+            id_purchase,
+            id_budget,
+            force: true,
+          })
+        ); // Fetch purchase details if purchaseList has items
+    },
+    deps: [dispatch, id_budget],
+  }); //refresh when the list is ready
 
   const onClose = () => {
     dispatch(clearPurchaseDetailSelected());

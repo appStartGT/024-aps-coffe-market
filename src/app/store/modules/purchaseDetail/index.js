@@ -17,11 +17,13 @@ import { updatePurchaseListDetailsAction } from '../purchase';
 
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
-  async ({ id_purchase, force }, { rejectWithValue, getState, dispatch }) => {
+  async (
+    { id_purchase, id_budget, force },
+    { rejectWithValue, getState, dispatch }
+  ) => {
     const state = getState();
     const purchase = state.purchase.purchaseSelected;
     const purchaseListDetails = state.purchase.rowPurchaseDetails;
-    const id_budget = state.budget.budget.id_budget;
 
     if (!force && purchaseListDetails && purchaseListDetails.length > 0) {
       const filteredDetails = purchaseListDetails.filter(
@@ -68,6 +70,7 @@ export const purchaseDetailCreateAction = createAsyncThunk(
     const state = getState();
     const purchaseSelected = state.purchase.purchaseSelected;
     const id_budget = state.budget.budget.id_budget;
+    console.log({ data });
     let body = cleanModel({ ...data, isSold: false, id_budget });
     body.isPriceless = Boolean(data.isPriceless);
     const purchaseDetailData = {

@@ -2,7 +2,6 @@ import { cleanModel, formatNumber } from '@utils';
 import { formatFirebaseTimestamp } from '@utils/dates';
 
 const loanModel = (loan) => {
-  console.log(loan);
   if (!loan) return {};
   const obj = {
     id: loan.id,

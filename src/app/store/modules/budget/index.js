@@ -156,7 +156,7 @@ export const budgetExpensesAction = createAsyncThunk(
               value: id_budget,
               reference: true,
             },
-            { field: 'isPriceless', condition: '==', value: false },
+            // { field: 'isPriceless', condition: '==', value: false },
           ],
           excludeReferences: [
             'id_budget',
@@ -197,8 +197,9 @@ export const budgetExpensesAction = createAsyncThunk(
         }),
       ]);
 
-      const groupedPurchaseDetails = purchaseDetails.data.reduce(
-        (acc, item) => {
+      const groupedPurchaseDetails = purchaseDetails.data
+        .filter((item) => !item.isPriceless)
+        .reduce((acc, item) => {
           if (item.id_cat_payment_method) {
             const key = item.cat_payment_method.name;
             if (!acc[key]) {
@@ -211,9 +212,22 @@ export const budgetExpensesAction = createAsyncThunk(
             acc[key].total += Number(item.price) * Number(item.quantity) || 0;
           }
           return acc;
-        },
-        {}
-      );
+        }, {});
+
+      groupedPurchaseDetails.Anticipos = {
+        items: purchaseDetails.data.filter(
+          (item) => item.advancePayments?.length > 0
+        ),
+        total: purchaseDetails.data.reduce(
+          (acc, item) =>
+            acc +
+            (item.advancePayments?.reduce(
+              (sum, payment) => sum + Number(payment.amount) || 0,
+              0
+            ) || 0),
+          0
+        ),
+      };
 
       const groupedExpenses = expenses.data.reduce((acc, item) => {
         if (item.id_cat_expense_type) {
