@@ -1,8 +1,10 @@
 import ApsDatagrid from '@components/ApsDatagrid';
-import { Paper } from '@mui/material';
+import { /* Fab, */ Paper } from '@mui/material';
 import usePurchaseDetail from '../hooks/usePurchaseDetail';
-import SearchBar from '@components/SearchBar';
+// import SearchBar from '@components/SearchBar';
 import DataTableOverview from '../components/DataTableOverview';
+import { Box, Switch, FormControlLabel } from '@mui/material';
+// import { Add as AddIcon } from '@mui/icons-material';
 
 const PAPER_STYLES = {
   padding: '16px',
@@ -12,17 +14,39 @@ const PAPER_STYLES = {
 const PurchaseDetailPage = () => {
   const {
     processing,
-    propsSearchBarButton,
+    // propsSearchBarButton,
     columns,
     searchList,
     purchaseList,
+    // handleAdd,
+    getAll,
+    setGetAll,
   } = usePurchaseDetail();
 
   return (
     <>
       <Paper sx={PAPER_STYLES}>
         <DataTableOverview purchaseList={purchaseList} />
-        <SearchBar {...propsSearchBarButton} />
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          gap={2}
+          marginBottom={2}
+        >
+          <FormControlLabel
+            control={<Switch onChange={() => setGetAll(!getAll)} />}
+            label="Ver todo"
+          />
+          {/* <Fab
+            color="primary"
+            size="small"
+            aria-label="add"
+            onClick={handleAdd}
+          >
+            <AddIcon />
+          </Fab> */}
+        </Box>
+        {/* <SearchBar {...propsSearchBarButton} /> */}
         <ApsDatagrid
           rows={searchList || purchaseList}
           columns={columns}

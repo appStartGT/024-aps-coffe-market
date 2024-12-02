@@ -14,16 +14,35 @@ import {
 } from '@utils/firebaseMethods';
 import { firestore, FieldValue } from '@config/firebaseConfig';
 import { updatePurchaseListDetailsAction } from '../purchase';
-
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
   async (
-    { id_purchase, id_budget, force },
+    { id_purchase, id_budget, force, getAll },
     { rejectWithValue, getState, dispatch }
   ) => {
     const state = getState();
     const purchase = state.purchase.purchaseSelected;
     const purchaseListDetails = state.purchase.rowPurchaseDetails;
+
+    if (getAll) {
+      return await getAllDocuments({
+        collectionName: firebaseCollections.PURCHASE_DETAIL,
+        filterBy: [
+          {
+            field: 'id_purchase',
+            condition: '==',
+            value: id_purchase,
+            reference: true,
+          },
+        ],
+        excludeReferences: ['id_purchase_detail_remate'],
+      })
+        .then((res) => {
+          dispatch(updatePurchaseListDetailsAction(res.data));
+          return { ...res, purchaseSelected: purchase };
+        })
+        .catch((res) => rejectWithValue(res));
+    }
 
     if (!force && purchaseListDetails && purchaseListDetails.length > 0) {
       const filteredDetails = purchaseListDetails.filter(

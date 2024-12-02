@@ -9,7 +9,7 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../components/PurchaseDetailForm';
-import { IconButton, Badge } from '@mui/material';
+import { IconButton, Badge, Chip, Tooltip } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useMountEffect } from '@hooks';
@@ -24,19 +24,24 @@ const usePurchaseDetail = () => {
   );
   const id_budget = useSelector((state) => state.budget.budget.id_budget);
   const [isQuintales, setIsQuintales] = useState(false);
+  const [getAll, setGetAll] = useState(false);
 
   useMountEffect({
     effect: () => {
-      id_budget &&
-        dispatch(
-          purchaseDetailListAction({
-            id_purchase,
-            id_budget,
-            force: true,
-          })
-        ); // Fetch purchase details if purchaseList has items
+      if (getAll) {
+        dispatch(purchaseDetailListAction({ id_purchase, getAll }));
+      } else {
+        id_budget &&
+          dispatch(
+            purchaseDetailListAction({
+              id_purchase,
+              id_budget,
+              force: true,
+            })
+          ); // Fetch purchase details if purchaseList has items
+      }
     },
-    deps: [dispatch, id_budget],
+    deps: [dispatch, id_budget, getAll],
   }); //refresh when the list is ready
 
   const onClose = () => {
@@ -54,6 +59,7 @@ const usePurchaseDetail = () => {
     searchList: purchaseList,
     searchResults: (results) => setSearchList(results),
     searchKey: 'quantity, priceFormat, totalFormat',
+    hideSearchBar: true,
     rightButton: {
       icon: 'add_circle',
       onClick: () =>
@@ -75,6 +81,7 @@ const usePurchaseDetail = () => {
       },
     },
   };
+
   const columns = [
     {
       field: 'quantityFormated',
@@ -122,6 +129,26 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
     },
     {
+      field: 'budgetDate',
+      headerName: 'Presupuesto',
+      flex: 1,
+      disableColumnMenu: true,
+      renderCell: (params) => (
+        <Tooltip
+          title={
+            params.row.budgetIsClosed
+              ? 'Presupuesto cerrado'
+              : 'Presupuesto abierto'
+          }
+        >
+          <Chip
+            label={params.row.budgetDate ? params.row.budgetDate : '-'}
+            color={params.row.budgetIsClosed ? 'error' : 'success'}
+          />
+        </Tooltip>
+      ),
+    },
+    {
       field: 'createdAt',
       headerName: 'Fecha y hora',
       flex: 1,
@@ -134,14 +161,6 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
       renderCell: (params) => (
         <>
-          {/* {params.row.isRemate && (
-            <Chip
-              label="Rematado"
-              color="warning"
-              size="small"
-              style={{ marginRight: '8px', color: 'white' }}
-            />
-          )} */}
           <IconButton
             onClick={() => handleEdit(params.row)}
             color="primary"
@@ -160,6 +179,19 @@ const usePurchaseDetail = () => {
       ),
     },
   ];
+
+  const handleAdd = () => {
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'xs',
+        title: 'Compra',
+        description: 'Registre un nuevo detalle de compra',
+        content: <PurchaseDetailForm id_purchase={id_purchase} />,
+        onClose,
+      })
+    );
+  };
 
   const handleEdit = (row) => {
     dispatch(setPurchaseDetail(row));
@@ -204,6 +236,9 @@ const usePurchaseDetail = () => {
     columns,
     searchList,
     purchaseList,
+    handleAdd,
+    getAll,
+    setGetAll,
   };
 };
 

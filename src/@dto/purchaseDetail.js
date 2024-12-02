@@ -7,6 +7,8 @@ const purchaseDetailModel = (purchaseDetail, purchaseSelected) => {
     id_purchase_detail: purchaseDetail.id_purchase_detail,
     id_purchase: purchaseDetail?.id_purchase,
     id_budget: purchaseDetail?.id_budget,
+    budgetDate: formatFirebaseTimestamp(purchaseDetail?.budget?.createdAt),
+    budgetIsClosed: purchaseDetail?.budget?.isClosed,
     priceFormat: `Q${formatNumber(purchaseDetail?.price)}`,
     price: purchaseDetail?.price,
     quantity: purchaseDetail?.quantity,

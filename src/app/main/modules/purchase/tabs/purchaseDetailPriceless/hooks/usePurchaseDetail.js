@@ -9,7 +9,7 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../../purchaseDetail/components/PurchaseDetailForm';
-import { Box, Chip, IconButton } from '@mui/material';
+import { Box, Chip, IconButton, Tooltip } from '@mui/material';
 import { Edit, Delete, PictureAsPdf } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import RemateDetailsForm from '../components/RemateDetailsForm';
@@ -29,18 +29,24 @@ const usePurchaseDetail = () => {
   const id_budget = useSelector((state) => state.budget.budget.id_budget);
   const [isQuintales, setIsQuintales] = useState(false);
   const [selectionModel, setSelectionModel] = useState([]);
+  const [getAll, setGetAll] = useState(false);
 
   useMountEffect({
     effect: () => {
-      dispatch(
-        purchaseDetailListAction({
-          id_purchase,
-          id_budget,
-          force: true,
-        })
-      ); // Fetch purchase details if purchaseListPriceless has items
+      if (getAll) {
+        dispatch(purchaseDetailListAction({ id_purchase, getAll }));
+      } else {
+        id_budget &&
+          dispatch(
+            purchaseDetailListAction({
+              id_purchase,
+              id_budget,
+              force: true,
+            })
+          );
+      }
     },
-    deps: [dispatch, id_budget],
+    deps: [dispatch, id_budget, getAll],
   });
 
   const totalSelectedQuantity = useMemo(() => {
@@ -54,12 +60,14 @@ const usePurchaseDetail = () => {
     dispatch(clearPurchaseDetailSelected());
     dispatch(setApsGlobalModalPropsAction({ open: false }));
   };
+
   const propsSearchBarButton = {
     label: 'Buscar por Libras / Precio / Total',
     type: 'text',
     searchList: purchaseListPriceless,
     searchResults: (results) => setSearchList(results),
     searchKey: 'quantity, priceFormat, totalFormat',
+    hideSearchBar: true,
     rightButton: {
       icon: 'add_circle',
       onClick: () =>
@@ -127,6 +135,26 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
     },
     {
+      field: 'budgetDate',
+      headerName: 'Presupuesto',
+      flex: 1,
+      disableColumnMenu: true,
+      renderCell: (params) => (
+        <Tooltip
+          title={
+            params.row.budgetIsClosed
+              ? 'Presupuesto cerrado'
+              : 'Presupuesto abierto'
+          }
+        >
+          <Chip
+            label={params.row.budgetDate ? params.row.budgetDate : '-'}
+            color={params.row.budgetIsClosed ? 'error' : 'success'}
+          />
+        </Tooltip>
+      ),
+    },
+    {
       field: 'createdAt',
       headerName: 'Fecha',
       flex: 1,
@@ -174,7 +202,6 @@ const usePurchaseDetail = () => {
             <BlobProvider
               document={
                 <PdfComprobante
-                  // title={`Compra ${params.row?.id}`}
                   purchaseCode={params.row?.id}
                   content={{ ...params.row }}
                 />
@@ -195,6 +222,19 @@ const usePurchaseDetail = () => {
       },
     },
   ];
+
+  const handleAdd = () => {
+    dispatch(
+      setApsGlobalModalPropsAction({
+        open: true,
+        maxWidth: 'xs',
+        title: 'Compra',
+        description: 'Registre un nuevo detalle de compra',
+        content: <PurchaseDetailForm id_purchase={id_purchase} />,
+        onClose,
+      })
+    );
+  };
 
   const handleEdit = (row) => {
     dispatch(setPurchaseDetail(row));
@@ -272,6 +312,9 @@ const usePurchaseDetail = () => {
     setSelectionModel,
     totalSelectedQuantity,
     handleRemate,
+    handleAdd,
+    getAll,
+    setGetAll,
   };
 };
 

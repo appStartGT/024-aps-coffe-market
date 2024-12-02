@@ -214,20 +214,24 @@ export const budgetExpensesAction = createAsyncThunk(
           return acc;
         }, {});
 
-      groupedPurchaseDetails.Anticipos = {
-        items: purchaseDetails.data.filter(
-          (item) => item.advancePayments?.length > 0
-        ),
-        total: purchaseDetails.data.reduce(
-          (acc, item) =>
-            acc +
-            (item.advancePayments?.reduce(
-              (sum, payment) => sum + Number(payment.amount) || 0,
-              0
-            ) || 0),
-          0
-        ),
-      };
+      const advancePaymentItems = purchaseDetails.data.filter(
+        (item) => item.advancePayments?.length > 0
+      );
+
+      if (advancePaymentItems.length > 0) {
+        groupedPurchaseDetails.Anticipos = {
+          items: advancePaymentItems,
+          total: purchaseDetails.data.reduce(
+            (acc, item) =>
+              acc +
+              (item.advancePayments?.reduce(
+                (sum, payment) => sum + Number(payment.amount) || 0,
+                0
+              ) || 0),
+            0
+          ),
+        };
+      }
 
       const groupedExpenses = expenses.data.reduce((acc, item) => {
         if (item.id_cat_expense_type) {
