@@ -1,4 +1,11 @@
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from '@react-pdf/renderer';
 
 // Estilos para el PDF
 const styles = StyleSheet.create({
@@ -6,6 +13,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     fontSize: 12,
     paddingBottom: '40px',
+    paddingTop: '40px',
   },
   header: {
     flexDirection: 'row',
@@ -13,67 +21,98 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginBottom: 20,
-    paddingHorizontal: 60,
-    marginTop: 25,
+    paddingHorizontal: 40,
   },
   headerText: {
     fontSize: 10,
-    color: '#6B7280',
+    color: '#4A5568',
+    fontWeight: 'bold',
   },
   purchaseCode: {
     fontSize: 10,
-    color: '#6B7280',
+    color: '#4A5568',
     marginBottom: 4,
+    fontWeight: 'bold',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#094067',
-    marginBottom: 14,
+    color: '#2D3748',
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: 'medium',
     textAlign: 'center',
-    color: '#3DA9FC',
-    marginBottom: 10,
+    color: '#4A5568',
+    marginBottom: 8,
   },
   content: {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    paddingHorizontal: 60,
+    paddingHorizontal: 40,
   },
   section: {
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#094067',
-    marginBottom: 8,
+    color: '#2D3748',
+    marginBottom: 10,
+    borderBottom: '1 solid #E2E8F0',
+    paddingBottom: 5,
   },
   listItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
+    justifyContent: 'flex-start',
+    marginBottom: 8,
   },
   listItemLabel: {
-    color: '#5F6C7B',
+    color: '#4A5568',
+    marginRight: 10,
+    width: '30%',
   },
   listItemValue: {
-    color: '#094067',
+    color: '#2D3748',
     fontWeight: 'medium',
+    width: '70%',
   },
   footer: {
     position: 'absolute',
     bottom: 30,
-    left: 60,
-    right: 60,
+    left: 40,
+    right: 40,
     textAlign: 'center',
-    color: '#5F6C7B',
+    color: '#718096',
     fontSize: 10,
+    borderTop: '1 solid #E2E8F0',
+    paddingTop: 10,
+  },
+  signature: {
+    marginTop: 150,
+    borderTop: '1 solid #718096',
+    width: '60%',
+    alignSelf: 'center',
+    textAlign: 'center',
+    paddingTop: 5,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+  },
+  pageHeader: {
+    fontSize: 10,
+    color: '#4A5568',
+    textAlign: 'center',
+    marginBottom: 60,
+    paddingHorizontal: 40,
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: '#000',
   },
 });
 
@@ -87,56 +126,54 @@ const PdfComprobante = ({ _, purchaseCode, content }) => {
   return (
     <Document>
       <Page style={styles.page}>
+        <Text style={styles.subtitle}>COMPRA DE CAFÉ</Text>
+        <Text style={styles.title}>DELICIA DEL CAFE</Text>
+        <Text style={styles.pageHeader}>
+          Estoy ubicado en el Kilómetro 87.5 Ruta a El Salvador, a 100 metros
+          antes de entrada a San José Acatempa, Jutiapa{'\n'}
+          SIEMPRE OFRECIÉNDOLE UN MEJOR PRECIO{'\n'}
+          ¡Será un gusto atenderle!{'\n'}
+          TELÉFONOS: 3047-9284
+        </Text>
+
         <View style={styles.header}>
+          {/* <Image style={styles.logo} src="/path/to/your/logo.png" /> */}
           <View>
-            <Text style={styles.purchaseCode}>ID: {purchaseCode}</Text>
+            <Text style={styles.purchaseCode}>
+              <Text style={styles.boldText}>Comprobante No: </Text>
+              {purchaseCode}
+            </Text>
             <Text style={styles.headerText}>
-              Fecha: {new Date().toLocaleDateString()}
+              <Text style={styles.boldText}>Fecha: </Text>
+              {new Date().toLocaleDateString()}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.subtitle}>COMPRA DE CAFÉ</Text>
-        <Text style={styles.title}>DELICIA DEL CAFE</Text>
-        <View style={{ alignItems: 'center', marginBottom: '12px' }}>
-          <Text style={styles.headerText}>
-            Estoy ubicado en el Kilómetro 87.5 Ruta a El Salvador, a 100 metros
-            antes de la entrada a San José Acatempa, Jutiapa.
-          </Text>
-          <Text style={styles.headerText}>
-            SIEMPRE OFRECIÉNDOLE UN MEJOR PRECIO
-          </Text>
-          <Text style={styles.headerText}>
-            Prop. Lic. M.A. Donaldo Cano Pernillo ¡Será un gusto atenderle!
-          </Text>
-          <Text style={styles.headerText}>TELÉFONOS: 3047-9284</Text>
-        </View>
+        {/* <Text style={styles.subtitle}>COMPRA DE CAFÉ</Text>
+        <Text style={styles.title}>DELICIA DEL CAFE</Text> */}
 
         <View style={styles.content}>
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Información de la Compra</Text>
             <View style={styles.listItem}>
-              <Text style={styles.listItemLabel}>Recibido de:</Text>
+              <Text style={styles.listItemLabel}>Recibí de:</Text>
               <Text style={styles.listItemValue}>
                 {content.customerName || 'No especificado'}
               </Text>
             </View>
-          </View>
-
-          <View style={styles.section}>
-            <View style={styles.listItem}>
-              <Text style={styles.listItemValue}>{content.description}</Text>
-            </View>
             <View style={styles.listItem}>
               <Text style={styles.listItemLabel}>Quintales:</Text>
               <Text style={styles.listItemValue}>
-                {`${content.quantity.toLocaleString()} libras (${(
-                  content.quantity / 100
-                ).toLocaleString()} quintales)`}
+                {`${(content.quantity / 100).toLocaleString()} quintales`}
+                {` (${content.quantity.toLocaleString()} libras)`}
               </Text>
             </View>
             <View style={styles.listItem}>
-              <Text style={styles.listItemLabel}>Fecha de Transacción:</Text>
-              <Text style={styles.listItemValue}>{content.createdAt}</Text>
+              <Text style={styles.listItemLabel}>Lugar y Fecha:</Text>
+              <Text style={styles.listItemValue}>
+                San José Acatempa, {content.createdAt}
+              </Text>
             </View>
           </View>
 
@@ -167,11 +204,17 @@ const PdfComprobante = ({ _, purchaseCode, content }) => {
               </View>
             </View>
           )}
+
+          <View style={styles.signature}>
+            <Text>Firma</Text>
+          </View>
         </View>
 
         <Text style={styles.footer}>
-          Este documento es un comprobante oficial de la transacción realizada.
-          Por favor, consérvelo para sus registros.
+          DELICIA DEL CAFE | Kilómetro 87.5 Ruta a El Salvador, a 100 metros
+          antes de entrada a San José Acatempa, Jutiapa | Tel: 3047-9284 | Este
+          documento es un comprobante oficial de la transacción realizada. Por
+          favor, consérvelo para sus registros.
         </Text>
       </Page>
     </Document>

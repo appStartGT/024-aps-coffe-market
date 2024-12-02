@@ -183,6 +183,7 @@ const usePurchaseDetail = () => {
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
+              flexWrap: 'wrap',
             }}
           >
             <IconButton
