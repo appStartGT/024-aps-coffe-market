@@ -108,7 +108,9 @@ const BudgetContent = () => {
         });
     }
   };
-
+  console.log(
+    Object.values(expense_purchaseDetails || {}).flatMap((group) => group.items)
+  );
   const calculateTotal = (items) => {
     if (!Array.isArray(items)) {
       return 0;
@@ -140,7 +142,8 @@ const BudgetContent = () => {
           amount: Number(item.amount || 0),
         }))
       )
-    );
+    ) +
+    expense_purchaseDetails?.Anticipos?.total;
 
   const transferenciasTotal =
     expense_purchaseDetails?.Transferencia?.total || 0;
