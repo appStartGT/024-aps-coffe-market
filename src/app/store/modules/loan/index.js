@@ -30,11 +30,32 @@ export const createLoanAction = createAsyncThunk(
     }
   }
 );
-
 export const getLoanListAction = createAsyncThunk(
   'loan/getLoanList',
-  async ({ id_budget, id_purchase }, { getState, rejectWithValue }) => {
+  async ({ id_budget, id_purchase, getAll }, { getState, rejectWithValue }) => {
     try {
+      if (getAll) {
+        const allLoans = await getAllDocuments({
+          collectionName: firebaseCollections.LOAN,
+          filterBy: [
+            {
+              field: firebaseCollectionsKey.purchase,
+              condition: '==',
+              value: id_purchase,
+              reference: true,
+            },
+          ],
+          excludeReferences: [
+            firebaseCollectionsKey.purchase,
+            // firebaseCollectionsKey.budget,
+          ],
+        });
+        return {
+          newLoans: allLoans.data || [],
+          updatedRowLoanList: allLoans.data || [],
+        };
+      }
+
       const state = getState();
       const existingLoans = state.loan.rowLoanList.filter(
         (loan) =>
@@ -63,7 +84,7 @@ export const getLoanListAction = createAsyncThunk(
         ],
         excludeReferences: [
           firebaseCollectionsKey.purchase,
-          firebaseCollectionsKey.budget,
+          // firebaseCollectionsKey.budget,
         ],
       });
 

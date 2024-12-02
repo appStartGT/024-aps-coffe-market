@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Delete, Edit } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
-import { Chip, Typography } from '@mui/material';
+import { Chip, Tooltip, Typography } from '@mui/material';
 import {
   clearLoanAction,
   deleteLoanAction,
@@ -33,18 +33,23 @@ const useLoanList = () => {
   const [openModalDelete, setOpenModalDelete] = useState(false);
   const [loanToDelete, setLoanToDelete] = useState({});
   const [, setText] = useState('');
+  const [getAll, setGetAll] = useState(false);
 
   /* use Effects */
   useEffect(() => {
-    id_budget &&
-      dispatch(
-        getLoanListAction({
-          id_budget: selectedBudget || id_budget,
-          id_purchase,
-          force: Boolean(selectedBudget),
-        })
-      );
-  }, [dispatch, id_budget, id_purchase]);
+    if (getAll) {
+      dispatch(getLoanListAction({ id_purchase, getAll }));
+    } else {
+      id_budget &&
+        dispatch(
+          getLoanListAction({
+            id_budget: selectedBudget || id_budget,
+            id_purchase,
+            force: Boolean(selectedBudget),
+          })
+        );
+    }
+  }, [dispatch, id_budget, id_purchase, getAll]);
 
   useEffect(() => {
     dispatch(catLoanTypeCatalogAction());
@@ -117,6 +122,29 @@ const useLoanList = () => {
       minWidth: 100,
       flex: 1,
     },
+    {
+      field: 'budgetDate',
+      headerName: 'Presupuesto',
+      headerAlign: 'center',
+      align: 'center',
+      minWidth: 100,
+      flex: 1,
+      renderCell: (params) => (
+        <Tooltip
+          title={
+            params.row.budgetIsClosed
+              ? 'Presupuesto cerrado'
+              : 'Presupuesto abierto'
+          }
+        >
+          <Chip
+            label={params.row.budgetDate ? params.row.budgetDate : '-'}
+            color={params.row.budgetIsClosed ? 'error' : 'success'}
+          />
+        </Tooltip>
+      ),
+    },
+
     {
       field: 'actions',
       headerName: 'Acciones',
@@ -238,6 +266,8 @@ const useLoanList = () => {
     setSearchList,
     labels,
     fields,
+    getAll,
+    setGetAll,
   };
 };
 

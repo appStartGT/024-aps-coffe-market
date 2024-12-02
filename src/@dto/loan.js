@@ -6,6 +6,9 @@ const loanModel = (loan) => {
   const obj = {
     id: loan.id,
     id_loan: loan?.id_loan,
+    id_budget: loan?.id_budget,
+    budgetDate: formatFirebaseTimestamp(loan?.budget?.createdAt),
+    budgetIsClosed: loan?.budget?.isClosed,
     amount: loan.amount,
     amountFormatted: `Q ${formatNumber(loan.amount)}`,
     description: loan.description || '',
