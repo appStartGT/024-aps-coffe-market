@@ -11,7 +11,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 
-const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro }) => {
+const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro, hideButtons }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const rubroLabel = item.isInitial
     ? 'Saldo inicial'
@@ -50,33 +50,31 @@ const BudgetListItem = ({ item, onEdit, onDelete, cat_rubro }) => {
             </>
           }
         />
-        <ListItemSecondaryAction>
-          {!item.isInitial && (
-            <>
-              <Tooltip title="Editar">
-                <IconButton
-                  edge="end"
-                  aria-label="edit"
-                  onClick={() => onEdit(item)}
-                  sx={{ mr: 1 }}
-                >
-                  <EditIcon color="primary" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Eliminar">
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={handleDeleteClick}
-                >
-                  <DeleteIcon color="error" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
-        </ListItemSecondaryAction>
+        {!hideButtons && !item.isInitial && (
+          <ListItemSecondaryAction>
+            <Tooltip title="Editar">
+              <IconButton
+                edge="end"
+                aria-label="edit"
+                onClick={() => onEdit(item)}
+                sx={{ mr: 1 }}
+              >
+                <EditIcon color="primary" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Eliminar">
+              <IconButton
+                edge="end"
+                aria-label="delete"
+                onClick={handleDeleteClick}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
+            </Tooltip>
+          </ListItemSecondaryAction>
+        )}
       </ListItemButton>
-      {!item.isInitial && (
+      {!hideButtons && !item.isInitial && (
         <DeleteConfirmationDialog
           open={openDeleteDialog}
           onClose={() => setOpenDeleteDialog(false)}

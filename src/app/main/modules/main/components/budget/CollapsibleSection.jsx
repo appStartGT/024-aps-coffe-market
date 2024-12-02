@@ -25,6 +25,7 @@ const CollapsibleSection = ({
   backgroundColor,
   id_budget,
   cat_rubro,
+  hideButtons,
 }) => (
   <Paper
     elevation={2}
@@ -66,6 +67,7 @@ const CollapsibleSection = ({
             onEdit={onEdit}
             onDelete={onDelete}
             cat_rubro={cat_rubro}
+            hideButtons={hideButtons}
           />
         ))}
       </List>

@@ -2,7 +2,6 @@ import React from 'react';
 import { List, ListItemButton, ListItemText } from '@mui/material';
 
 const ExpenseList = ({ expenses, renderPrimaryText = true }) => {
-  console.log('expenses', expenses);
   return (
     <List component="div" disablePadding>
       {Object.entries(expenses).map(([key, value]) => (

@@ -256,16 +256,18 @@ const BudgetContent = () => {
 
   return (
     <Box sx={{ width: '100%', maxWidth: 360, margin: '0 auto' }}>
-      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-        <Button
-          variant="outlined"
-          color="primary"
-          fullWidth
-          onClick={handleNewBudget}
-        >
-          Nuevo Presupuesto
-        </Button>
-      </Stack>
+      {!budget?.isClosed && (
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            fullWidth
+            onClick={handleNewBudget}
+          >
+            Nuevo Presupuesto
+          </Button>
+        </Stack>
+      )}
 
       <CollapsibleSection
         title="Presupuesto"
@@ -275,11 +277,12 @@ const BudgetContent = () => {
         items={budget_items || []}
         onEdit={handleEditItem}
         onDelete={(item) => handleDeleteItem(item, true)}
-        showAddButton={true}
+        showAddButton={!budget?.isClosed}
         onAdd={handleNewItem}
         backgroundColor="rgba(25, 118, 210, 0.08)"
         id_budget={budget?.id_budget}
         cat_rubro={cat_rubro}
+        hideButtons={budget?.isClosed}
       />
 
       <Egresos
