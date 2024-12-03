@@ -75,7 +75,10 @@ export const createBudgetAction = createAsyncThunk(
       return {
         budget: budgetData,
         budget_items: budgetItemsData,
-        rawBudgets,
+        rawBudgets: rawBudgets.map((item) => ({
+          ...item,
+          isClosed: true,
+        })),
         old_budget,
       };
     } catch (error) {

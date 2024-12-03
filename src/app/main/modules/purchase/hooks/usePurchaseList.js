@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Edit, ShoppingCart } from '@mui/icons-material';
+import { ShoppingCart, Input } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { purchaseListAction } from '../../../../store/modules/purchase';
 import { clearAllPurchaseDetails } from '../../../../store/modules/purchaseDetail';
@@ -22,6 +22,7 @@ const usePurchaseList = () => {
     (state) => state.purchase.purchaseListDetails
   );
   const id_budget = useSelector((state) => state.budget.budget?.id_budget);
+  const budgetIsClosed = useSelector((state) => state.budget.budget?.isClosed);
   /* States */
   const [searchList, setSearchList] = useState(null);
   const [, setText] = useState('');
@@ -158,25 +159,27 @@ const usePurchaseList = () => {
               justifyContent: 'center',
             }}
           >
-            <ApsIconButton
-              tooltip={{ title: 'Comprar' }}
-              onClick={() =>
-                handleOpenPurchaseDetailModal(params.row.id_purchase)
-              }
-              children={<ShoppingCart color="primary" />}
-              can={{
-                key: `can-buy-purchase-${params.row.id_purchase}`,
-                I: Actions.CREATE,
-                a: Subjects.PURCHASES,
-              }}
-            />
+            {!budgetIsClosed && (
+              <ApsIconButton
+                tooltip={{ title: 'Comprar' }}
+                onClick={() =>
+                  handleOpenPurchaseDetailModal(params.row.id_purchase)
+                }
+                children={<ShoppingCart color="primary" />}
+                can={{
+                  key: `can-buy-purchase-${params.row.id_purchase}`,
+                  I: Actions.CREATE,
+                  a: Subjects.PURCHASES,
+                }}
+              />
+            )}
             {params.row.id_purchase && (
               <ApsIconButton
-                tooltip={{ title: 'Editar registro' }}
+                tooltip={{ title: 'Ver mas detalle' }}
                 onClick={() =>
                   navigate(`/main/purchase/detail/${params.row.id_purchase}`)
                 }
-                children={<Edit color="" />}
+                children={<Input color="" />}
                 can={{
                   key: `can-edit-purchase-${params.row.id_purchase}`,
                   I: Actions.EDIT,

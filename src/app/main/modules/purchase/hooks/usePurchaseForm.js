@@ -148,8 +148,8 @@ const usePurchaseForm = ({ navigate }) => {
         })
       )
         .unwrap()
-        .then((data) => {
-          navigate(`/main/purchase/detail/${data.id_purchase}`);
+        .then(() => {
+          navigate(`/main/purchase`);
         });
     }
   };

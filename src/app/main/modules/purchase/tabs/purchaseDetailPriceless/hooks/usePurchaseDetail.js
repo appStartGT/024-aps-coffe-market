@@ -9,7 +9,7 @@ import {
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../../purchaseDetail/components/PurchaseDetailForm';
-import { Box, Chip, IconButton, Tooltip } from '@mui/material';
+import { Alert, Box, Chip, IconButton, Tooltip } from '@mui/material';
 import { Edit, Delete, PictureAsPdf } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import RemateDetailsForm from '../components/RemateDetailsForm';
@@ -27,6 +27,7 @@ const usePurchaseDetail = () => {
     (state) => state.purchaseDetail.purchaseDetailListPriceless
   );
   const id_budget = useSelector((state) => state.budget.budget.id_budget);
+  const budgetIsClosed = useSelector((state) => state.budget.budget.isClosed);
   const [isQuintales, setIsQuintales] = useState(false);
   const [selectionModel, setSelectionModel] = useState([]);
   const [getAll, setGetAll] = useState(false);
@@ -275,6 +276,24 @@ const usePurchaseDetail = () => {
   };
 
   const handleRemate = () => {
+    if (budgetIsClosed) {
+      dispatch(
+        setApsGlobalModalPropsAction({
+          open: true,
+          maxWidth: 'sm',
+          title: 'Presupuesto cerrado',
+          closeBtn: true,
+          content: (
+            <Alert severity="error">
+              No se puede realizar un remate con un presupuesto cerrado,
+              seleccione el presupuesto actual.
+            </Alert>
+          ),
+        })
+      );
+      return;
+    }
+
     const selectedItems = (searchList || purchaseListPriceless).filter((item) =>
       selectionModel.includes(item.id)
     );

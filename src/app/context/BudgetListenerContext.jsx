@@ -32,6 +32,7 @@ export const BudgetListenerProvider = ({ children }) => {
 
   useEffect(() => {
     dispatch(catRubroCatalogAction());
+    dispatch(getBudgetAction());
   }, [dispatch]);
 
   return (

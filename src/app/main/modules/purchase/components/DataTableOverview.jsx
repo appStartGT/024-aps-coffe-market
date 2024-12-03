@@ -69,10 +69,8 @@ const DataTableOverview = ({ purchaseList }) => {
 
       const averagePriceWithExpenses = Number(
         totalQuantity !== 0
-          ? (
-              (expensesGrandTotal || 0) /
-              (totalLbPriced + totalLbRemate)
-            ).toFixed(2)
+          ? ((expensesGrandTotal || 0) / totalLbPriced /* + totalLbRemate */) //not include remate
+              .toFixed(2)
           : 0
       );
 

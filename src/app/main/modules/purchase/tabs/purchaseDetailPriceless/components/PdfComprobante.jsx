@@ -4,7 +4,7 @@ import {
   Text,
   View,
   StyleSheet,
-  Image,
+  // Image,
 } from '@react-pdf/renderer';
 
 // Estilos para el PDF
@@ -132,6 +132,7 @@ const PdfComprobante = ({ _, purchaseCode, content }) => {
           Estoy ubicado en el Kilómetro 87.5 Ruta a El Salvador, a 100 metros
           antes de entrada a San José Acatempa, Jutiapa{'\n'}
           SIEMPRE OFRECIÉNDOLE UN MEJOR PRECIO{'\n'}
+          Prop. Lic. M.A. Donaldo Cano Pernillo{'\n'}
           ¡Será un gusto atenderle!{'\n'}
           TELÉFONOS: 3047-9284
         </Text>

@@ -31,7 +31,7 @@ const DailyBudget = () => {
               paddingRight={2}
             >
               <Typography>
-                Administrar Presupuesto{' '}
+                Administrar Presupuesto
                 {formatFirebaseTimestamp(budget?.createdAt)}
               </Typography>
               {budget?.isClosed ? (

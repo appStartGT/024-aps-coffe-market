@@ -38,7 +38,6 @@ export const purchaseDetailListAction = createAsyncThunk(
         excludeReferences: ['id_purchase_detail_remate'],
       })
         .then((res) => {
-          dispatch(updatePurchaseListDetailsAction(res.data));
           return { ...res, purchaseSelected: purchase };
         })
         .catch((res) => rejectWithValue(res));

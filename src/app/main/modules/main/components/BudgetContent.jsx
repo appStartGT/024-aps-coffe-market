@@ -121,7 +121,12 @@ const BudgetContent = () => {
       Object.values(expense_purchaseDetails || {}).flatMap((group) =>
         group.items.map((item) => ({
           ...item,
-          amount: Number(item.price || 0) * Number(item.quantity || 0),
+          amount:
+            Number(item.price || 0) * Number(item.quantity || 0) -
+            (item.advancePayment || []).reduce(
+              (total, payment) => total + Number(payment.amount || 0),
+              0
+            ),
         }))
       )
     ) +
@@ -143,8 +148,34 @@ const BudgetContent = () => {
     ) +
     (expense_purchaseDetails?.Anticipos?.total || 0);
 
-  const transferenciasTotal =
-    expense_purchaseDetails?.Transferencia?.total || 0;
+  let transferenciasTotal = Object.values(
+    //items with amount
+    { ...expense_expenses, ...expense_loans } || {}
+  )
+    .flatMap((group) => group.items)
+    .reduce((sum, item) => {
+      return item.cat_payment_method.name === 'Transferencia'
+        ? sum + Number(item.amount || 0)
+        : sum;
+    }, 0);
+
+  const purchaseTransferenciasTotal = Object.values(
+    expense_purchaseDetails || {}
+  )
+    .flatMap((group) => group.items)
+    .reduce((sum, item) => {
+      const advancePaymentTotal = (item.advancePayment || []).reduce(
+        (total, payment) => total + Number(payment.amount || 0),
+        0
+      );
+      return item.cat_payment_method.name === 'Transferencia'
+        ? sum +
+            Number(item.price || 0) * Number(item.quantity || 0) -
+            advancePaymentTotal
+        : sum;
+    }, 0);
+
+  transferenciasTotal = transferenciasTotal + purchaseTransferenciasTotal;
 
   const balance = budgetTotal - expenseTotal;
 
@@ -204,9 +235,8 @@ const BudgetContent = () => {
         }
       });
     }
-
     // Subtract Transferencias from Bancos
-    if (allExpenses && allExpenses.Transferencia) {
+    if (transferenciasTotal > 0) {
       const bancosRubro =
         cat_rubro &&
         cat_rubro.find((rubro) => rubro && rubro.label === 'Bancos')?.value;

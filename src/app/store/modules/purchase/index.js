@@ -22,7 +22,13 @@ export const purchaseListAction = createAsyncThunk(
       const old_budget = state.budget.old_budget;
       let { rowPurchases, rowPurchaseDetails } = state.purchase;
       if (!force && rowPurchases.length > 0 && rowPurchaseDetails.length > 0) {
-        return { isUpdateNeeded: false, rowPurchases, rowPurchaseDetails };
+        return {
+          isUpdateNeeded: false,
+          rowPurchases,
+          rowPurchaseDetails: rowPurchaseDetails.filter(
+            (detail) => detail.budget?.id_budget === id_budget
+          ),
+        };
       }
 
       const purchases = await getAllDocuments({
