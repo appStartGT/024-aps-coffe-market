@@ -6,8 +6,11 @@ import {
   truckloadUpdateAction,
   clearTruckloadSelected,
 } from '../../../../../../store/modules/truckload';
-import { fieldValidations } from '@utils';
-import { paymentMethodCatalogAction } from '../../../../../../store/modules/catalogs';
+import { fieldValidations, firebaseCollections } from '@utils';
+import {
+  newOptionModalAction,
+  paymentMethodCatalogAction,
+} from '../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import * as Yup from 'yup';
 import ApsFileUpload from '@components/ApsFileUpload';
@@ -18,11 +21,27 @@ const useTruckloadForm = (id_sale) => {
   const truckloadSelected = useSelector(
     (state) => state.truckload.truckloadSelected
   );
-  const cat_truckload_licenseplate = useSelector(
-    (state) => state.catalogs.cat_truckload_licenseplate
+  const cat_truckload_license_plate = useSelector(
+    (state) => state.catalogs.cat_truckload_license_plate
   );
-
+  const purchaseDetailsResult = useSelector(
+    (state) => state.sale.purchaseDetailsResult
+  );
+  const availableForShipment =
+    (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
+    (purchaseDetailsResult?.totalLbAvailable || 0);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  const handleNewOption = (catalog, inputValue) => {
+    const modalProps = {
+      open: true,
+      inputValue,
+      catalog,
+    };
+    dispatch(newOptionModalAction(modalProps));
+  };
+
+  console.log({ truckloadSelected });
 
   const formikTruckload = useFormikFields({
     fields: [
@@ -30,12 +49,19 @@ const useTruckloadForm = (id_sale) => {
         id: '5',
         label: 'Placa',
         name: 'id_cat_truckload_license_plate',
-        field: 'select',
-        options: cat_truckload_licenseplate,
+        field: 'autocomplete',
+        options: cat_truckload_license_plate,
+        noOptionsText: 'No hay opciones disponibles.',
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
-        validations: Yup.string().required('La placa es requerida'),
+        onAddNew: (inputValue) => {
+          handleNewOption(
+            firebaseCollections.CAT_TRUCKLOAD_LICENSE_PLATE,
+            inputValue
+          );
+        },
+        validations: fieldValidations.requiredSelect,
       },
       {
         id: '6',
@@ -44,7 +70,20 @@ const useTruckloadForm = (id_sale) => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
-        validations: fieldValidations.numberRequired,
+        validations: truckloadSelected
+          ? Yup.number()
+              .required('El total de libras enviado es requerido')
+              .typeError('El total enviado debe ser un número')
+          : Yup.number()
+              .required('El total de libras enviado es requerido')
+              .test(
+                'max',
+                'El total enviado no puede ser mayor que el disponible para envío',
+                function (value) {
+                  return value <= availableForShipment;
+                }
+              )
+              .typeError('El total enviado debe ser un número'),
       },
       {
         id: '7',

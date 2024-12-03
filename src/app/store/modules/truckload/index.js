@@ -55,6 +55,7 @@ export const truckloadCreateAction = createAsyncThunk(
   'truckload/create',
   async (data, { rejectWithValue, dispatch }) => {
     let body = cleanModel(data);
+    console.log({ data });
     if (data.colilla && data.colilla instanceof File) {
       let url = await uploadFile({
         file: data.colilla,
@@ -70,6 +71,7 @@ export const truckloadCreateAction = createAsyncThunk(
 
     const truckloadData = {
       ...body,
+      id_cat_truckload_license_plate: data.id_cat_truckload_license_plate.value,
     };
 
     return await insertDocument({

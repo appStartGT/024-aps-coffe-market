@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { catalogsDto } from '@dto';
-import { getAllDocuments } from '@utils/firebaseMethods';
+import { getAllDocuments, insertDocument } from '@utils/firebaseMethods';
 import { firebaseCollections, firebaseCollectionsKey } from '@utils/constants';
 
 export const rolesCatalogAction = createAsyncThunk(
@@ -64,9 +64,9 @@ export const catTruckloadLicensePlateCatalogAction = createAsyncThunk(
   'catalogs/cat-truckload-license-plate',
   async (_, { getState, rejectWithValue }) => {
     const state = getState();
-    if (state.catalogs.cat_truckload_licenseplate.length > 0) {
+    if (state.catalogs.cat_truckload_license_plate.length > 0) {
       return {
-        data: state.catalogs.cat_truckload_licenseplate,
+        data: state.catalogs.cat_truckload_license_plate,
         isLocal: true,
       };
     }
@@ -108,6 +108,43 @@ export const catLoanTypeCatalogAction = createAsyncThunk(
   }
 );
 
+export const insertNewOptionAction = createAsyncThunk(
+  'catalogs/insertNewOption',
+  async ({ catalog, name }, { rejectWithValue }) => {
+    try {
+      const result = await insertDocument({
+        collectionName: catalog,
+        data: {
+          name,
+          isActive: true,
+        },
+      });
+      return { ...result, catalog };
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
+export const getCatalogAction = createAsyncThunk(
+  'catalogs/getCatalog',
+  async ({ catalog }, { rejectWithValue, getState }) => {
+    try {
+      const state = getState();
+      // Check if catalog data already exists in redux store
+      if (state.catalogs[catalog]?.length > 0) {
+        return { catalog: state.catalogs[catalog], isLocal: true };
+      }
+
+      return await getAllDocuments({
+        collectionName: catalog,
+      });
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);
+
 const initialState = {
   processing: false,
   roles: [],
@@ -115,15 +152,24 @@ const initialState = {
   person: [],
   cat_payment_method: [],
   cat_expense_type: [],
-  cat_truckload_licenseplate: [],
+  cat_truckload_license_plate: [],
   cat_rubro: [],
   cat_loan_type: [],
+  newOptionModal: {
+    open: false,
+    fields: [],
+    inputValue: undefined,
+    catalog: undefined,
+  },
 };
 
 export const catalogsSlice = createSlice({
   name: 'catalogs',
   initialState,
   reducers: {
+    newOptionModalAction: (state, action) => {
+      state.newOptionModal = { ...state.newOptionModal, ...action.payload };
+    },
     clearLastSelected: (state) => {
       state.lastCategory = null;
       state.lastMeasureType = null;
@@ -202,7 +248,7 @@ export const catalogsSlice = createSlice({
         catTruckloadLicensePlateCatalogAction.fulfilled,
         (state, { payload }) => {
           if (payload?.data && !payload.isLocal) {
-            state.cat_truckload_licenseplate = catalogsDto.list({
+            state.cat_truckload_license_plate = catalogsDto.list({
               data: payload.data,
               valueKey: firebaseCollectionsKey.cat_truckload_license_plate,
             });
@@ -242,9 +288,32 @@ export const catalogsSlice = createSlice({
         }
         state.processing = false;
       });
+
+    /* Insert New Option */
+    builder.addCase(insertNewOptionAction.pending, (state) => {
+      state.processing = true;
+    });
+    builder.addCase(insertNewOptionAction.rejected, (state, { payload }) => {
+      state.error = payload;
+      state.processing = false;
+    });
+    builder.addCase(
+      insertNewOptionAction.fulfilled,
+      (state, { payload, meta }) => {
+        const catalog = meta.arg.catalog;
+        const list = catalogsDto.list({
+          data: [payload],
+          valueKey: firebaseCollectionsKey[catalog],
+        });
+        console.log({ catalog, list });
+        state[catalog] = [...state[catalog], ...list];
+        state.processing = false;
+      }
+    );
   },
 });
 
-export const { clearLastSelected } = catalogsSlice.actions;
+export const { clearLastSelected, newOptionModalAction } =
+  catalogsSlice.actions;
 
 export default catalogsSlice.reducer;

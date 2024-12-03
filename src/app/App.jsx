@@ -10,6 +10,7 @@ import { useRouter } from '@hooks';
 import { Toaster } from 'react-hot-toast';
 import ApsGlobalModal from '@components/ApsGlobalModal';
 import { BudgetListenerProvider } from './context/BudgetListenerContext';
+import ApsNewOptionModal from '@components/ApsNewOptionModal';
 
 const App = () => {
   const { mainNavigation } = useRouter();
@@ -22,6 +23,7 @@ const App = () => {
         <BudgetListenerProvider>
           <CustomTheme>
             <ApsGlobalModal />
+            <ApsNewOptionModal />
             {navigation}
           </CustomTheme>
         </BudgetListenerProvider>

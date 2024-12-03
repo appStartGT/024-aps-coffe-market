@@ -5,6 +5,8 @@ const truckloadModel = (truckload) => {
   const obj = {
     id: truckload.id_beneficio_truckload,
     id_beneficio_truckload: truckload.id_beneficio_truckload,
+    id_cat_truckload_license_plate:
+      truckload.id_cat_truckload_license_plate?.value,
     id_sale: truckload?.id_sale,
     createdAt: truckload.createdAt,
     createdAtFormated: formatFirebaseTimestamp(
@@ -15,8 +17,6 @@ const truckloadModel = (truckload) => {
     isActive: truckload.isActive || false,
     updatedAt: formatFirebaseTimestamp(truckload.updatedAt),
     id_truckload_remate: truckload?.id_truckload_remate || '',
-    id_cat_truckload_license_plate:
-      truckload?.id_cat_truckload_license_plate || '',
     totalSent: truckload?.totalSent || 0,
     totalReceived: truckload?.totalReceived || 0,
     colilla: truckload?.colilla || null,
@@ -36,6 +36,11 @@ const truckloadGetModel = (truckload) => {
       truckload.totalReceived / 100
     )} qq`,
     colillaUrl: truckload.colilla?.url,
+    id_cat_truckload_license_plate: {
+      label: truckload?.cat_truckload_license_plate?.name,
+      value:
+        truckload?.cat_truckload_license_plate?.id_cat_truckload_license_plate,
+    },
   };
 };
 

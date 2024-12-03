@@ -12,10 +12,6 @@ const DataTableOverview = ({ saleList }) => {
   const rowPurchaseDetails = useSelector(
     (state) => state.sale.rowPurchaseDetails
   );
-  const id_budget = useSelector((state) => state.budget.budget?.id_budget);
-  // const expensesGrandTotal = useSelector(
-  //   (state) => state.budget.expenses?.totals?.grandTotal
-  // );
 
   const [statistics, setStatistics] = useState({
     totalQuantity: '0.00',
@@ -29,10 +25,8 @@ const DataTableOverview = ({ saleList }) => {
   });
   const [isQuintales, setIsQuintales] = useState(false);
 
-  console.log({ purchaseDetailsResult, rowPurchaseDetails });
-
   useEffect(() => {
-    if (saleList && saleList.length > 0) {
+    const calculateStatistics = () => {
       const totalQuantity = saleList.reduce(
         (sum, sale) => sum + Number(sale.totalLbQuantity || 0),
         0
@@ -41,7 +35,6 @@ const DataTableOverview = ({ saleList }) => {
         (sum, sale) => sum + Number(sale.totalLbPriceless || 0),
         0
       );
-
       const totalTruckloadsSent = saleList.reduce(
         (sum, sale) => sum + Number(sale.totalTruckloadsSent || 0),
         0
@@ -50,51 +43,22 @@ const DataTableOverview = ({ saleList }) => {
         (sum, sale) => sum + Number(sale.totalTruckloadsReceived || 0),
         0
       );
-
       const totalLbSold = saleList.reduce(
         (sum, sale) => sum + Number(sale.totalLbsSold || 0),
         0
       );
-
-      const totalLbAvailable = saleList.reduce((sum, sale) => {
-        return (
+      const totalLbAvailable = saleList.reduce(
+        (sum, sale) =>
           sum +
           (Number(sale.totalTruckloadsReceived || 0) -
-            Number(sale.totalLbPriceless || 0))
-        );
-      }, 0);
-
+            Number(sale.totalLbPriceless || 0)),
+        0
+      );
       const totalLbAvailablePriceless =
         purchaseDetailsResult?.totalLbAvailablePriceless || 0;
-
-      const totalLbPricedForShipment = Number(
-        rowPurchaseDetails
-          ?.filter(
-            (detail) =>
-              !detail.isPriceless &&
-              !detail.isRemate &&
-              detail.id_budget === id_budget
-          )
-          .reduce((sum, detail) => sum + Number(detail.quantity) || 0, 0)
-          .toFixed(2)
-      );
-
-      const totalLbPricelessForShipment = Number(
-        rowPurchaseDetails
-          ?.filter(
-            (detail) =>
-              detail.isPriceless &&
-              !detail.isRemate &&
-              detail.id_budget === id_budget
-          )
-          .reduce((sum, detail) => sum + Number(detail.quantity) || 0, 0)
-          .toFixed(2)
-      );
-
       const availableForShipment =
-        Number(totalLbPricedForShipment) +
-        Number(totalLbPricelessForShipment) -
-        Number(totalTruckloadsSent);
+        (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
+        (purchaseDetailsResult?.totalLbAvailable || 0);
 
       setStatistics({
         totalQuantity: formatNumber(totalQuantity),
@@ -106,31 +70,15 @@ const DataTableOverview = ({ saleList }) => {
         totalLbAvailablePriceless: formatNumber(totalLbAvailablePriceless),
         availableForShipment: formatNumber(availableForShipment),
       });
-    } else {
-      setStatistics({
-        totalQuantity: '0.00',
-        totalLbPriceless: '0.00',
-        totalTruckloadsSent: '0.00',
-        totalTruckloadsReceived: '0.00',
-        totalLbSold: '0.00',
-        totalLbAvailable: formatNumber(
-          purchaseDetailsResult?.totalLbAvailable || 0
-        ),
-        totalLbAvailablePriceless: formatNumber(
-          purchaseDetailsResult?.totalLbAvailablePriceless || 0
-        ),
-        availableForShipment: '0.00',
-      });
-    }
+    };
+
+    calculateStatistics();
   }, [saleList, purchaseDetailsResult, rowPurchaseDetails]);
 
-  const toggleUnit = () => {
-    setIsQuintales(!isQuintales);
-  };
+  const toggleUnit = () => setIsQuintales(!isQuintales);
 
-  const convertToQuintales = (value) => {
-    return formatNumber(parseFloat(value.replace(/,/g, '')) / 100);
-  };
+  const convertToQuintales = (value) =>
+    formatNumber(parseFloat(value.replace(/,/g, '')) / 100);
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -149,23 +97,23 @@ const DataTableOverview = ({ saleList }) => {
         <DataItem
           value={
             isQuintales
-              ? convertToQuintales(statistics.totalLbAvailable)
-              : statistics.totalLbAvailable
-          }
-          label={`Disponible para venta ${isQuintales ? '(qq)' : '(lb)'} `}
-          backgroundColor={theme.palette.primary.main}
-          color={theme.palette.primary.contrastText}
-          onClick={toggleUnit}
-        />
-        <DataItem
-          value={
-            isQuintales
               ? convertToQuintales(statistics.totalLbAvailablePriceless)
               : statistics.totalLbAvailablePriceless
           }
           label={`Total sin precio ${isQuintales ? '(qq)' : '(lb)'}`}
           backgroundColor={theme.palette.balance.background}
           color={theme.palette.balance.text}
+          onClick={toggleUnit}
+        />
+        <DataItem
+          value={
+            isQuintales
+              ? convertToQuintales(statistics.totalLbAvailable)
+              : statistics.totalLbAvailable
+          }
+          label={`Disponible para venta ${isQuintales ? '(qq)' : '(lb)'}`}
+          backgroundColor={theme.palette.primary.main}
+          color={theme.palette.primary.contrastText}
           onClick={toggleUnit}
         />
         <DataItem
