@@ -13,7 +13,7 @@ export const createBudgetAction = createAsyncThunk(
   'budget/createBudget',
   async ({ createdBy, budgetItems }, { rejectWithValue, getState }) => {
     const state = getState();
-    const old_budget = state.budget.budget?.id_budget;
+    // const old_budget = state.budget.budget?.id_budget;
     const rawBudgets = state.budget.rawBudgets;
     const data = {
       createdBy,
@@ -79,7 +79,7 @@ export const createBudgetAction = createAsyncThunk(
           ...item,
           isClosed: true,
         })),
-        old_budget,
+        // old_budget,
       };
     } catch (error) {
       console.error('Create Budget Error:', error);
@@ -330,7 +330,7 @@ const initialState = {
   budget_items: [],
   processing: false,
   error: null,
-  old_budget: null,
+  // old_budget: null,
   expenses: {
     purchaseDetails: [],
     expenses: [],
@@ -381,7 +381,7 @@ export const budgetSlice = createSlice({
       state.budget = null;
       state.budgets = [];
       state.budget_items = [];
-      state.old_budget = null;
+      // state.old_budget = null;
       state.expenses = {
         purchaseDetails: [],
         expenses: [],
@@ -394,9 +394,9 @@ export const budgetSlice = createSlice({
         },
       };
     },
-    setOldBudget: (state, action) => {
-      state.old_budget = action.payload;
-    },
+    // setOldBudget: (state, action) => {
+    //   state.old_budget = action.payload;
+    // },
     setExpenseTotalAction: (state, action) => {
       state.expenses.totals.expenseTotal = action.payload;
     },
@@ -411,12 +411,12 @@ export const budgetSlice = createSlice({
       })
       .addCase(createBudgetAction.fulfilled, (state, action) => {
         state.processing = false;
-        const { budget, budget_items, rawBudgets, old_budget } = action.payload;
+        const { budget, budget_items, rawBudgets } = action.payload; // Removed old_budget
         state.budget = budget;
         state.rawBudgets = [...rawBudgets, budget];
         state.budget_items = budget_items;
         state.budgets = formatAndSortBudgets([...rawBudgets, budget]);
-        state.old_budget = old_budget;
+        // state.old_budget = old_budget;
         state.expenses = {
           purchaseDetails: [],
           expenses: [],
@@ -503,7 +503,7 @@ export const budgetSlice = createSlice({
 
 export const {
   clearBudget,
-  setOldBudget,
+  // setOldBudget,
   setExpenseTotalAction,
   setSelectedBudgetAction,
 } = budgetSlice.actions;

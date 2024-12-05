@@ -24,6 +24,7 @@ import ItemDialog from './budget/ItemDialog';
 import CollapsibleSection from './budget/CollapsibleSection';
 import Egresos from './budget/Egresos';
 import { useDispatch, useSelector } from 'react-redux';
+import { purchaseListAction } from '../../../../store/modules/purchase';
 // Main Budget Content Component
 const BudgetContent = () => {
   const dispatch = useDispatch();
@@ -197,8 +198,11 @@ const BudgetContent = () => {
         budgetItems: newBudgetItems,
       })
     )
-      .then(() => {
+      .then(({ payload: { budget } }) => {
         setOpenNewBudgetDialog(false);
+        dispatch(
+          purchaseListAction({ id_budget: budget?.id_budget, force: true })
+        );
       })
       .catch((error) => {
         console.error('Error al crear nuevo presupuesto:', error);

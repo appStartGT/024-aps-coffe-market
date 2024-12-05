@@ -11,68 +11,69 @@ import {
 const styles = StyleSheet.create({
   page: {
     fontFamily: 'Helvetica',
-    fontSize: 12,
-    paddingBottom: '40px',
-    paddingTop: '40px',
+    fontSize: 8, // Reduced font size
+    paddingBottom: '20px', // Reduced padding
+    paddingTop: '20px',
+    height: '50%', // Set height to 50% of the page
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    marginBottom: 20,
-    paddingHorizontal: 40,
+    marginBottom: 10, // Reduced margin
+    paddingHorizontal: 20, // Reduced padding
   },
   headerText: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#4A5568',
     fontWeight: 'bold',
   },
   purchaseCode: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#4A5568',
-    marginBottom: 4,
+    marginBottom: 2,
     fontWeight: 'bold',
   },
   title: {
-    fontSize: 28,
+    fontSize: 18, // Reduced font size
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#2D3748',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 10,
     fontWeight: 'medium',
     textAlign: 'center',
     color: '#4A5568',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   content: {
     display: 'flex',
     flexDirection: 'column',
     width: '100%',
-    paddingHorizontal: 40,
+    paddingHorizontal: 20,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 10,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 12,
     fontWeight: 'bold',
     color: '#2D3748',
-    marginBottom: 10,
+    marginBottom: 5,
     borderBottom: '1 solid #E2E8F0',
-    paddingBottom: 5,
+    paddingBottom: 2,
   },
   listItem: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   listItemLabel: {
     color: '#4A5568',
-    marginRight: 10,
+    marginRight: 5,
     width: '30%',
   },
   listItemValue: {
@@ -81,34 +82,34 @@ const styles = StyleSheet.create({
     width: '70%',
   },
   footer: {
-    position: 'absolute',
-    bottom: 30,
-    left: 40,
-    right: 40,
+    marginTop: 40, // Reduced margin
+    marginLeft: 20,
+    marginRight: 20,
+    bottom: 15,
     textAlign: 'center',
     color: '#718096',
-    fontSize: 10,
+    fontSize: 7,
     borderTop: '1 solid #E2E8F0',
-    paddingTop: 10,
+    paddingTop: 5,
   },
   signature: {
-    marginTop: 150,
+    marginTop: 40, // Reduced margin
     borderTop: '1 solid #718096',
     width: '60%',
     alignSelf: 'center',
     textAlign: 'center',
-    paddingTop: 5,
+    paddingTop: 2,
   },
   logo: {
-    width: 100,
-    height: 100,
+    width: 50, // Reduced size
+    height: 50,
   },
   pageHeader: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#4A5568',
     textAlign: 'center',
-    marginBottom: 60,
-    paddingHorizontal: 40,
+    marginBottom: 20, // Reduced margin
+    paddingHorizontal: 20,
   },
   boldText: {
     fontWeight: 'bold',
@@ -141,7 +142,7 @@ const PdfComprobante = ({ _, purchaseCode, content }) => {
           {/* <Image style={styles.logo} src="/path/to/your/logo.png" /> */}
           <View>
             <Text style={styles.purchaseCode}>
-              <Text style={styles.boldText}>Comprobante No: </Text>
+              <Text style={styles.boldText}>Código de comprobante: </Text>
               {purchaseCode}
             </Text>
             <Text style={styles.headerText}>
@@ -150,9 +151,6 @@ const PdfComprobante = ({ _, purchaseCode, content }) => {
             </Text>
           </View>
         </View>
-
-        {/* <Text style={styles.subtitle}>COMPRA DE CAFÉ</Text>
-        <Text style={styles.title}>DELICIA DEL CAFE</Text> */}
 
         <View style={styles.content}>
           <View style={styles.section}>

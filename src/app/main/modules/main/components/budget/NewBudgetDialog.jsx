@@ -9,9 +9,11 @@ import {
   Stack,
   Alert,
 } from '@mui/material';
+import { useSelector } from 'react-redux';
 
 const NewBudgetDialog = ({ open, onClose, onConfirm, rubroBalances }) => {
   const [errors, setErrors] = useState({});
+  const processing = useSelector((state) => state.budget.processing);
 
   const validateRubroBalances = () => {
     const newErrors = {};
@@ -48,7 +50,7 @@ const NewBudgetDialog = ({ open, onClose, onConfirm, rubroBalances }) => {
               key={key}
               label={key}
               type="number"
-              value={value}
+              value={Number(value).toFixed(2)}
               error={!!errors[key]}
               helperText={errors[key]}
               InputProps={{
@@ -60,7 +62,12 @@ const NewBudgetDialog = ({ open, onClose, onConfirm, rubroBalances }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancelar</Button>
-        <Button onClick={handleConfirm} variant="contained" color="primary">
+        <Button
+          onClick={handleConfirm}
+          variant="contained"
+          color="primary"
+          disabled={processing}
+        >
           Crear Nuevo Presupuesto
         </Button>
       </DialogActions>

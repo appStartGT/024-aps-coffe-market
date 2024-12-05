@@ -12,14 +12,17 @@ import {
   firestore,
 } from '@utils/firebaseMethods';
 import { customerCreateAction, customerUpdateAction } from '../customer';
-import { setOldBudget } from '../budget';
+// import { setOldBudget } from '../budget';
 
 export const purchaseListAction = createAsyncThunk(
   'purchase/list',
-  async ({ id_budget, force }, { rejectWithValue, getState, dispatch }) => {
+  async (
+    { id_budget, force },
+    { rejectWithValue, getState /* dispatch */ }
+  ) => {
     try {
       const state = getState();
-      const old_budget = state.budget.old_budget;
+      // const old_budget = state.budget.old_budget;
       let { rowPurchases, rowPurchaseDetails } = state.purchase;
       if (!force && rowPurchases.length > 0 && rowPurchaseDetails.length > 0) {
         return {
@@ -63,9 +66,11 @@ export const purchaseListAction = createAsyncThunk(
           return purchaseDetails.data;
         })
       );
+
+      // console.log('old_budget', old_budget);
       // Clear old budget when a new budget is created
-      if (old_budget && old_budget?.id_budget !== id_budget)
-        dispatch(setOldBudget(null));
+      // if (old_budget/*  && old_budget?.id_budget  */!== id_budget)
+      //   dispatch(setOldBudget(null));
       // Flatten the array of arrays
       rowPurchaseDetails = rowPurchaseDetails.flat();
 
