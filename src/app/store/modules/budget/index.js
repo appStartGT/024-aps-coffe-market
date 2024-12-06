@@ -238,7 +238,9 @@ export const budgetExpensesAction = createAsyncThunk(
               };
             }
             acc[key].items.push(item);
-            acc[key].total += Number(item.price) * Number(item.quantity) || 0;
+            acc[key].total +=
+              (Number(item.price) * Number(item.quantity) || 0) -
+              Number(item.totalAdvancePayments || 0);
           }
           return acc;
         }, {});

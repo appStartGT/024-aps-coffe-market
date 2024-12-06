@@ -186,7 +186,6 @@ export const createRemateAction = createAsyncThunk(
       id_cat_payment_method,
     } = data;
     const id_budget = state.budget.budget.id_budget;
-
     try {
       return await firestore.runTransaction(async (transaction) => {
         const remateList = list.map((item) => ({

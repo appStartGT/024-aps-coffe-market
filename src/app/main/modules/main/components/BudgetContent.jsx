@@ -117,6 +117,7 @@ const BudgetContent = () => {
     return items.reduce((sum, item) => sum + Number(item.amount), 0);
   };
   const budgetTotal = calculateTotal(budget_items || []);
+
   const expenseTotal =
     calculateTotal(
       Object.values(expense_purchaseDetails || {}).flatMap((group) =>
@@ -124,10 +125,7 @@ const BudgetContent = () => {
           ...item,
           amount:
             Number(item.price || 0) * Number(item.quantity || 0) -
-            (item.advancePayment || []).reduce(
-              (total, payment) => total + Number(payment.amount || 0),
-              0
-            ),
+            Number(item.totalAdvancePayments || 0),
         }))
       )
     ) +
@@ -165,10 +163,7 @@ const BudgetContent = () => {
   )
     .flatMap((group) => group.items)
     .reduce((sum, item) => {
-      const advancePaymentTotal = (item.advancePayment || []).reduce(
-        (total, payment) => total + Number(payment.amount || 0),
-        0
-      );
+      const advancePaymentTotal = item.totalAdvancePayments || 0;
       return item.cat_payment_method.name === 'Transferencia'
         ? sum +
             Number(item.price || 0) * Number(item.quantity || 0) -

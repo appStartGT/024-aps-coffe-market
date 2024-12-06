@@ -184,6 +184,8 @@ const RemateDetailsForm = ({ selectedItems, handleComplete }) => {
     return isValid;
   };
 
+
+
   const handleConfirm = () => {
     if (validateForm()) {
       dispatch(
