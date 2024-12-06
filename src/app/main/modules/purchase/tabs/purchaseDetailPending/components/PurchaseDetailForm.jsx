@@ -14,7 +14,7 @@ import { formatNumber } from '@utils';
 import AdvancePayment from './AdvancePayment';
 
 const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
-  const { formikPurchaseDetail, handleOnclick, loading } =
+  const { formikPurchaseDetail, handleOnclick, loading, currentBudget } =
     usePurchaseDetailForm(id_purchase);
 
   const disableSwitch = useMemo(() => {
@@ -58,71 +58,74 @@ const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
       );
     }
   };
-
+  console.log(formikPurchaseDetail.form.values);
   return (
     <Box display="flex" flexDirection="column">
-      {/* <ApsModalLoading open={loading} message="Procesando compra..." /> */}
       <Box
         display="flex"
-        justifyContent="space-between"
+        justifyContent={'space-between'}
         alignItems="center"
         mb={2}
       >
-        <Box display="flex" flexDirection="column" width="100%">
-          {!formikPurchaseDetail.form.values.isPriceless && (
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={Boolean(
-                    formikPurchaseDetail.form.values.isPendingPayment
-                  )}
-                  onChange={(event) =>
-                    formikPurchaseDetail.form.setFieldValue(
-                      'isPendingPayment',
-                      event.target.checked
-                    )
+        {!formikPurchaseDetail.form.values.budgetIsClosed &&
+          formikPurchaseDetail.form.values.id_budget ===
+            currentBudget?.id_budget && (
+            <Box display="flex" flexDirection="column" width="100%">
+              {!formikPurchaseDetail.form.values.isPriceless && (
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(
+                        formikPurchaseDetail.form.values.isPendingPayment
+                      )}
+                      onChange={(event) =>
+                        formikPurchaseDetail.form.setFieldValue(
+                          'isPendingPayment',
+                          event.target.checked
+                        )
+                      }
+                      name="isPendingPayment"
+                    />
                   }
-                  name="isPendingPayment"
+                  label="Pendiente de pago"
+                  sx={{ width: '100%' }}
                 />
-              }
-              label="Pendiente de pago"
-              sx={{ width: '100%' }}
-            />
-          )}
-          <Tooltip
-            title={
-              disableSwitch
-                ? 'Para habilitar esta opción elimine los anticipos'
-                : ''
-            }
-            arrow
-          >
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={Boolean(
-                    formikPurchaseDetail.form.values.isPriceless
-                  )}
-                  onChange={(event) => {
-                    formikPurchaseDetail.form.setFieldValue(
-                      'isPriceless',
-                      event.target.checked
-                    );
+              )}
+              <Tooltip
+                title={
+                  disableSwitch
+                    ? 'Para habilitar esta opción elimine los anticipos'
+                    : ''
+                }
+                arrow
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={Boolean(
+                        formikPurchaseDetail.form.values.isPriceless
+                      )}
+                      onChange={(event) => {
+                        formikPurchaseDetail.form.setFieldValue(
+                          'isPriceless',
+                          event.target.checked
+                        );
 
-                    formikPurchaseDetail.form.setFieldValue(
-                      'isPendingPayment',
-                      false
-                    );
-                  }}
-                  name="isPriceless"
-                  // disabled={disableSwitch}
+                        formikPurchaseDetail.form.setFieldValue(
+                          'isPendingPayment',
+                          false
+                        );
+                      }}
+                      name="isPriceless"
+                      // disabled={disableSwitch}
+                    />
+                  }
+                  label="Sin precio"
+                  sx={{ width: '100%' }}
                 />
-              }
-              label="Sin precio"
-              sx={{ width: '100%' }}
-            />
-          </Tooltip>
-        </Box>
+              </Tooltip>
+            </Box>
+          )}
         <Typography variant="h6" textAlign="end" width="100%">
           {formikPurchaseDetail.form.values.isPriceless ? (
             <>
@@ -138,13 +141,13 @@ const PurchaseDetailForm = ({ id_purchase, nonupdate }) => {
               })()}
             </>
           ) : (
-            <>
+            <Box display="flex" justifyContent="center">
               {calculateTotalToPay() < 0 ? (
                 <>Anticipos Q{formatNumber(Math.abs(calculateTotalToPay()))}</>
               ) : (
                 <>Total a pagar Q{formatNumber(calculateTotalToPay())}</>
               )}
-            </>
+            </Box>
           )}
         </Typography>
       </Box>

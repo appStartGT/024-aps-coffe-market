@@ -14,6 +14,7 @@ import {
 } from '@utils/firebaseMethods';
 import { firestore, FieldValue } from '@config/firebaseConfig';
 import { updatePurchaseListDetailsAction } from '../purchase';
+
 export const purchaseDetailListAction = createAsyncThunk(
   'purchaseDetail/list',
   async (
@@ -137,7 +138,8 @@ export const purchaseDetailUpdateAction = createAsyncThunk(
       ],
     })
       .then((res) => {
-        dispatch(updatePurchaseListDetailsAction([res]));
+        !res.isPendingPayment &&
+          dispatch(updatePurchaseListDetailsAction([res]));
         return res;
       })
       .catch((res) => rejectWithValue(res));
@@ -268,6 +270,7 @@ const initialState = {
   processing: false,
   purchaseDetailList: [],
   purchaseDetailListPriceless: [],
+  purchaseDetailListPendingPayment: [],
   totalItems: 5,
 };
 
@@ -287,6 +290,7 @@ export const purchaseDetailSlice = createSlice({
     clearAllPurchaseDetails: (state) => {
       state.purchaseDetailList = [];
       state.purchaseDetailListPriceless = [];
+      state.purchaseDetailListPendingPayment = [];
     },
   },
   extraReducers: (builder) => {
@@ -306,10 +310,13 @@ export const purchaseDetailSlice = createSlice({
           payload.purchaseSelected
         );
         state.purchaseDetailList = allPurchaseDetails.filter(
-          (detail) => detail.isPriceless === false
+          (detail) => !detail.isPriceless && !detail.isPendingPayment
         );
         state.purchaseDetailListPriceless = allPurchaseDetails.filter(
-          (detail) => detail.isPriceless === true
+          (detail) => detail.isPriceless
+        );
+        state.purchaseDetailListPendingPayment = allPurchaseDetails.filter(
+          (detail) => detail.isPendingPayment
         );
         state.totalItems = payload.data.totalItems;
         state.processing = false;
@@ -342,6 +349,11 @@ export const purchaseDetailSlice = createSlice({
               ...state.purchaseDetailListPriceless,
               purchaseDetail,
             ];
+          } else if (purchaseDetail.isPendingPayment) {
+            state.purchaseDetailListPendingPayment = [
+              ...state.purchaseDetailListPendingPayment,
+              purchaseDetail,
+            ];
           } else {
             state.purchaseDetailList = [
               ...state.purchaseDetailList,
@@ -369,7 +381,7 @@ export const purchaseDetailSlice = createSlice({
           purchaseDetailDto.purchaseDetailGetOne(payload);
         state.purchaseDetailSelected = updatedPurchaseDetail;
 
-        // Remove the old record from both lists
+        // Remove the old record from all lists
         state.purchaseDetailList = state.purchaseDetailList.filter(
           (detail) =>
             detail[firebaseCollectionsKey.purchase_detail] !==
@@ -381,10 +393,18 @@ export const purchaseDetailSlice = createSlice({
               detail[firebaseCollectionsKey.purchase_detail] !==
               updatedPurchaseDetail[firebaseCollectionsKey.purchase_detail]
           );
+        state.purchaseDetailListPendingPayment =
+          state.purchaseDetailListPendingPayment.filter(
+            (detail) =>
+              detail[firebaseCollectionsKey.purchase_detail] !==
+              updatedPurchaseDetail[firebaseCollectionsKey.purchase_detail]
+          );
 
         // Add the updated record to the correct list
         if (updatedPurchaseDetail.isPriceless) {
           state.purchaseDetailListPriceless.push(updatedPurchaseDetail);
+        } else if (updatedPurchaseDetail.isPendingPayment) {
+          state.purchaseDetailListPendingPayment.push(updatedPurchaseDetail);
         } else {
           state.purchaseDetailList.push(updatedPurchaseDetail);
         }
@@ -412,6 +432,12 @@ export const purchaseDetailSlice = createSlice({
         );
         state.purchaseDetailListPriceless =
           state.purchaseDetailListPriceless.filter(
+            (purchaseDetail) =>
+              purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
+              id_purchaseDetail
+          );
+        state.purchaseDetailListPendingPayment =
+          state.purchaseDetailListPendingPayment.filter(
             (purchaseDetail) =>
               purchaseDetail[firebaseCollectionsKey.purchase_detail] !==
               id_purchaseDetail

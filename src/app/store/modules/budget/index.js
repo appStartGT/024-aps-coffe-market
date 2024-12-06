@@ -149,59 +149,85 @@ export const budgetExpensesAction = createAsyncThunk(
   'budget/expenses',
   async (id_budget, { rejectWithValue }) => {
     try {
-      const [purchaseDetails, expenses, loans] = await Promise.all([
-        getAllDocuments({
-          collectionName: firebaseCollections.PURCHASE_DETAIL,
-          filterBy: [
-            {
-              field: 'id_budget',
-              condition: '==',
-              value: id_budget,
-              reference: true,
-            },
-            // { field: 'isPriceless', condition: '==', value: false },
-          ],
-          excludeReferences: [
-            'id_budget',
-            'id_average_price',
-            'id_sale',
-            'id_purchase_detail_remate',
-            'id_purchase',
-          ],
-        }),
-        getAllDocuments({
-          collectionName: firebaseCollections.EXPENSE,
-          filterBy: [
-            {
-              field: 'id_budget',
-              condition: '==',
-              value: id_budget,
-              reference: true,
-            },
-          ],
-          excludeReferences: ['id_budget'],
-        }),
-        getAllDocuments({
-          collectionName: firebaseCollections.LOAN,
-          filterBy: [
-            {
-              field: 'id_budget',
-              condition: '==',
-              value: id_budget,
-              reference: true,
-            },
-            {
-              field: 'isPaid',
-              condition: '==',
-              value: false,
-            },
-          ],
-          excludeReferences: ['id_budget'],
-        }),
-      ]);
+      const [purchaseDetails, purchaseDetailsPaidWithBudget, expenses, loans] =
+        await Promise.all([
+          getAllDocuments({
+            collectionName: firebaseCollections.PURCHASE_DETAIL,
+            filterBy: [
+              {
+                field: 'id_budget',
+                condition: '==',
+                value: id_budget,
+                reference: true,
+              },
+              // { field: 'isPriceless', condition: '==', value: false },
+            ],
+            excludeReferences: [
+              'id_budget',
+              'id_average_price',
+              'id_sale',
+              'id_purchase_detail_remate',
+              'id_purchase',
+            ],
+          }),
+          getAllDocuments({
+            collectionName: firebaseCollections.PURCHASE_DETAIL,
+            filterBy: [
+              {
+                field: 'paidWithBudget',
+                condition: '==',
+                value: id_budget,
+                // reference: true,
+              },
+              // { field: 'isPriceless', condition: '==', value: false },
+            ],
+            excludeReferences: [
+              'id_budget',
+              'id_average_price',
+              'id_sale',
+              'id_purchase_detail_remate',
+              'id_purchase',
+            ],
+          }),
+          getAllDocuments({
+            collectionName: firebaseCollections.EXPENSE,
+            filterBy: [
+              {
+                field: 'id_budget',
+                condition: '==',
+                value: id_budget,
+                reference: true,
+              },
+            ],
+            excludeReferences: ['id_budget'],
+          }),
+          getAllDocuments({
+            collectionName: firebaseCollections.LOAN,
+            filterBy: [
+              {
+                field: 'id_budget',
+                condition: '==',
+                value: id_budget,
+                reference: true,
+              },
+              {
+                field: 'isPaid',
+                condition: '==',
+                value: false,
+              },
+            ],
+            excludeReferences: ['id_budget'],
+          }),
+        ]);
 
-      const groupedPurchaseDetails = purchaseDetails.data
-        .filter((item) => !item.isPriceless)
+      const groupedPurchaseDetails = [
+        ...purchaseDetails.data,
+        ...purchaseDetailsPaidWithBudget.data,
+      ]
+        .filter(
+          (item) =>
+            (!item.isPriceless && !item.isPendingPayment) || item.paidWithBudget
+        )
         .reduce((acc, item) => {
           if (item.id_cat_payment_method) {
             const key = item.cat_payment_method.name;

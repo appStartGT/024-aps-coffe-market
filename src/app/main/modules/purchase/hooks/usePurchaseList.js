@@ -41,7 +41,14 @@ const usePurchaseList = () => {
     dispatch(
       setApsGlobalModalPropsAction({
         open: true,
-        maxWidth: 'xs',
+        maxWidth: 'sm',
+        dialogProps: {
+          sx: {
+            '& .MuiDialog-paper': {
+              maxWidth: '500px',
+            },
+          },
+        },
         title: 'Detalle de Compra',
         description: 'Registre un nuevo detalle de compra',
         content: <PurchaseDetailForm id_purchase={id_purchase} nonupdate />,

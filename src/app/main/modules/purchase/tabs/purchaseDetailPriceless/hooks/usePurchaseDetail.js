@@ -225,19 +225,6 @@ const usePurchaseDetail = () => {
     },
   ];
 
-  const handleAdd = () => {
-    dispatch(
-      setApsGlobalModalPropsAction({
-        open: true,
-        maxWidth: 'xs',
-        title: 'Compra',
-        description: 'Registre un nuevo detalle de compra',
-        content: <PurchaseDetailForm id_purchase={id_purchase} />,
-        onClose,
-      })
-    );
-  };
-
   const handleEdit = (row) => {
     dispatch(setPurchaseDetail(row));
     dispatch(
@@ -332,7 +319,6 @@ const usePurchaseDetail = () => {
     setSelectionModel,
     totalSelectedQuantity,
     handleRemate,
-    handleAdd,
     getAll,
     setGetAll,
   };

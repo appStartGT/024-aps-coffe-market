@@ -1,6 +1,6 @@
 import ApsDatagrid from '@components/ApsDatagrid';
 import { Paper } from '@mui/material';
-import usePurchaseDetail from '../hooks/usePurchaseDetail';
+import usePurchaseDetailPending from '../hooks/usePurchaseDetailPending';
 import DataTableOverview from '../components/DataTableOverview';
 import { Box, Switch, FormControlLabel } from '@mui/material';
 
@@ -9,14 +9,14 @@ const PAPER_STYLES = {
   borderRadius: '12px',
 };
 
-const PurchaseDetailPage = () => {
+const PurchaseDetailPendingPage = () => {
   const {
     processing,
     columns,
-    /* searchList, */ purchaseList,
+    purchaseList,
     getAll,
     setGetAll,
-  } = usePurchaseDetail();
+  } = usePurchaseDetailPending();
 
   return (
     <>
@@ -32,18 +32,9 @@ const PurchaseDetailPage = () => {
             control={<Switch onChange={() => setGetAll(!getAll)} />}
             label="Ver todo"
           />
-          {/* <Fab
-            color="primary"
-            size="small"
-            aria-label="add"
-            onClick={handleAdd}
-          >
-            <AddIcon />
-          </Fab> */}
         </Box>
-        {/* <SearchBar {...propsSearchBarButton} /> */}
         <ApsDatagrid
-          rows={/* searchList || */ purchaseList}
+          rows={purchaseList}
           columns={columns}
           loading={processing}
           sxContainerProps={{ height: 500 }}
@@ -54,4 +45,4 @@ const PurchaseDetailPage = () => {
   );
 };
 
-export default PurchaseDetailPage;
+export default PurchaseDetailPendingPage;

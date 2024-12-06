@@ -7,7 +7,6 @@ import {
   clearPurchaseDetailSelected,
 } from '../../../../../../store/modules/purchaseDetail';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
-import { Actions, Subjects } from '@config/permissions';
 import PurchaseDetailForm from '../components/PurchaseDetailForm';
 import { IconButton, Badge, Chip, Tooltip } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
@@ -17,7 +16,7 @@ import { useMountEffect } from '@hooks';
 const usePurchaseDetail = () => {
   const { id_purchase } = useParams();
   const dispatch = useDispatch();
-  const [searchList, setSearchList] = useState(null);
+  // const [searchList, setSearchList] = useState(null);
   const processing = useSelector((state) => state.purchaseDetail.processing);
   const purchaseList = useSelector(
     (state) => state.purchaseDetail.purchaseDetailList
@@ -51,35 +50,6 @@ const usePurchaseDetail = () => {
 
   const toggleUnit = () => {
     setIsQuintales((prevState) => !prevState);
-  };
-
-  const propsSearchBarButton = {
-    label: 'Buscar por Libras / Precio / Total',
-    type: 'text',
-    searchList: purchaseList,
-    searchResults: (results) => setSearchList(results),
-    searchKey: 'quantity, priceFormat, totalFormat',
-    hideSearchBar: true,
-    rightButton: {
-      icon: 'add_circle',
-      onClick: () =>
-        dispatch(
-          setApsGlobalModalPropsAction({
-            open: true,
-            maxWidth: 'xs',
-            title: 'Compra',
-            description: 'Registre un nuevo detalle de compra',
-            content: <PurchaseDetailForm id_purchase={id_purchase} />,
-            onClose,
-          })
-        ),
-      color: 'primary',
-      can: {
-        key: 'can-create-purchase-record',
-        I: Actions.CREATE,
-        a: Subjects.PURCHASES,
-      },
-    },
   };
 
   const columns = [
@@ -180,19 +150,6 @@ const usePurchaseDetail = () => {
     },
   ];
 
-  const handleAdd = () => {
-    dispatch(
-      setApsGlobalModalPropsAction({
-        open: true,
-        maxWidth: 'xs',
-        title: 'Compra',
-        description: 'Registre un nuevo detalle de compra',
-        content: <PurchaseDetailForm id_purchase={id_purchase} />,
-        onClose,
-      })
-    );
-  };
-
   const handleEdit = (row) => {
     dispatch(setPurchaseDetail(row));
     dispatch(
@@ -232,11 +189,9 @@ const usePurchaseDetail = () => {
 
   return {
     processing,
-    propsSearchBarButton,
     columns,
-    searchList,
+    // searchList,
     purchaseList,
-    handleAdd,
     getAll,
     setGetAll,
   };

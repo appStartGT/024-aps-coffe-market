@@ -18,6 +18,7 @@ import {
 import PurchaseDetailPage from '../tabs/purchaseDetail/pages/PurchaseDetailPage';
 import PurchaseDetailPricelessPage from '../tabs/purchaseDetailPriceless/pages/PurchaseDetailPricelessPage';
 import LoanListPage from '../../loan/pages/LoanListPage';
+import PurchaseDetailPendingPage from '../tabs/purchaseDetailPending/pages/PurchaseDetailPendingPage';
 
 const stylesPaper = {
   padding: '16px',
@@ -127,6 +128,12 @@ const usePurchaseDetail = () => {
         title: 'Compras (Sin precio)',
         content: <PurchaseDetailPricelessPage />, //purchases without price (cafe sin precio)
       });
+
+      ability.can(Actions.PURCHASES_TAB_PENDING, Subjects.PURCHASES) &&
+        tabs.push({
+          title: 'Compras (Pendientes)',
+          content: <PurchaseDetailPendingPage />,
+        });
 
       // ability.can(Actions.PUsRCHASES_TAB_LOANS, Subjects.PURCHASES) &&
       tabs.push({

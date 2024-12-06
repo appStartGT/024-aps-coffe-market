@@ -19,6 +19,7 @@ const purchaseDetailModel = (purchaseDetail, purchaseSelected) => {
       purchaseDetail?.quantity * purchaseDetail?.price
     )}`,
     isPriceless: purchaseDetail?.isPriceless,
+    isPendingPayment: purchaseDetail?.isPendingPayment,
     id_cat_payment_method: purchaseDetail?.id_cat_payment_method,
     createdAt: formatFirebaseTimestamp(
       purchaseDetail.createdAt,
@@ -47,6 +48,7 @@ const purchaseDetailModel = (purchaseDetail, purchaseSelected) => {
     id_purchase_detail_remate: purchaseDetail?.id_purchase_detail_remate || '',
     isSold: purchaseDetail?.isSold || false,
     customerName: purchaseSelected?.fullName || '',
+    paidWithBudget: purchaseDetail?.paidWithBudget,
   };
   return obj;
 };
