@@ -1,3 +1,4 @@
+import React from 'react';
 import { useFormikFields, useMountEffect, useUpdateEffect } from '@hooks';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -10,6 +11,7 @@ import { paymentMethodCatalogAction } from '../../../../../../store/modules/cata
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
 import * as Yup from 'yup';
 import { useEffect } from 'react';
+import { Alert } from '@mui/material';
 
 const usePurchaseDetailForm = (id_purchase) => {
   const dispatch = useDispatch();
@@ -20,7 +22,7 @@ const usePurchaseDetailForm = (id_purchase) => {
   const cat_payment_method = useSelector(
     (state) => state.catalogs.cat_payment_method
   );
-
+  const budget = useSelector((state) => state.budget.budget);
   const formikPurchaseDetail = useFormikFields({
     fields: [
       {
@@ -105,6 +107,27 @@ const usePurchaseDetailForm = (id_purchase) => {
   };
 
   const handleOnclick = (nonupdate) => {
+    if (budget.isClosed) {
+      return dispatch(
+        setApsGlobalModalPropsAction({
+          open: true,
+          maxWidth: 'xs',
+          title: 'Presupuesto cerrado',
+          closeBtn: true,
+          content: (
+            <Alert severity="warning">
+              Seleccione el presupuesto actual para realizar el operaciones.
+            </Alert>
+          ),
+          onClose: () => {
+            dispatch(
+              setApsGlobalModalPropsAction({ open: false, content: null })
+            );
+          },
+        })
+      );
+    }
+
     const body = { ...formikPurchaseDetail.form.values };
     if (purchaseDetailSelected?.id_purchase_detail) {
       dispatch(

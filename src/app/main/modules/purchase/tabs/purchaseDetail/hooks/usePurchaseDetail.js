@@ -114,6 +114,7 @@ const usePurchaseDetail = () => {
           <Chip
             label={params.row.budgetDate ? params.row.budgetDate : '-'}
             color={params.row.budgetIsClosed ? 'error' : 'success'}
+            size="small"
           />
         </Tooltip>
       ),
@@ -131,20 +132,26 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
       renderCell: (params) => (
         <>
-          <IconButton
-            onClick={() => handleEdit(params.row)}
-            color="primary"
-            size="small"
-          >
-            <Edit />
-          </IconButton>
-          <IconButton
-            onClick={() => handleDelete(params.row.id_purchase_detail)}
-            color="error"
-            size="small"
-          >
-            <Delete />
-          </IconButton>
+          {params.row.budgetIsClosed ? (
+            <Chip label="Cerrado" color="error" size="small" />
+          ) : (
+            <>
+              <IconButton
+                onClick={() => handleEdit(params.row)}
+                color="primary"
+                size="small"
+              >
+                <Edit />
+              </IconButton>
+              <IconButton
+                onClick={() => handleDelete(params.row.id_purchase_detail)}
+                color="error"
+                size="small"
+              >
+                <Delete />
+              </IconButton>
+            </>
+          )}
         </>
       ),
     },

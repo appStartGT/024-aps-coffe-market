@@ -151,6 +151,7 @@ const usePurchaseDetail = () => {
           <Chip
             label={params.row.budgetDate ? params.row.budgetDate : '-'}
             color={params.row.budgetIsClosed ? 'error' : 'success'}
+            size="small"
           />
         </Tooltip>
       ),
