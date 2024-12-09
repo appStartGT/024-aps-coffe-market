@@ -385,6 +385,7 @@ const initialState = {
   rowTruckloads: [], // Updated in saleListAction.fulfilled
   rowPurchaseDetails: [], // Updated in saleListAction.fulfilled
   purchaseDetailsResult: null,
+  statistics: null,
 };
 
 export const saleSlice = createSlice({
@@ -399,6 +400,9 @@ export const saleSlice = createSlice({
     },
     setNewGeneralTotal: (state, payload) => {
       state.saleSelected.total = payload.payload;
+    },
+    setDataStatistics: (state, { payload }) => {
+      state.statistics = payload;
     },
   },
   extraReducers: (builder) => {
@@ -563,6 +567,7 @@ export const {
   clearSaleSelected,
   clearSalePaymentSelected,
   setNewGeneralTotal,
+  setDataStatistics,
 } = saleSlice.actions;
 
 export default saleSlice.reducer;

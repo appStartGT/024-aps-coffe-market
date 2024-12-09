@@ -151,7 +151,10 @@ const calculatePurchaseDetailsResult = (purchase_details) => {
   );
   const totalLbAvailablePriceless = Number(
     purchase_details
-      ?.filter((detail) => detail.isPriceless && !detail.isSold)
+      ?.filter(
+        (detail) =>
+          detail.isPriceless && !detail.isRemate /* && !detail.isSold */
+      )
       .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0)
       .toFixed(2)
   );

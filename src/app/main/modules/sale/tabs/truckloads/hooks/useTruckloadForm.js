@@ -24,12 +24,10 @@ const useTruckloadForm = (id_sale) => {
   const cat_truckload_license_plate = useSelector(
     (state) => state.catalogs.cat_truckload_license_plate
   );
-  const purchaseDetailsResult = useSelector(
-    (state) => state.sale.purchaseDetailsResult
+  const statistics = useSelector((state) => state.sale.statistics);
+  const availableForShipment = parseFloat(
+    statistics?.availableForShipment?.replace(/,/g, '') || 0
   );
-  const availableForShipment =
-    (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
-    (purchaseDetailsResult?.totalLbAvailable || 0);
   const [selectedFile, setSelectedFile] = useState(null);
 
   const handleNewOption = (catalog, inputValue) => {
@@ -40,8 +38,6 @@ const useTruckloadForm = (id_sale) => {
     };
     dispatch(newOptionModalAction(modalProps));
   };
-
-  console.log({ truckloadSelected });
 
   const formikTruckload = useFormikFields({
     fields: [
@@ -74,16 +70,27 @@ const useTruckloadForm = (id_sale) => {
           ? Yup.number()
               .required('El total de libras enviado es requerido')
               .typeError('El total enviado debe ser un número')
+              .min(0, 'El total enviado debe ser mayor o igual a 0')
+              .test(
+                'min',
+                'El total enviado debe ser mayor o igual al total recibido',
+                function (value) {
+                  const totalReceived = this.parent.totalReceived;
+                  if (!totalReceived) return true;
+                  return value >= totalReceived;
+                }
+              )
           : Yup.number()
               .required('El total de libras enviado es requerido')
+              .typeError('El total enviado debe ser un número')
+              .min(0, 'El total enviado debe ser mayor o igual a 0')
               .test(
                 'max',
                 'El total enviado no puede ser mayor que el disponible para envío',
                 function (value) {
                   return value <= availableForShipment;
                 }
-              )
-              .typeError('El total enviado debe ser un número'),
+              ),
       },
       {
         id: '7',
@@ -92,7 +99,18 @@ const useTruckloadForm = (id_sale) => {
         gridItem: true,
         gridProps: { md: 6 },
         inputProps: { maxLength: 10 },
-        validations: fieldValidations.number,
+        validations: Yup.number()
+          .typeError('El total recibido debe ser un número')
+          .min(0, 'El total recibido debe ser mayor o igual a 0')
+          .test(
+            'max',
+            'El total recibido no puede ser mayor que el total enviado',
+            function (value) {
+              const totalSent = this.parent.totalSent;
+              if (!value) return true;
+              return value <= totalSent;
+            }
+          ),
       },
       {
         id: '4',
@@ -100,7 +118,6 @@ const useTruckloadForm = (id_sale) => {
         field: 'custom',
         children: (
           <ApsFileUpload
-            // required
             label="Colilla"
             accept="image/png,image/jpg,image/jpeg,image/gif"
             onChange={(file) => {

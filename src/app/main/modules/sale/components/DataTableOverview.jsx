@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import DataItem from './DataItem';
 import { formatNumber } from '@utils';
+import { setDataStatistics } from '../../../../store/modules/sale';
 
 const DataTableOverview = ({ saleList }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const purchaseDetailsResult = useSelector(
     (state) => state.sale.purchaseDetailsResult
   );
@@ -62,7 +64,7 @@ const DataTableOverview = ({ saleList }) => {
         (purchaseDetailsResult?.totalLbAvailable || 0) -
         totalTruckloadsSent;
 
-      setStatistics({
+      const result = {
         totalQuantity: formatNumber(totalQuantity),
         totalLbPriceless: formatNumber(totalLbPriceless),
         totalTruckloadsSent: formatNumber(totalTruckloadsSent),
@@ -71,7 +73,10 @@ const DataTableOverview = ({ saleList }) => {
         totalLbAvailable: formatNumber(totalLbAvailable),
         totalLbAvailablePriceless: formatNumber(totalLbAvailablePriceless),
         availableForShipment: formatNumber(availableForShipment),
-      });
+      };
+
+      setStatistics(result);
+      dispatch(setDataStatistics(result));
     };
 
     calculateStatistics();
@@ -120,17 +125,6 @@ const DataTableOverview = ({ saleList }) => {
           color={theme.palette.totalQuantity.text}
           onClick={toggleUnit}
         />
-        {/* <DataItem
-          value={
-            isQuintales
-              ? convertToQuintales(statistics.totalLbAvailable)
-              : statistics.totalLbAvailable
-          }
-          label={`Disponible para venta ${isQuintales ? '(qq)' : '(lb)'}`}
-          backgroundColor={theme.palette.primary.main}
-          color={theme.palette.primary.contrastText}
-          onClick={toggleUnit}
-        /> */}
 
         <DataItem
           value={
@@ -143,6 +137,17 @@ const DataTableOverview = ({ saleList }) => {
           } en Beneficio`}
           backgroundColor={theme.palette.info.main}
           color={theme.palette.info.contrastText}
+          onClick={toggleUnit}
+        />
+        <DataItem
+          value={
+            isQuintales
+              ? convertToQuintales(statistics.totalLbAvailable)
+              : statistics.totalLbAvailable
+          }
+          label={`Disponible para venta ${isQuintales ? '(qq)' : '(lb)'}`}
+          backgroundColor={theme.palette.primary.main}
+          color={theme.palette.primary.contrastText}
           onClick={toggleUnit}
         />
         <DataItem
