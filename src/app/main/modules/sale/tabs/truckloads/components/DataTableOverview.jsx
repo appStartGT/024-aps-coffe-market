@@ -17,7 +17,6 @@ const DataTableOverview = ({ truckloadList }) => {
 
   useEffect(() => {
     if (truckloadList && truckloadList.length > 0) {
-      console.log(truckloadList);
       const totalTruckloads = truckloadList.length;
       const totalSent = truckloadList.reduce(
         (sum, truckload) => sum + Number(truckload.totalSent),

@@ -142,7 +142,7 @@ export const saleDetailDeleteAction = createAsyncThunk(
 export const createRemateBeneficioAction = createAsyncThunk(
   'saleDetail/createRemateBeneficio',
   async (
-    { selectedPrices, data, accumulated, truckloadsSelected },
+    { selectedPrices, data, accumulated, truckloadsSelected, operativeCost },
     { rejectWithValue, dispatch }
   ) => {
     try {
@@ -172,6 +172,7 @@ export const createRemateBeneficioAction = createAsyncThunk(
           isSold: false,
           isPriceless: false,
           isAccumulated: true,
+          operativeCost,
         };
         batch.set(accumulatedPurchaseDetailRef, accumulatedPurchaseDetailData);
       }
@@ -187,6 +188,7 @@ export const createRemateBeneficioAction = createAsyncThunk(
         isSold: true,
         deleted: false,
         createdAt: FieldValue.serverTimestamp(),
+        operativeCost,
       });
 
       // 3. Update each purchase from selectedPrices with isSold: true in parallel

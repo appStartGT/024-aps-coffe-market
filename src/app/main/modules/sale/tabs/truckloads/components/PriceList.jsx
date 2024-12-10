@@ -20,6 +20,9 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   const [isQuantityValid, setIsQuantityValid] = useState(false);
   const [manualPrice, setManualPrice] = useState('');
   const [isPriceValid, setIsPriceValid] = useState(false);
+  const [sellQuantity, setSellQuantity] = useState(totalNeeded);
+  const [error, setError] = useState('');
+  const [operativeCost, setOperativeCost] = useState(0.03);
   const purchaseDetails = useSelector(
     (state) => state.averagePrice.unaveragesPurchaseDetails
   );
@@ -37,9 +40,9 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 
   const calculateAverage = useMemo(() => {
     if (selectedPrices.length === 0) return 0;
-    const sum = selectedPrices.reduce((acc, curr) => acc + parseFloat(curr), 0);
+    const sum = selectedPrices.reduce((acc, curr) => acc + parseFloat(curr) + parseFloat(operativeCost || 0), 0);
     return (sum / selectedPrices.length).toFixed(2);
-  }, [selectedPrices]);
+  }, [selectedPrices, operativeCost]);
 
   const selectedTotalLbs = useMemo(() => {
     if (!purchaseDetails || purchaseDetails.length === 0) return 0;
@@ -49,24 +52,55 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   }, [purchaseDetails, selectedPrices]);
 
   const excedent = useMemo(() => {
-    return Math.max(0, selectedTotalLbs - totalNeeded);
-  }, [selectedTotalLbs, totalNeeded]);
+    return Math.max(0, selectedTotalLbs - sellQuantity);
+  }, [selectedTotalLbs, sellQuantity]);
+
+  const totalSale = useMemo(() => {
+    if (!manualPrice || !sellQuantity) return 0;
+    return parseFloat(manualPrice) * sellQuantity;
+  }, [manualPrice, sellQuantity]);
 
   useEffect(() => {
-    setIsQuantityValid(selectedTotalLbs >= totalNeeded);
-  }, [selectedTotalLbs, totalNeeded]);
+    setIsQuantityValid(selectedTotalLbs >= sellQuantity);
+  }, [selectedTotalLbs, sellQuantity]);
 
   const lbsToQuintales = (lbs) => (lbs / 100).toFixed(2);
 
   const handleManualPriceChange = (event) => {
     const value = event.target.value;
     setManualPrice(value);
-    setIsPriceValid(/^\d+(\.\d{1,2})?$/.test(value) && parseFloat(value) > 0);
+    if (!value) {
+      setError('El precio es requerido');
+      setIsPriceValid(false);
+    } else if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+      setError('Formato inválido. Use números con hasta 2 decimales');
+      setIsPriceValid(false);
+    } else if (parseFloat(value) <= 0) {
+      setError('El precio debe ser mayor a 0');
+      setIsPriceValid(false);
+    } else {
+      setError('');
+      setIsPriceValid(true);
+    }
+  };
+
+  const handleQuantityChange = (event) => {
+    const value = parseFloat(event.target.value);
+    if (!isNaN(value) && value > 0 && value <= totalNeeded) {
+      setSellQuantity(value);
+    }
+  };
+
+  const handleOperativeCostChange = (event) => {
+    const value = event.target.value;
+    if (!value || /^\d+(\.\d{0,2})?$/.test(value)) {
+      setOperativeCost(value);
+    }
   };
 
   const onButtonClick = async () => {
     if (!manualPrice || !isPriceValid) {
-      console.error('Invalid manual price');
+      setError('Precio inválido');
       return;
     }
 
@@ -77,8 +111,8 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 
     const data = {
       price: parseFloat(manualPrice),
-      quantity: totalNeeded,
-      total: totalNeeded * parseFloat(manualPrice),
+      quantity: sellQuantity,
+      total: sellQuantity * parseFloat(manualPrice),
       id_sale,
     };
 
@@ -91,16 +125,23 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
         : null;
 
     try {
-      await dispatch(
-        createRemateBeneficioAction({
-          selectedPrices: selectedPricesData,
-          data,
-          accumulated,
-          truckloadsSelected: selectedTruckloads,
-        })
-      ).unwrap();
-      onClose();
+      // await dispatch(
+      //   createRemateBeneficioAction({
+      //     selectedPrices: selectedPricesData,
+      //     data,
+      //     accumulated,
+      //     truckloadsSelected: selectedTruckloads,
+      //   })
+      // ).unwrap();
+      // onClose();
+      console.log({
+        selectedPrices: selectedPricesData,
+        data,
+        accumulated,
+        truckloadsSelected: selectedTruckloads,
+      });
     } catch (error) {
+      setError('Error al crear el remate');
       console.error('Error in createRemateBeneficioAction:', error);
     }
   };
@@ -133,7 +174,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             variant="subtitle1"
             color={isQuantityValid ? 'success.main' : 'error.main'}
           >
-            Total Necesario: {totalNeeded.toLocaleString()} lb (
+            Total Camionadas: {totalNeeded.toLocaleString()} lb (
             {lbsToQuintales(totalNeeded)} qq)
           </Typography>
 
@@ -141,6 +182,33 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             Acumulado: {excedent.toLocaleString()} lb (
             {lbsToQuintales(excedent)} qq)
           </Typography>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            <TextField
+              label="Cantidad a vender (lb)"
+              variant="outlined"
+              size="small"
+              type="number"
+              value={sellQuantity}
+              onChange={handleQuantityChange}
+              inputProps={{ /* min: 0, */ max: totalNeeded }}
+              sx={{ width: '200px', mr: 1 }}
+              error={sellQuantity <= 0 || sellQuantity > totalNeeded}
+              helperText={
+                sellQuantity <= 0 || sellQuantity > totalNeeded
+                  ? 'Cantidad inválida'
+                  : ''
+              }
+            />
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => setSellQuantity(totalNeeded)}
+              disabled={selectedTotalLbs < totalNeeded}
+            >
+              Todo
+            </Button>
+          </Box>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           {isQuantityValid && (
@@ -151,27 +219,45 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
                 size="small"
                 value={manualPrice}
                 onChange={handleManualPriceChange}
-                error={!isPriceValid && manualPrice !== ''}
-                helperText={
-                  !isPriceValid && manualPrice !== '' ? 'Precio inválido' : ''
-                }
+                error={!!error}
+                helperText={error}
                 sx={{ mr: 2 }}
               />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={onButtonClick}
-                disabled={!isQuantityValid || !isPriceValid}
-                sx={{ alignSelf: 'flex-end' }}
-                startIcon={<CheckCircle />}
-              >
-                Remate
-              </Button>
+              <Typography variant="subtitle1" sx={{ mr: 2 }}>
+                Total: Q
+                {totalSale.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Typography>
             </>
           )}
         </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={onButtonClick}
+            disabled={!isQuantityValid || !isPriceValid}
+            sx={{ alignSelf: 'flex-end', mt: 2 }}
+            startIcon={<CheckCircle />}
+          >
+            Remate
+          </Button>
+        </Box>
       </Paper>
-
+      {/* List of prices */}
+      <Box sx={{ mb: 2 }}>
+        <TextField
+          label="Costo Operativo"
+          variant="outlined"
+          size="small"
+          value={operativeCost}
+          onChange={handleOperativeCostChange}
+          type="text"
+          sx={{ width: '200px' }}
+        />
+      </Box>
       <List component={Paper} sx={{ maxHeight: 300, overflow: 'auto' }}>
         {purchaseDetails?.slice(0, 6).map((detail, index) => (
           <ListItem
@@ -187,7 +273,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
               disableRipple
             />
             <ListItemText
-              primary={`Q${parseFloat(detail.price).toFixed(2)}`}
+              primary={`Q${(parseFloat(detail.price) + parseFloat(operativeCost || 0)).toFixed(2)}`}
               secondary={
                 <Typography variant="body2" color="text.secondary">
                   {detail.totalQuantity.toLocaleString()} lb (
@@ -211,7 +297,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
               disableRipple
             />
             <ListItemText
-              primary={`Q${parseFloat(detail.price).toFixed(2)}`}
+              primary={`Q${(parseFloat(detail.price) + parseFloat(operativeCost || 0)).toFixed(2)}`}
               secondary={
                 <Typography variant="body2" color="text.secondary">
                   {detail.totalQuantity.toLocaleString()} lb (
@@ -227,3 +313,4 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 };
 
 export default PriceList;
+
