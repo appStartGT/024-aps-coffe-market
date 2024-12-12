@@ -40,7 +40,10 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 
   const calculateAverage = useMemo(() => {
     if (selectedPrices.length === 0) return 0;
-    const sum = selectedPrices.reduce((acc, curr) => acc + parseFloat(curr) + parseFloat(operativeCost || 0), 0);
+    const sum = selectedPrices.reduce(
+      (acc, curr) => acc + parseFloat(curr) + parseFloat(operativeCost || 0),
+      0
+    );
     return (sum / selectedPrices.length).toFixed(2);
   }, [selectedPrices, operativeCost]);
 
@@ -273,7 +276,9 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
               disableRipple
             />
             <ListItemText
-              primary={`Q${(parseFloat(detail.price) + parseFloat(operativeCost || 0)).toFixed(2)}`}
+              primary={`Q${(
+                parseFloat(detail.price) + parseFloat(operativeCost || 0)
+              ).toFixed(2)}`}
               secondary={
                 <Typography variant="body2" color="text.secondary">
                   {detail.totalQuantity.toLocaleString()} lb (
@@ -297,7 +302,9 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
               disableRipple
             />
             <ListItemText
-              primary={`Q${(parseFloat(detail.price) + parseFloat(operativeCost || 0)).toFixed(2)}`}
+              primary={`Q${(
+                parseFloat(detail.price) + parseFloat(operativeCost || 0)
+              ).toFixed(2)}`}
               secondary={
                 <Typography variant="body2" color="text.secondary">
                   {detail.totalQuantity.toLocaleString()} lb (
@@ -313,4 +320,3 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 };
 
 export default PriceList;
-

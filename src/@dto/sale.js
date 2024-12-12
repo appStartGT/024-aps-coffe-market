@@ -7,7 +7,7 @@ const saleModel = (sale, sale_details, truckloads) => {
   ).map((detail) => ({
     ...detail,
   }));
-
+  console.log({ relevantDetails, truckloads });
   const totalPricedAmount = Number(
     relevantDetails
       .reduce(

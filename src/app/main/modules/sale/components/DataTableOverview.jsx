@@ -16,7 +16,6 @@ const DataTableOverview = ({ saleList }) => {
   );
 
   const [statistics, setStatistics] = useState({
-    totalQuantity: '0.00',
     totalLbPriceless: '0.00',
     totalTruckloadsSent: '0.00',
     totalTruckloadsReceived: '0.00',
@@ -29,10 +28,6 @@ const DataTableOverview = ({ saleList }) => {
 
   useEffect(() => {
     const calculateStatistics = () => {
-      const totalQuantity = saleList.reduce(
-        (sum, sale) => sum + Number(sale.totalLbQuantity || 0),
-        0
-      );
       const totalLbPriceless = saleList.reduce(
         (sum, sale) => sum + Number(sale.totalLbPriceless || 0),
         0
@@ -49,15 +44,18 @@ const DataTableOverview = ({ saleList }) => {
         (sum, sale) => sum + Number(sale.totalLbsSold || 0),
         0
       );
-      const totalLbAvailable = saleList.reduce(
-        (sum, sale) =>
-          sum +
-          (Number(sale.totalTruckloadsReceived || 0) -
-            Number(sale.totalLbPriceless || 0)),
-        0
-      );
+
       const totalLbAvailablePriceless =
         purchaseDetailsResult?.totalLbAvailablePriceless || 0;
+
+      const totalLbAvailable =
+        saleList.reduce(
+          (sum, sale) =>
+            sum +
+            (Number(sale.totalTruckloadsReceived || 0) -
+              Number(sale.totalLbPriceless || 0)),
+          0
+        ) - totalLbAvailablePriceless; //substract priceless from total available
 
       const availableForShipment =
         (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
@@ -65,7 +63,6 @@ const DataTableOverview = ({ saleList }) => {
         totalTruckloadsSent;
 
       const result = {
-        totalQuantity: formatNumber(totalQuantity),
         totalLbPriceless: formatNumber(totalLbPriceless),
         totalTruckloadsSent: formatNumber(totalTruckloadsSent),
         totalTruckloadsReceived: formatNumber(totalTruckloadsReceived),
