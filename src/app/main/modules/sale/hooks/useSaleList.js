@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Edit, LocalShipping } from '@mui/icons-material';
+import { Input, LocalShipping } from '@mui/icons-material';
 import ApsIconButton from '@components/ApsIconButton';
 import { saleListAction } from '../../../../store/modules/sale';
 import { clearAllSaleDetails } from '../../../../store/modules/saleDetail';
@@ -142,11 +142,11 @@ const useSaleList = () => {
             />
             {params.row.id_sale && (
               <ApsIconButton
-                tooltip={{ title: 'Editar venta' }}
+                tooltip={{ title: 'Detalles' }}
                 onClick={() =>
                   navigate(`/main/sale/detail/${params.row.id_sale}`)
                 }
-                children={<Edit />}
+                children={<Input />}
                 can={{
                   key: `can-edit-sale-${params.row.id_sale}`,
                   I: Actions.EDIT,
