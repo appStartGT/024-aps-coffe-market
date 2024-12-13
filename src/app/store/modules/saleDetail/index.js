@@ -5,7 +5,6 @@ import {
   firebaseCollections,
   firebaseCollectionsKey,
 } from '@utils';
-import { setLoadingMainViewAction } from '../main';
 import {
   getAllDocuments,
   deleteRecordById,
@@ -59,10 +58,14 @@ export const saleDetailCreateAction = createAsyncThunk(
   async (data, { rejectWithValue, dispatch, getState }) => {
     const state = getState();
     const id_budget = state.budget.budget.id_budget;
-    let body = cleanModel({ ...data, isAveraged: false, id_budget });
+    let body = cleanModel({
+      ...data,
+      isAveraged: false,
+      isSentToBeneficio: false,
+      id_budget,
+    });
     body.isPriceless = Boolean(data.isPriceless);
     const saleDetailData = {
-      key: firebaseCollectionsKey.sale_detail,
       ...body,
     };
 
@@ -71,7 +74,6 @@ export const saleDetailCreateAction = createAsyncThunk(
       data: saleDetailData,
     })
       .then((res) => {
-        dispatch(setLoadingMainViewAction(false));
         dispatch(updateSaleListDetailsAction([res]));
         return { ...res };
       })
@@ -294,6 +296,29 @@ export const createRemateBeneficioAction = createAsyncThunk(
   }
 );
 
+export const saleDetailUpdateSentToBeneficioAction = createAsyncThunk(
+  'saleDetail/saleDetailUpdateSentToBeneficioAction',
+  async (_params, { rejectWithValue, dispatch, getState }) => {
+    try {
+      const state = getState();
+      const currentDetails = state.sale.rowPurchaseDetails;
+      const updatedDetails = currentDetails.map((detail) => ({
+        ...detail,
+        isSentToBeneficio: true,
+      }));
+      return await updateRecordBy({
+        collectionName: firebaseCollections.PURCHASE_DETAIL,
+        data: { isSentToBeneficio: true },
+      }).then((res) => {
+        dispatch(updateSaleListPurchaseDetailsAction(updatedDetails));
+        return res;
+      });
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const initialState = {
   saleDetailSelected: null,
   processing: false,
@@ -419,6 +444,32 @@ export const saleDetailSlice = createSlice({
       );
       state.processing = false;
     });
+    //   builder.addCase(
+    //     saleDetailUpdateSentToBeneficioAction.fulfilled,
+    //     (state) => {
+    //       state.processing = false;
+    //       state.saleDetailSelected = {
+    //         ...state.saleDetailSelected,
+    //         isSentToBeneficio: true,
+    //       };
+    //       state.saleDetailList = state.saleDetailList.map((saleDetail) =>
+    //         saleDetail[firebaseCollectionsKey.sale_detail] ===
+    //         state.saleDetailSelected[firebaseCollectionsKey.sale_detail]
+    //           ? { ...saleDetail, isSentToBeneficio: true }
+    //           : saleDetail
+    //       );
+    //     }
+    //   );
+    //   builder.addCase(
+    //     saleDetailUpdateSentToBeneficioAction.rejected,
+    //     (state, action) => {
+    //       state.error = action.payload;
+    //       state.processing = false;
+    //     }
+    //   );
+    //   builder.addCase(saleDetailUpdateSentToBeneficioAction.pending, (state) => {
+    //     state.processing = true;
+    //   });
   },
 });
 

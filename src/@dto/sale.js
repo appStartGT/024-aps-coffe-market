@@ -7,7 +7,7 @@ const saleModel = (sale, sale_details, truckloads) => {
   ).map((detail) => ({
     ...detail,
   }));
-  console.log({ relevantDetails, truckloads });
+
   const totalPricedAmount = Number(
     relevantDetails
       .reduce(
@@ -151,9 +151,15 @@ const calculatePurchaseDetailsResult = (purchase_details) => {
   );
   const totalLbAvailablePriceless = Number(
     purchase_details
+      ?.filter((detail) => detail.isPriceless && !detail.isRemate)
+      .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0)
+      .toFixed(2)
+  );
+  const totalLbAvailablePricelessSentToBeneficio = Number(
+    purchase_details
       ?.filter(
         (detail) =>
-          detail.isPriceless && !detail.isRemate /* && !detail.isSold */
+          detail.isPriceless && !detail.isRemate && detail.isSentToBeneficio
       )
       .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0)
       .toFixed(2)
@@ -176,6 +182,11 @@ const calculatePurchaseDetailsResult = (purchase_details) => {
     totalQQAvailablePricelessFormatted: `${formatNumber(
       Number((totalLbAvailablePriceless / 100).toFixed(2))
     )} qq`,
+    totalLbAvailablePricelessSentToBeneficio:
+      totalLbAvailablePricelessSentToBeneficio,
+    // totalLbAvailablePricelessSentToBeneficioFormatted: `${formatNumber(
+    //   totalLbAvailablePricelessSentToBeneficio
+    // )} lb`,
   };
 };
 

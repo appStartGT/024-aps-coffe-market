@@ -12,6 +12,7 @@ import {
   paymentMethodCatalogAction,
 } from '../../../../../../store/modules/catalogs';
 import { setApsGlobalModalPropsAction } from '../../../../../../store/modules/main';
+import { saleDetailUpdateSentToBeneficioAction } from '../../../../../../store/modules/saleDetail';
 import * as Yup from 'yup';
 import ApsFileUpload from '@components/ApsFileUpload';
 
@@ -70,7 +71,7 @@ const useTruckloadForm = (id_sale) => {
           ? Yup.number()
               .required('El total de libras enviado es requerido')
               .typeError('El total enviado debe ser un número')
-              .min(0, 'El total enviado debe ser mayor o igual a 0')
+              .min(1, 'El total enviado debe ser mayor a 0')
               .test(
                 'min',
                 'El total enviado debe ser mayor o igual al total recibido',
@@ -83,7 +84,7 @@ const useTruckloadForm = (id_sale) => {
           : Yup.number()
               .required('El total de libras enviado es requerido')
               .typeError('El total enviado debe ser un número')
-              .min(0, 'El total enviado debe ser mayor o igual a 0')
+              .min(1, 'El total enviado debe ser mayor a 0')
               .test(
                 'max',
                 'El total enviado no puede ser mayor que el disponible para envío',
@@ -163,6 +164,12 @@ const useTruckloadForm = (id_sale) => {
 
   const handleOnclick = (nonupdate) => {
     const body = { ...formikTruckload.form.values };
+
+    // Calculate if availableForShipment will be 0 after this truckload
+    const remainingShipment =
+      availableForShipment - Number(body.totalSent || 0);
+    const willBeZero = remainingShipment === 0;
+
     if (truckloadSelected?.id_beneficio_truckload) {
       dispatch(
         truckloadUpdateAction({
@@ -172,6 +179,9 @@ const useTruckloadForm = (id_sale) => {
       )
         .unwrap()
         .then(() => {
+          if (willBeZero) {
+            dispatch(saleDetailUpdateSentToBeneficioAction());
+          }
           handleFormReset();
         });
     } else {
@@ -180,10 +190,14 @@ const useTruckloadForm = (id_sale) => {
           ...formikTruckload.form.values,
           id_sale: id_sale,
           nonupdate,
+          // availableForShipmentWillBeZero: willBeZero
         })
       )
         .unwrap()
         .then(() => {
+          if (willBeZero) {
+            dispatch(saleDetailUpdateSentToBeneficioAction());
+          }
           handleFormReset();
         });
     }

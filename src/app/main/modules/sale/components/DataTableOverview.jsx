@@ -45,17 +45,18 @@ const DataTableOverview = ({ saleList }) => {
         0
       );
 
-      const totalLbAvailablePriceless =
-        purchaseDetailsResult?.totalLbAvailablePriceless || 0;
+      const totalLbAvailablePricelessSentToBeneficio =
+        purchaseDetailsResult?.totalLbAvailablePricelessSentToBeneficio || 0;
+
+      /*  const totalLbAvailablePriceless =
+        purchaseDetailsResult?.totalLbAvailablePriceless || 0; */
 
       const totalLbAvailable =
         saleList.reduce(
-          (sum, sale) =>
-            sum +
-            (Number(sale.totalTruckloadsReceived || 0) -
-              Number(sale.totalLbPriceless || 0)),
+          (sum, sale) => sum + Number(sale.totalTruckloadsReceived || 0),
           0
-        ) - totalLbAvailablePriceless; //substract priceless from total available
+        ) - purchaseDetailsResult?.totalLbAvailablePricelessSentToBeneficio ||
+        0; //substract priceless from total available
 
       const availableForShipment =
         (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
@@ -67,8 +68,12 @@ const DataTableOverview = ({ saleList }) => {
         totalTruckloadsSent: formatNumber(totalTruckloadsSent),
         totalTruckloadsReceived: formatNumber(totalTruckloadsReceived),
         totalLbSold: formatNumber(totalLbSold),
-        totalLbAvailable: formatNumber(totalLbAvailable),
-        totalLbAvailablePriceless: formatNumber(totalLbAvailablePriceless),
+        totalLbAvailable: formatNumber(
+          totalLbAvailable > 0 ? totalLbAvailable : 0
+        ),
+        totalLbAvailablePriceless: formatNumber(
+          totalLbAvailablePricelessSentToBeneficio
+        ),
         availableForShipment: formatNumber(availableForShipment),
       };
 

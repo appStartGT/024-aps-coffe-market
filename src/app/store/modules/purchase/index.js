@@ -391,7 +391,7 @@ export const purchaseSlice = createSlice({
         state.rowPurchaseDetails = [...payload];
         state.purchaseList = purchaseDto.purchaseList(
           state.rowPurchases,
-          state.rowPurchaseDetails
+          [...payload]
         );
       }
     );
