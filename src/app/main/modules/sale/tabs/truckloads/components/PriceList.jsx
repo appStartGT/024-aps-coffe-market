@@ -10,6 +10,7 @@ import {
   Paper,
   Button,
   TextField,
+  Divider,
 } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 import { createRemateBeneficioAction } from '../../../.././../../store/modules/saleDetail';
@@ -26,6 +27,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   const purchaseDetails = useSelector(
     (state) => state.averagePrice.unaveragesPurchaseDetails
   );
+  const [truckloadAccumulated, setTruckloadAccumulated] = useState(0);
 
   const handleToggle = (price) => {
     setSelectedPrices((prevSelectedPrices) => {
@@ -64,8 +66,16 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   }, [manualPrice, sellQuantity]);
 
   useEffect(() => {
-    setIsQuantityValid(selectedTotalLbs >= sellQuantity);
+    setIsQuantityValid(selectedTotalLbs >= sellQuantity && sellQuantity > 0);
   }, [selectedTotalLbs, sellQuantity]);
+
+  useEffect(() => {
+    if (sellQuantity < totalNeeded) {
+      setTruckloadAccumulated(totalNeeded - sellQuantity);
+    } else {
+      setTruckloadAccumulated(0);
+    }
+  }, [sellQuantity, totalNeeded]);
 
   const lbsToQuintales = (lbs) => (lbs / 100).toFixed(2);
 
@@ -88,9 +98,13 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   };
 
   const handleQuantityChange = (event) => {
-    const value = parseFloat(event.target.value);
-    if (!isNaN(value) && value > 0 && value <= totalNeeded) {
+    const value =
+      event.target.value === '' ? '' : parseFloat(event.target.value);
+    if (value === '' || (!isNaN(value) && value >= 0 && value <= totalNeeded)) {
       setSellQuantity(value);
+      if (value === '' || value <= 0) {
+        setIsQuantityValid(false);
+      }
     }
   };
 
@@ -104,6 +118,11 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   const onButtonClick = async () => {
     if (!manualPrice || !isPriceValid) {
       setError('Precio inválido');
+      return;
+    }
+
+    if (!sellQuantity || sellQuantity <= 0) {
+      setError('Cantidad inválida');
       return;
     }
 
@@ -141,6 +160,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
         selectedPrices: selectedPricesData,
         data,
         accumulated,
+        truckloadAccumulated,
         truckloadsSelected: selectedTruckloads,
       });
     } catch (error) {
@@ -152,7 +172,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   return (
     <Box>
       <Paper
-        elevation={3}
+        elevation={0}
         sx={{
           mb: 2,
           p: 2,
@@ -170,8 +190,12 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             Precio Promedio: Q{calculateAverage}
           </Typography>
           <Typography variant="subtitle1">
-            Total Lb Seleccionado: {selectedTotalLbs.toLocaleString()} lb (
+            Total Seleccionado: {selectedTotalLbs.toLocaleString()} lb (
             {lbsToQuintales(selectedTotalLbs)} qq)
+          </Typography>
+          <Typography variant="caption" color="text.disabled">
+            Acumulado seleccionado: {excedent.toLocaleString()} lb (
+            {lbsToQuintales(excedent)} qq)
           </Typography>
           <Typography
             variant="subtitle1"
@@ -180,12 +204,12 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             Total Camionadas: {totalNeeded.toLocaleString()} lb (
             {lbsToQuintales(totalNeeded)} qq)
           </Typography>
-
-          <Typography variant="subtitle1" color="text.disabled">
-            Acumulado: {excedent.toLocaleString()} lb (
-            {lbsToQuintales(excedent)} qq)
+          <Typography variant="caption" color="text.secondary">
+            Acumulado camionadas: {truckloadAccumulated.toLocaleString()} lb (
+            {lbsToQuintales(truckloadAccumulated)} qq)
           </Typography>
-
+          {/* Divider */}
+          <Divider sx={{ my: 2 }} />
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
             <TextField
               label="Cantidad a vender (lb)"
@@ -194,11 +218,15 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
               type="number"
               value={sellQuantity}
               onChange={handleQuantityChange}
-              inputProps={{ /* min: 0, */ max: totalNeeded }}
+              inputProps={{ max: totalNeeded }}
               sx={{ width: '200px', mr: 1 }}
-              error={sellQuantity <= 0 || sellQuantity > totalNeeded}
+              error={
+                !sellQuantity || sellQuantity <= 0 || sellQuantity > totalNeeded
+              }
               helperText={
-                sellQuantity <= 0 || sellQuantity > totalNeeded
+                !sellQuantity || sellQuantity <= 0
+                  ? 'La cantidad es requerida y debe ser mayor a 0'
+                  : sellQuantity > totalNeeded
                   ? 'Cantidad inválida'
                   : ''
               }
@@ -241,7 +269,12 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             variant="contained"
             color="primary"
             onClick={onButtonClick}
-            disabled={!isQuantityValid || !isPriceValid}
+            disabled={
+              !isQuantityValid ||
+              !isPriceValid ||
+              !sellQuantity ||
+              sellQuantity <= 0
+            }
             sx={{ alignSelf: 'flex-end', mt: 2 }}
             startIcon={<CheckCircle />}
           >
@@ -250,6 +283,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
         </Box>
       </Paper>
       {/* List of prices */}
+      <Divider sx={{ my: 2 }} />
       <Box sx={{ mb: 2 }}>
         <TextField
           label="Costo Operativo"
@@ -261,7 +295,11 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
           sx={{ width: '200px' }}
         />
       </Box>
-      <List component={Paper} sx={{ maxHeight: 300, overflow: 'auto' }}>
+      <List
+        elevation={0}
+        component={Paper}
+        sx={{ maxHeight: 300, overflow: 'auto' }}
+      >
         {purchaseDetails?.slice(0, 6).map((detail, index) => (
           <ListItem
             key={index}
