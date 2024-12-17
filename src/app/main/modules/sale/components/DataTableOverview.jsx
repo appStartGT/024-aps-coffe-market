@@ -66,13 +66,7 @@ const DataTableOverview = ({ saleList }) => {
         (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
         (purchaseDetailsResult?.totalLbAvailable || 0) -
         totalTruckloadsSentToSubstract;
-      console.log({
-        totalLbAvailablePriceless:
-          purchaseDetailsResult?.totalLbAvailablePriceless,
-        totalLbAvailable: totalLbAvailablePricelessSentToBeneficio,
-        totalTruckloadsSentToSubstract: totalTruckloadsSentToSubstract,
-        availableForShipment: availableForShipment,
-      });
+
       const result = {
         totalLbPriceless: formatNumber(totalLbPriceless),
         totalTruckloadsSent: formatNumber(totalTruckloadsSent),
