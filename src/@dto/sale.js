@@ -70,6 +70,25 @@ const saleModel = (sale, sale_details, truckloads) => {
     truckloads
       ?.reduce(
         (sum, truckload) =>
+          // !truckload.isAccumulated &&
+          // !truckload.isSold &&
+          truckload.id_sale === sale.id_sale
+            ? sum + (Number(truckload.totalSent) || 0)
+            : sum,
+        0
+      )
+      .toFixed(2)
+  );
+
+  const totalTruckloadsSentToSubstract = Number(
+    truckloads
+      ?.reduce(
+        (sum, truckload) =>
+          !truckload.isAccumulated &&
+          !truckload.isSold &&
+          !truckload.isReceived &&
+          // !truckload.isSent &&
+          // !truckload.totalReceived &&
           truckload.id_sale === sale.id_sale
             ? sum + (Number(truckload.totalSent) || 0)
             : sum,
@@ -138,14 +157,22 @@ const saleModel = (sale, sale_details, truckloads) => {
     totalQQSoldFormatted: `${formatNumber(
       Number((totalLbsSold / 100).toFixed(2))
     )} qq`,
+    totalTruckloadsSentToSubstract: totalTruckloadsSentToSubstract,
   };
   return obj;
 };
 
 const calculatePurchaseDetailsResult = (purchase_details) => {
+  console.log({ purchase_details });
   const totalLbAvailable = Number(
     purchase_details
-      ?.filter((detail) => !detail.isPriceless && !detail.isSold)
+      ?.filter(
+        (detail) =>
+          !detail.isPriceless &&
+          !detail.isSold &&
+          !detail?.isSentToBeneficio &&
+          !detail.isAccumulated
+      )
       .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0)
       .toFixed(2)
   );

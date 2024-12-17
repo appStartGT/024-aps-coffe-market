@@ -5,6 +5,7 @@ import {
   truckloadCreateAction,
   truckloadUpdateAction,
   clearTruckloadSelected,
+  truckloadUpdateReceivedAction,
 } from '../../../../../../store/modules/truckload';
 import { fieldValidations, firebaseCollections } from '@utils';
 import {
@@ -135,6 +136,9 @@ const useTruckloadForm = (id_sale) => {
 
   useMountEffect({
     effect: () => {
+      // console.log('useMountEffect');
+      // dispatch(truckloadUpdateReceivedAction());
+
       if (truckloadSelected) {
         formikTruckload.form.setValues(truckloadSelected);
         setSelectedFile(truckloadSelected.colilla?.metadata);
@@ -181,6 +185,7 @@ const useTruckloadForm = (id_sale) => {
         .then(() => {
           if (willBeZero) {
             dispatch(saleDetailUpdateSentToBeneficioAction());
+            dispatch(truckloadUpdateReceivedAction());
           }
           handleFormReset();
         });
@@ -197,6 +202,7 @@ const useTruckloadForm = (id_sale) => {
         .then(() => {
           if (willBeZero) {
             dispatch(saleDetailUpdateSentToBeneficioAction());
+            dispatch(truckloadUpdateReceivedAction());
           }
           handleFormReset();
         });

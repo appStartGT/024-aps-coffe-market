@@ -389,10 +389,9 @@ export const purchaseSlice = createSlice({
       (state, { payload }) => {
         // Update rowPurchaseDetails
         state.rowPurchaseDetails = [...payload];
-        state.purchaseList = purchaseDto.purchaseList(
-          state.rowPurchases,
-          [...payload]
-        );
+        state.purchaseList = purchaseDto.purchaseList(state.rowPurchases, [
+          ...payload,
+        ]);
       }
     );
   },

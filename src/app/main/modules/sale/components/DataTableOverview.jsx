@@ -36,6 +36,10 @@ const DataTableOverview = ({ saleList }) => {
         (sum, sale) => sum + Number(sale.totalTruckloadsSent || 0),
         0
       );
+      const totalTruckloadsSentToSubstract = saleList.reduce(
+        (sum, sale) => sum + Number(sale.totalTruckloadsSentToSubstract || 0),
+        0
+      );
       const totalTruckloadsReceived = saleList.reduce(
         (sum, sale) => sum + Number(sale.totalTruckloadsReceived || 0),
         0
@@ -50,19 +54,25 @@ const DataTableOverview = ({ saleList }) => {
 
       /*  const totalLbAvailablePriceless =
         purchaseDetailsResult?.totalLbAvailablePriceless || 0; */
-
       const totalLbAvailable =
         saleList.reduce(
           (sum, sale) => sum + Number(sale.totalTruckloadsReceived || 0),
           0
-        ) - purchaseDetailsResult?.totalLbAvailablePricelessSentToBeneficio ||
-        0; //substract priceless from total available
+        ) -
+        (purchaseDetailsResult?.totalLbAvailablePricelessSentToBeneficio || 0) -
+        totalLbSold; //substract priceless from total available
 
-      const availableForShipment =
+      let availableForShipment =
         (purchaseDetailsResult?.totalLbAvailablePriceless || 0) +
         (purchaseDetailsResult?.totalLbAvailable || 0) -
-        totalTruckloadsSent;
-
+        totalTruckloadsSentToSubstract;
+      console.log({
+        totalLbAvailablePriceless:
+          purchaseDetailsResult?.totalLbAvailablePriceless,
+        totalLbAvailable: totalLbAvailablePricelessSentToBeneficio,
+        totalTruckloadsSentToSubstract: totalTruckloadsSentToSubstract,
+        availableForShipment: availableForShipment,
+      });
       const result = {
         totalLbPriceless: formatNumber(totalLbPriceless),
         totalTruckloadsSent: formatNumber(totalTruckloadsSent),

@@ -14,6 +14,7 @@ import {
 } from '@mui/material';
 import { CheckCircle } from '@mui/icons-material';
 import { createRemateBeneficioAction } from '../../../.././../../store/modules/saleDetail';
+import { getUnaveragesPurchaseDetailsAction } from '../../../../../../store/modules/averagePrice';
 
 const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   const dispatch = useDispatch();
@@ -27,8 +28,9 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   const purchaseDetails = useSelector(
     (state) => state.averagePrice.unaveragesPurchaseDetails
   );
-  const [truckloadAccumulated, setTruckloadAccumulated] = useState(0);
-
+  const processing = useSelector((state) => state.saleDetail.processing);
+  const [accumulatedTruckload, setAccumulatedTruckload] = useState(0);
+  console.log(purchaseDetails);
   const handleToggle = (price) => {
     setSelectedPrices((prevSelectedPrices) => {
       const currentIndex = prevSelectedPrices.indexOf(price);
@@ -42,12 +44,22 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 
   const calculateAverage = useMemo(() => {
     if (selectedPrices.length === 0) return 0;
-    const sum = selectedPrices.reduce(
-      (acc, curr) => acc + parseFloat(curr) + parseFloat(operativeCost || 0),
-      0
-    );
+    console.log('selectedPrices', selectedPrices);
+
+    const sum = purchaseDetails
+      .filter((detail) => selectedPrices.includes(detail.price))
+      .reduce((acc, detail) => {
+        console.log({ detail });
+        const price = parseFloat(detail.price);
+        return (
+          acc +
+          price +
+          (detail.isAccumulated ? 0 : parseFloat(operativeCost || 0))
+        );
+      }, 0);
+
     return (sum / selectedPrices.length).toFixed(2);
-  }, [selectedPrices, operativeCost]);
+  }, [selectedPrices, operativeCost, purchaseDetails]);
 
   const selectedTotalLbs = useMemo(() => {
     if (!purchaseDetails || purchaseDetails.length === 0) return 0;
@@ -71,9 +83,9 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 
   useEffect(() => {
     if (sellQuantity < totalNeeded) {
-      setTruckloadAccumulated(totalNeeded - sellQuantity);
+      setAccumulatedTruckload(totalNeeded - sellQuantity);
     } else {
-      setTruckloadAccumulated(0);
+      setAccumulatedTruckload(0);
     }
   }, [sellQuantity, totalNeeded]);
 
@@ -147,22 +159,18 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
         : null;
 
     try {
-      // await dispatch(
-      //   createRemateBeneficioAction({
-      //     selectedPrices: selectedPricesData,
-      //     data,
-      //     accumulated,
-      //     truckloadsSelected: selectedTruckloads,
-      //   })
-      // ).unwrap();
-      // onClose();
-      console.log({
-        selectedPrices: selectedPricesData,
-        data,
-        accumulated,
-        truckloadAccumulated,
-        truckloadsSelected: selectedTruckloads,
-      });
+      await dispatch(
+        createRemateBeneficioAction({
+          selectedPrices: selectedPricesData,
+          data,
+          accumulated,
+          accumulatedTruckload,
+          truckloadsSelected: selectedTruckloads,
+          operativeCost,
+        })
+      ).unwrap();
+      dispatch(getUnaveragesPurchaseDetailsAction());
+      onClose();
     } catch (error) {
       setError('Error al crear el remate');
       console.error('Error in createRemateBeneficioAction:', error);
@@ -194,8 +202,8 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             {lbsToQuintales(selectedTotalLbs)} qq)
           </Typography>
           <Typography variant="caption" color="text.disabled">
-            Acumulado seleccionado: {excedent.toLocaleString()} lb (
-            {lbsToQuintales(excedent)} qq)
+            Sobrante: {excedent.toLocaleString()} lb ({lbsToQuintales(excedent)}{' '}
+            qq)
           </Typography>
           <Typography
             variant="subtitle1"
@@ -205,8 +213,8 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             {lbsToQuintales(totalNeeded)} qq)
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Acumulado camionadas: {truckloadAccumulated.toLocaleString()} lb (
-            {lbsToQuintales(truckloadAccumulated)} qq)
+            Sobrante: {accumulatedTruckload.toLocaleString()} lb (
+            {lbsToQuintales(accumulatedTruckload)} qq)
           </Typography>
           {/* Divider */}
           <Divider sx={{ my: 2 }} />
@@ -273,7 +281,8 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
               !isQuantityValid ||
               !isPriceValid ||
               !sellQuantity ||
-              sellQuantity <= 0
+              sellQuantity <= 0 ||
+              processing
             }
             sx={{ alignSelf: 'flex-end', mt: 2 }}
             startIcon={<CheckCircle />}
@@ -315,8 +324,13 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
             />
             <ListItemText
               primary={`Q${(
-                parseFloat(detail.price) + parseFloat(operativeCost || 0)
-              ).toFixed(2)}`}
+                parseFloat(detail.price) +
+                (detail.isAccumulated ? 0 : parseFloat(operativeCost || 0))
+              ).toFixed(2)} ${
+                detail.isAccumulated
+                  ? ` (Costo aplicado: Q${detail.operativeCost})`
+                  : ''
+              }`}
               secondary={
                 <Typography variant="body2" color="text.secondary">
                   {detail.totalQuantity.toLocaleString()} lb (

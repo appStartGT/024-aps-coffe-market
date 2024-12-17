@@ -9,6 +9,8 @@ export const averagePriceListDto = (purchaseDetails) => {
           totalQuantity: 0,
           purchases: [],
           id_average_price: null,
+          isAccumulated: detail.isAccumulated,
+          operativeCost: detail.operativeCost,
         };
       }
       acc[price].totalQuantity += Number(detail.quantity) || 0;
@@ -30,5 +32,7 @@ export const averagePriceListDto = (purchaseDetails) => {
     totalQuantity: group.totalQuantity,
     purchases: group.purchases,
     id_average_price: group.id_average_price,
+    isAccumulated: group.isAccumulated,
+    operativeCost: group.operativeCost,
   }));
 };

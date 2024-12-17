@@ -139,7 +139,7 @@ const useTruckload = () => {
                 onClick={() => handleEdit(params.row)}
                 color="primary"
                 size="small"
-                disabled={params.row.isSold}
+                disabled={params.row.isSold || params.row.isAccumulated}
               >
                 <Edit />
               </IconButton>
@@ -157,7 +157,7 @@ const useTruckload = () => {
                 onClick={() => handleDelete(params.row.id_beneficio_truckload)}
                 color="error"
                 size="small"
-                disabled={params.row.isSold}
+                disabled={params.row.isSold || params.row.isAccumulated}
               >
                 <Delete />
               </IconButton>

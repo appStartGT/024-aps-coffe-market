@@ -89,7 +89,12 @@ export const purchaseDetailCreateAction = createAsyncThunk(
     const state = getState();
     const purchaseSelected = state.purchase.purchaseSelected;
     const id_budget = state.budget.budget.id_budget;
-    let body = cleanModel({ ...data, isSold: false, id_budget });
+    let body = cleanModel({
+      ...data,
+      isSold: false,
+      isAccumulated: false,
+      id_budget,
+    });
     body.isPriceless = Boolean(data.isPriceless);
     const purchaseDetailData = {
       ...body,

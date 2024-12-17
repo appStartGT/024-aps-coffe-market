@@ -23,13 +23,16 @@ const DataTableOverview = ({ truckloadList }) => {
         0
       );
       const totalReceived = truckloadList.reduce(
-        (sum, truckload) =>
-          sum + (!truckload.isSold ? Number(truckload.totalReceived) : 0),
+        (sum, truckload) => sum + Number(truckload.totalReceived) || 0,
+        // sum + (!truckload.isSold ? Number(truckload.totalReceived) : 0),
         0
       );
       const totalSold = truckloadList.reduce(
         (sum, truckload) =>
-          sum + (truckload.isSold ? Number(truckload.totalReceived) : 0),
+          sum +
+          (truckload.isSold && !truckload.isAccumulated
+            ? Number(truckload.totalReceived)
+            : 0),
         0
       );
       const difference = totalReceived - totalSent;

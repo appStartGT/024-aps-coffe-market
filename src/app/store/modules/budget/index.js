@@ -160,6 +160,11 @@ export const budgetExpensesAction = createAsyncThunk(
                 value: id_budget,
                 reference: true,
               },
+              // {
+              //   field: 'isAccumulated',
+              //   condition: '==',
+              //   value: false,
+              // },
               // { field: 'isPriceless', condition: '==', value: false },
             ],
             excludeReferences: [

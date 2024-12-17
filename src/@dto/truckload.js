@@ -20,8 +20,11 @@ const truckloadModel = (truckload) => {
     totalSent: truckload?.totalSent || 0,
     totalReceived: truckload?.totalReceived || 0,
     colilla: truckload?.colilla || null,
-    licensePlate: truckload?.cat_truckload_license_plate?.name || null,
+    licensePlate: truckload?.isAccumulated
+      ? 'Acumulado'
+      : truckload?.cat_truckload_license_plate?.name || null,
     isSold: truckload?.isSold || false,
+    isAccumulated: truckload?.isAccumulated || false,
   };
   return obj;
 };

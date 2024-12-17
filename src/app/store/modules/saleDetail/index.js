@@ -60,13 +60,14 @@ export const saleDetailCreateAction = createAsyncThunk(
     const id_budget = state.budget.budget.id_budget;
     let body = cleanModel({
       ...data,
-      isAveraged: false,
-      isSentToBeneficio: false,
       id_budget,
     });
     body.isPriceless = Boolean(data.isPriceless);
     const saleDetailData = {
       ...body,
+      isAveraged: false,
+      isSentToBeneficio: false,
+      isAccumulated: false,
     };
 
     return await insertDocument({
@@ -144,9 +145,25 @@ export const saleDetailDeleteAction = createAsyncThunk(
 export const createRemateBeneficioAction = createAsyncThunk(
   'saleDetail/createRemateBeneficio',
   async (
-    { selectedPrices, data, accumulated, truckloadsSelected, operativeCost },
+    {
+      selectedPrices,
+      data,
+      accumulated,
+      accumulatedTruckload,
+      truckloadsSelected,
+      operativeCost,
+    },
     { rejectWithValue, dispatch }
   ) => {
+    console.log({
+      selectedPrices,
+      data,
+      accumulated,
+      accumulatedTruckload,
+      truckloadsSelected,
+      operativeCost,
+    });
+
     try {
       const batch = firestore.batch();
 
@@ -158,6 +175,26 @@ export const createRemateBeneficioAction = createAsyncThunk(
         id_purchase_detail: purchaseId,
         deleted: true,
       }));
+      let newTruckload = null;
+      if (accumulatedTruckload > 0) {
+        //create new truckload
+        const truckloadRef = firestore
+          .collection(firebaseCollections.BENEFICIO_TRUCKLOAD)
+          .doc();
+        newTruckload = {
+          id: truckloadRef.id,
+          id_beneficio_truckload: truckloadRef.id,
+          id_sale: firestore.doc(`${firebaseCollections.SALE}/${data.id_sale}`),
+          totalSent: accumulatedTruckload,
+          totalReceived: accumulatedTruckload,
+          deleted: false,
+          createdAt: FieldValue.serverTimestamp(),
+          isSold: false,
+          isAccumulated: true,
+        };
+        batch.set(truckloadRef, newTruckload);
+      }
+
       if (accumulated) {
         accumulatedPurchaseDetailRef = firestore
           .collection(firebaseCollections.PURCHASE_DETAIL)
@@ -173,8 +210,9 @@ export const createRemateBeneficioAction = createAsyncThunk(
           createdAt: FieldValue.serverTimestamp(),
           isSold: false,
           isPriceless: false,
+          isSentToBeneficio: true,
           isAccumulated: true,
-          operativeCost,
+          operativeCost, //applied to the purchase detail
         };
         batch.set(accumulatedPurchaseDetailRef, accumulatedPurchaseDetailData);
       }
@@ -273,22 +311,32 @@ export const createRemateBeneficioAction = createAsyncThunk(
         id_average_price: dataAveragePriceRef.id,
         isSold: true,
       }));
-      //update truckloads in sale view
-      dispatch(updateSaleListTruckloadsAction(truckloadsSelectedUpdated));
-      //update purchase details in main view
+
+      // Update all reducers
+      if (newTruckload) {
+        dispatch(
+          updateSaleListTruckloadsAction([
+            ...truckloadsSelectedUpdated,
+            newTruckload,
+          ])
+        );
+      } else {
+        dispatch(updateSaleListTruckloadsAction(truckloadsSelectedUpdated));
+      }
+
       dispatch(
         updateSaleListPurchaseDetailsAction([
           accumulatedPurchaseDetailData,
           ...deletePurchaseDetail,
         ])
       );
-      //Update the sale with the new average price
       dispatch(updateSaleListDetailsAction([saleDetail.data[0]]));
 
       return {
         accumulatedAveragePriceId: accumulatedPurchaseDetailRef?.id,
         dataAveragePriceId: dataAveragePriceRef.id,
         saleDetail: saleDetail.data[0],
+        newTruckload,
       };
     } catch (error) {
       return rejectWithValue(error.message);
@@ -444,6 +492,26 @@ export const saleDetailSlice = createSlice({
       );
       state.processing = false;
     });
+
+    /* CREATE REMATE BENEFICIO */
+    builder.addCase(createRemateBeneficioAction.pending, (state) => {
+      state.processing = true;
+    });
+    builder.addCase(
+      createRemateBeneficioAction.rejected,
+      (state, { payload }) => {
+        state.error = payload;
+        state.processing = false;
+      }
+    );
+    builder.addCase(
+      createRemateBeneficioAction.fulfilled,
+      (state, { payload }) => {
+        console.log({ payload });
+        state.processing = false;
+      }
+    );
+
     //   builder.addCase(
     //     saleDetailUpdateSentToBeneficioAction.fulfilled,
     //     (state) => {

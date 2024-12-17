@@ -71,6 +71,7 @@ export const truckloadCreateAction = createAsyncThunk(
 
     const truckloadData = {
       ...body,
+      isAccumulated: false,
       id_cat_truckload_license_plate: data.id_cat_truckload_license_plate.value,
     };
 
@@ -138,6 +139,33 @@ export const truckloadDeleteAction = createAsyncThunk(
     })
       .then((res) => res)
       .catch((res) => rejectWithValue(res));
+  }
+);
+export const truckloadUpdateReceivedAction = createAsyncThunk(
+  'truckload/truckloadUpdateReceivedAction',
+  async (_params, { rejectWithValue, dispatch, getState }) => {
+    try {
+      const state = getState();
+      const currentDetails = state.sale.rowTruckloads;
+      const updatedDetails = currentDetails.map((detail) => ({
+        id_beneficio_truckload: detail.id_beneficio_truckload,
+        isReceived: true,
+      }));
+      if (!updatedDetails.length) {
+        return rejectWithValue('No se encontraron detalles');
+      }
+
+      return await updateRecordBy({
+        collectionName: firebaseCollections.BENEFICIO_TRUCKLOAD,
+        data: { isReceived: true },
+        showAlert: false,
+      }).then((res) => {
+        dispatch(updateSaleListTruckloadsAction(updatedDetails));
+        return res;
+      });
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
 );
 
@@ -219,6 +247,25 @@ export const truckloadSlice = createSlice({
       );
       state.processing = false;
     });
+
+    builder.addCase(truckloadUpdateReceivedAction.pending, (state) => {
+      state.processing = true;
+    });
+    builder.addCase(truckloadUpdateReceivedAction.rejected, (state, action) => {
+      state.error = action.payload;
+      state.processing = false;
+    });
+    builder.addCase(
+      truckloadUpdateReceivedAction.fulfilled,
+      (state, { payload }) => {
+        state.truckloadList = state.truckloadList.map((truckload) => ({
+          ...truckload,
+          isReceived: true,
+        }));
+        state.processing = false;
+      }
+    );
+
     builder.addCase(updateTruckloadList.fulfilled, (state, { payload }) => {
       state.truckloadList = truckloadDto.truckloadList(payload);
     });

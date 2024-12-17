@@ -81,6 +81,11 @@ export const saleListAction = createAsyncThunk(
                 value: sale.id_sale,
                 reference: true,
               },
+              // {
+              //   field: 'isAccumulated',
+              //   condition: '==',
+              //   value: false,
+              // },
             ],
             excludeReferences: [firebaseCollectionsKey.sale],
           });
