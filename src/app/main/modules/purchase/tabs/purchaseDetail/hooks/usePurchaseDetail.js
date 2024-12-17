@@ -132,8 +132,24 @@ const usePurchaseDetail = () => {
       disableColumnMenu: true,
       renderCell: (params) => (
         <>
-          {params.row.budgetIsClosed ? (
-            <Chip label="Cerrado" color="error" size="small" />
+          {params.row.isSold ? (
+            <Tooltip title="Vendido a beneficio">
+              <Chip
+                label="Vendido"
+                color="primary"
+                size="small"
+                sx={{ marginTop: 1, marginBottom: 1 }}
+              />
+            </Tooltip>
+          ) : params.row.budgetIsClosed ? (
+            <Tooltip title="Comprado en un presupuesto anterior">
+              <Chip
+                label="Cerrado"
+                color="error"
+                size="small"
+                sx={{ marginTop: 1, marginBottom: 1 }}
+              />
+            </Tooltip>
           ) : (
             <>
               <IconButton

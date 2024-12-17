@@ -222,6 +222,7 @@ export const createRemateAction = createAsyncThunk(
           deleted: false,
           createdBy,
           isPriceless: false,
+          isSold: false,
         };
         transaction.set(newRemateRef, newRemateData);
 

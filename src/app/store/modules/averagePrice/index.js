@@ -14,11 +14,13 @@ export const getUnaveragesPurchaseDetailsAction = createAsyncThunk(
             // { field: 'isAveraged', condition: '==', value: false },
             { field: 'isPriceless', condition: '==', value: false },
             { field: 'isSold', condition: '==', value: false },
+            { field: 'isSentToBeneficio', condition: '==', value: true },
           ],
           excludeReferences: [
             'id_purchase',
             'id_cat_payment_method',
             'id_budget',
+            'id_purchase_detail_remate',
           ],
         }),
         getAllDocuments({
@@ -26,6 +28,7 @@ export const getUnaveragesPurchaseDetailsAction = createAsyncThunk(
           filterBy: [{ field: 'isSold', condition: '==', value: false }],
         }),
       ]);
+
       return { result, getAveragePrices };
     } catch (error) {
       return rejectWithValue(

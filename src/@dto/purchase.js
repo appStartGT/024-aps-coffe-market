@@ -164,7 +164,9 @@ const purchaseModel = (purchase, purchase_details) => {
 };
 
 export const purchaseList = (data, purchase_details) => {
-  return data.map((item) => purchaseModel(item, purchase_details));
+  return data
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map((item) => purchaseModel(item, purchase_details));
 };
 
 export const purchaseGetOne = (purchase) => purchaseModel(purchase);

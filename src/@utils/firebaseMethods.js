@@ -233,7 +233,7 @@ async function getAllDocuments({
       });
       excludeReferences.forEach((key) => {
         if (resolvedData[key] && typeof resolvedData[key] === 'object') {
-          resolvedData[key] = resolvedData[key].id;
+          resolvedData[key] = resolvedData[key]?.id;
         }
       });
 

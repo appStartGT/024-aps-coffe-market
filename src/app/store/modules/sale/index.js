@@ -363,13 +363,14 @@ export const updateSaleListTruckloadsAction = createAsyncThunk(
           updatedDetails.push(newDetail);
         }
       });
-      //update truckload list in  main view
-      dispatch(updateTruckloadList(updatedDetails));
 
       // Remove items with deleted: true
       updatedDetails = updatedDetails.filter(
         (detail) => detail.deleted !== true
       );
+      
+      //update truckload list in  main view
+      dispatch(updateTruckloadList(updatedDetails));
 
       return updatedDetails;
     } catch (error) {

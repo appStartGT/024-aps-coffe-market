@@ -70,7 +70,7 @@ const saleModel = (sale, sale_details, truckloads) => {
     truckloads
       ?.reduce(
         (sum, truckload) =>
-          // !truckload.isAccumulated &&
+          !truckload.isAccumulated &&
           // !truckload.isSold &&
           truckload.id_sale === sale.id_sale
             ? sum + (Number(truckload.totalSent) || 0)
@@ -101,7 +101,7 @@ const saleModel = (sale, sale_details, truckloads) => {
     truckloads
       ?.reduce(
         (sum, truckload) =>
-          truckload.id_sale === sale.id_sale
+          !truckload.isAccumulated && truckload.id_sale === sale.id_sale
             ? sum + (Number(truckload.totalReceived) || 0)
             : sum,
         0
@@ -163,7 +163,6 @@ const saleModel = (sale, sale_details, truckloads) => {
 };
 
 const calculatePurchaseDetailsResult = (purchase_details) => {
-  console.log({ purchase_details });
   const totalLbAvailable = Number(
     purchase_details
       ?.filter(
@@ -171,14 +170,22 @@ const calculatePurchaseDetailsResult = (purchase_details) => {
           !detail.isPriceless &&
           !detail.isSold &&
           !detail?.isSentToBeneficio &&
-          !detail.isAccumulated
+          !detail.isAccumulated &&
+          !detail.isRemate
       )
       .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0)
       .toFixed(2)
   );
+
   const totalLbAvailablePriceless = Number(
     purchase_details
-      ?.filter((detail) => detail.isPriceless && !detail.isRemate)
+      ?.filter(
+        (detail) =>
+          detail.isPriceless &&
+          !detail.isRemate &&
+          !detail.isSentToBeneficio &&
+          !detail.isSold
+      )
       .reduce((sum, detail) => sum + (Number(detail.quantity) || 0), 0)
       .toFixed(2)
   );
@@ -219,9 +226,11 @@ const calculatePurchaseDetailsResult = (purchase_details) => {
 
 export const saleList = (data, sale_details, truckloads, purchase_details) => {
   return {
-    saleList: data.map((item) =>
-      saleModel(item, sale_details, truckloads, purchase_details)
-    ),
+    saleList: data
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .map((item) =>
+        saleModel(item, sale_details, truckloads, purchase_details)
+      ),
     purchaseDetailsResult: calculatePurchaseDetailsResult(purchase_details),
   };
 };

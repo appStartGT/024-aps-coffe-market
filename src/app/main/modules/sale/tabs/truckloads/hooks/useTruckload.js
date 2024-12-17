@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { IconButton, Tooltip } from '@mui/material';
+import { Box, Chip, IconButton, Tooltip } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import { Actions, Subjects } from '@config/permissions';
 import TruckloadForm from '../components/TruckloadForm';
@@ -123,47 +123,66 @@ const useTruckload = () => {
     {
       field: 'actions',
       headerName: 'Acciones',
+      align: 'center',
+      headerAlign: 'center',
+      flex: 1,
       sortable: false,
       disableColumnMenu: true,
       renderCell: (params) => (
-        <>
-          <Tooltip
-            title={
-              params.row.isSold
-                ? 'No se puede editar una camionada vendida'
-                : ''
-            }
-          >
-            <span>
-              <IconButton
-                onClick={() => handleEdit(params.row)}
-                color="primary"
-                size="small"
-                disabled={params.row.isSold || params.row.isAccumulated}
+        <Box
+          padding={1}
+          width="100%"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          {params.row.isSold ? (
+            <Chip label="Vendido" color="primary" size="small" />
+          ) : params.row.isAccumulated ? (
+            <Chip label="Acumulado" color="secondary" size="small" />
+          ) : (
+            <>
+              <Tooltip
+                title={
+                  params.row.isSold
+                    ? 'No se puede editar una camionada vendida'
+                    : ''
+                }
               >
-                <Edit />
-              </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip
-            title={
-              params.row.isSold
-                ? 'No se puede eliminar una camionada vendida'
-                : ''
-            }
-          >
-            <span>
-              <IconButton
-                onClick={() => handleDelete(params.row.id_beneficio_truckload)}
-                color="error"
-                size="small"
-                disabled={params.row.isSold || params.row.isAccumulated}
+                <span>
+                  <IconButton
+                    onClick={() => handleEdit(params.row)}
+                    color="primary"
+                    size="small"
+                    disabled={params.row.isSold || params.row.isAccumulated}
+                  >
+                    <Edit />
+                  </IconButton>
+                </span>
+              </Tooltip>
+              <Tooltip
+                title={
+                  params.row.isSold
+                    ? 'No se puede eliminar una camionada vendida'
+                    : ''
+                }
               >
-                <Delete />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </>
+                <span>
+                  <IconButton
+                    onClick={() =>
+                      handleDelete(params.row.id_beneficio_truckload)
+                    }
+                    color="error"
+                    size="small"
+                    disabled={params.row.isSold || params.row.isAccumulated}
+                  >
+                    <Delete />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            </>
+          )}
+        </Box>
       ),
     },
   ];

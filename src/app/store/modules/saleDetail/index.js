@@ -155,15 +155,6 @@ export const createRemateBeneficioAction = createAsyncThunk(
     },
     { rejectWithValue, dispatch }
   ) => {
-    console.log({
-      selectedPrices,
-      data,
-      accumulated,
-      accumulatedTruckload,
-      truckloadsSelected,
-      operativeCost,
-    });
-
     try {
       const batch = firestore.batch();
 
@@ -184,15 +175,19 @@ export const createRemateBeneficioAction = createAsyncThunk(
         newTruckload = {
           id: truckloadRef.id,
           id_beneficio_truckload: truckloadRef.id,
-          id_sale: firestore.doc(`${firebaseCollections.SALE}/${data.id_sale}`),
+          id_sale: data.id_sale,
           totalSent: accumulatedTruckload,
           totalReceived: accumulatedTruckload,
           deleted: false,
-          createdAt: FieldValue.serverTimestamp(),
+          createdAt: new Date(),
           isSold: false,
           isAccumulated: true,
         };
-        batch.set(truckloadRef, newTruckload);
+        batch.set(truckloadRef, {
+          ...newTruckload,
+          id_sale: firestore.doc(`${firebaseCollections.SALE}/${data.id_sale}`),
+          createdAt: FieldValue.serverTimestamp(),
+        });
       }
 
       if (accumulated) {
@@ -307,7 +302,8 @@ export const createRemateBeneficioAction = createAsyncThunk(
       });
       // Update the truckloadsSelected with the new average price
       const truckloadsSelectedUpdated = truckloadsSelected.map((truckload) => ({
-        ...truckload,
+        // ...truckload,
+        id_beneficio_truckload: truckload.id_beneficio_truckload,
         id_average_price: dataAveragePriceRef.id,
         isSold: true,
       }));
@@ -357,6 +353,7 @@ export const saleDetailUpdateSentToBeneficioAction = createAsyncThunk(
       return await updateRecordBy({
         collectionName: firebaseCollections.PURCHASE_DETAIL,
         data: { isSentToBeneficio: true },
+        showAlert: false,
       }).then((res) => {
         dispatch(updateSaleListPurchaseDetailsAction(updatedDetails));
         return res;
@@ -504,13 +501,9 @@ export const saleDetailSlice = createSlice({
         state.processing = false;
       }
     );
-    builder.addCase(
-      createRemateBeneficioAction.fulfilled,
-      (state, { payload }) => {
-        console.log({ payload });
-        state.processing = false;
-      }
-    );
+    builder.addCase(createRemateBeneficioAction.fulfilled, (state) => {
+      state.processing = false;
+    });
 
     //   builder.addCase(
     //     saleDetailUpdateSentToBeneficioAction.fulfilled,

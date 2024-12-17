@@ -30,7 +30,7 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
   );
   const processing = useSelector((state) => state.saleDetail.processing);
   const [accumulatedTruckload, setAccumulatedTruckload] = useState(0);
-  console.log(purchaseDetails);
+
   const handleToggle = (price) => {
     setSelectedPrices((prevSelectedPrices) => {
       const currentIndex = prevSelectedPrices.indexOf(price);
@@ -44,12 +44,10 @@ const PriceList = ({ selectedTruckloads, totalNeeded, id_sale, onClose }) => {
 
   const calculateAverage = useMemo(() => {
     if (selectedPrices.length === 0) return 0;
-    console.log('selectedPrices', selectedPrices);
 
     const sum = purchaseDetails
       .filter((detail) => selectedPrices.includes(detail.price))
       .reduce((acc, detail) => {
-        console.log({ detail });
         const price = parseFloat(detail.price);
         return (
           acc +

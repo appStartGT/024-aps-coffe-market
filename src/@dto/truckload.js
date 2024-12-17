@@ -21,7 +21,7 @@ const truckloadModel = (truckload) => {
     totalReceived: truckload?.totalReceived || 0,
     colilla: truckload?.colilla || null,
     licensePlate: truckload?.isAccumulated
-      ? 'Acumulado'
+      ? '-- -- -- --'
       : truckload?.cat_truckload_license_plate?.name || null,
     isSold: truckload?.isSold || false,
     isAccumulated: truckload?.isAccumulated || false,
@@ -48,7 +48,9 @@ const truckloadGetModel = (truckload) => {
 };
 
 export const truckloadList = (data) => {
-  return data.map((item) => truckloadGetModel(item));
+  return data
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map((item) => truckloadGetModel(item));
 };
 
 export const truckloadGetOne = (truckload) => truckloadGetModel(truckload);

@@ -54,7 +54,9 @@ const purchaseDetailModel = (purchaseDetail, purchaseSelected) => {
 };
 
 export const purchaseDetailList = (data, purchaseSelected) => {
-  return data.map((item) => purchaseDetailModel({ ...item }, purchaseSelected));
+  return data
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .map((item) => purchaseDetailModel({ ...item }, purchaseSelected));
 };
 
 export const purchaseDetailGetOne = (purchaseDetail, purchaseSelected) =>

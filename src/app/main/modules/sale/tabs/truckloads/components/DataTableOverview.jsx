@@ -19,22 +19,36 @@ const DataTableOverview = ({ truckloadList }) => {
     if (truckloadList && truckloadList.length > 0) {
       const totalTruckloads = truckloadList.length;
       const totalSent = truckloadList.reduce(
-        (sum, truckload) => sum + Number(truckload.totalSent),
+        (sum, truckload) =>
+          sum + (!truckload.isAccumulated ? Number(truckload.totalSent) : 0),
         0
       );
       const totalReceived = truckloadList.reduce(
-        (sum, truckload) => sum + Number(truckload.totalReceived) || 0,
-        // sum + (!truckload.isSold ? Number(truckload.totalReceived) : 0),
-        0
-      );
-      const totalSold = truckloadList.reduce(
         (sum, truckload) =>
           sum +
-          (truckload.isSold && !truckload.isAccumulated
+            (!truckload.isAccumulated ? Number(truckload.totalReceived) : 0) ||
+          0,
+        0
+      );
+      const totalAccumulated = truckloadList.reduce(
+        (sum, truckload) =>
+          sum +
+          (truckload.isAccumulated && !truckload.isSold
             ? Number(truckload.totalReceived)
             : 0),
         0
       );
+
+      const totalSold =
+        truckloadList.reduce(
+          (sum, truckload) =>
+            sum +
+            (truckload.isSold && !truckload.isAccumulated
+              ? Number(truckload.totalReceived)
+              : 0),
+          0
+        ) - totalAccumulated;
+
       const difference = totalReceived - totalSent;
       const availableForSale = totalReceived - totalSold;
 

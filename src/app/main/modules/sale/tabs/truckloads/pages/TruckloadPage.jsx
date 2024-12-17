@@ -1,7 +1,6 @@
 import ApsDatagrid from '@components/ApsDatagrid';
 import { Box, Paper, Typography, Button } from '@mui/material';
 import useTruckload from '../hooks/useTruckload';
-import SearchBar from '@components/SearchBar';
 import DataTableOverview from '../components/DataTableOverview';
 
 const PAPER_STYLES = {
@@ -12,7 +11,6 @@ const PAPER_STYLES = {
 const TruckloadPage = () => {
   const {
     processing,
-    propsSearchBarButton,
     columns,
     searchList,
     truckloadList,
@@ -26,7 +24,7 @@ const TruckloadPage = () => {
     <>
       <Paper sx={PAPER_STYLES}>
         <DataTableOverview truckloadList={truckloadList} />
-        <SearchBar {...propsSearchBarButton} />
+        {/* <SearchBar {...propsSearchBarButton} /> */}
         {selectionModel.length > 0 && totalReceivedSelected > 0 && (
           <Box
             sx={{
